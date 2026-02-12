@@ -1,0 +1,970 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Product Search - Table View (n8n Integration)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <style>
+      .loading {
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .table-container {
+        overflow-x: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e0 #f1f5f9;
+      }
+      .table-container::-webkit-scrollbar {
+        height: 8px;
+      }
+      .table-container::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 4px;
+      }
+      .table-container::-webkit-scrollbar-thumb {
+        background: #cbd5e0;
+        border-radius: 4px;
+      }
+      .table-container::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+      }
+      .product-row {
+        transition: all 0.2s;
+      }
+      .product-row:hover {
+        background-color: #f8fafc;
+      }
+      .product-image {
+        transition: transform 0.2s;
+      }
+      .product-image:hover {
+        transform: scale(1.5);
+        cursor: pointer;
+      }
+      .filter-active {
+        background-color: #3b82f6 !important;
+        color: white !important;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+      <!-- Header -->
+      <header class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-slate-800 mb-2">
+          <span
+            class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600"
+          >
+            Product Search
+          </span>
+        </h1>
+      </header>
+
+      <!-- Search Section -->
+      <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+        <div class="flex flex-col md:flex-row gap-4">
+          <div class="flex-1">
+            <label
+              for="searchInput"
+              class="block text-sm font-medium text-slate-700 mb-1"
+            >
+              Product Keyword
+            </label>
+            <input
+              type="text"
+              id="searchInput"
+              class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+              placeholder="Enter product keyword"
+              autofocus
+            />
+          </div>
+          <div class="flex items-end gap-2">
+            <button
+              onclick="searchProducts()"
+              class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              <span class="flex items-center justify-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-5 w-5"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                Search
+              </span>
+            </button>
+            <button
+              onclick="resetSearch()"
+              class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-6 rounded-lg transition duration-300"
+            >
+              Reset
+            </button>
+          </div>
+        </div>
+
+        <!-- Filter Section - Added Price Filters -->
+        <div
+          id="filterSection"
+          class="hidden mt-6 pt-4 border-t border-slate-200"
+        >
+          <div class="flex flex-wrap items-center gap-4">
+            <span class="text-sm font-semibold text-slate-700"
+              >Filter Harga:</span
+            >
+
+            <!-- Price Range Indicators -->
+            <div id="priceRangeInfo" class="flex items-center gap-3 text-sm">
+              <span class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full">
+                Min: <span id="minPriceDisplay">Rp 0</span>
+              </span>
+              <span class="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-full">
+                Max: <span id="maxPriceDisplay">Rp 0</span>
+              </span>
+            </div>
+
+            <div class="flex items-center gap-2 ml-auto">
+              <span class="text-sm text-slate-600">Urutkan:</span>
+              <button
+                id="filterTermurah"
+                onclick="applyPriceFilter('termurah')"
+                class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M14.707 12.707a1 1 0 01-1.414 0L10 9.414l-3.293 3.293a1 1 0 01-1.414-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 010 1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                Termurah
+              </button>
+              <button
+                id="filterTermahal"
+                onclick="applyPriceFilter('termahal')"
+                class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-1.5 rounded-lg text-sm font-medium transition flex items-center gap-1"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="h-4 w-4"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fill-rule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clip-rule="evenodd"
+                  />
+                </svg>
+                Termahal
+              </button>
+              <button
+                id="resetFilter"
+                onclick="resetPriceFilter()"
+                class="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-1.5 rounded-lg text-sm font-medium transition ml-2"
+              >
+                Reset Filter
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading Indicator -->
+      <div id="loading" class="hidden text-center py-12">
+        <div
+          class="inline-flex items-center gap-3 bg-white rounded-lg px-6 py-4 shadow-md"
+        >
+          <div
+            class="loading w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full"
+          ></div>
+          <span class="text-slate-700 font-medium">Searching products</span>
+        </div>
+      </div>
+
+      <!-- Error Message -->
+      <div
+        id="errorMessage"
+        class="hidden bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6"
+      >
+        <div class="flex items-center gap-2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-5 w-5"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fill-rule="evenodd"
+              d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+              clip-rule="evenodd"
+            />
+          </svg>
+          <span id="errorText"></span>
+        </div>
+      </div>
+
+      <!-- Results Section - TABLE VIEW -->
+      <div id="resultsContainer" class="hidden">
+        <!-- Summary Stats -->
+        <div
+          class="bg-white rounded-lg shadow-md p-4 mb-4 flex flex-wrap items-center justify-between"
+        >
+          <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-blue-600"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"
+                />
+              </svg>
+              <span class="font-semibold text-slate-800">Total Products:</span>
+              <span
+                id="resultCount"
+                class="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full text-sm font-medium"
+              ></span>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="font-semibold text-slate-800">Keyword:</span>
+              <span
+                id="searchKeyword"
+                class="bg-slate-100 text-slate-800 px-3 py-1 rounded-full text-sm"
+              ></span>
+            </div>
+            <!-- Active Filter Indicator -->
+            <div id="activeFilterIndicator" class="hidden items-center gap-2">
+              <span class="font-semibold text-slate-800">Filter:</span>
+              <span
+                id="activeFilterText"
+                class="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-sm"
+              ></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+          <div class="table-container">
+            <table class="min-w-full divide-y divide-slate-200">
+              <thead class="bg-gradient-to-r from-slate-50 to-slate-100">
+                <tr>
+                  <th
+                    scope="col"
+                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-20"
+                  >
+                    Image
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
+                  >
+                    Product Name
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-32"
+                  >
+                    Price
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-40"
+                  >
+                    Source
+                  </th>
+                  <th
+                    scope="col"
+                    class="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-28"
+                  >
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody
+                id="productTableBody"
+                class="bg-white divide-y divide-slate-200"
+              >
+                <!-- Products will be inserted here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Export Options -->
+        <div class="mt-4 flex justify-end gap-2">
+          <button
+            onclick="exportToCSV()"
+            class="bg-green-50 hover:bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            Export CSV
+          </button>
+          <button
+            onclick="copyToClipboard()"
+            class="bg-slate-50 hover:bg-slate-100 text-slate-700 px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-4 w-4"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+              <path
+                d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z"
+              />
+            </svg>
+            Copy Table
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div id="emptyState" class="hidden text-center py-16">
+        <div class="bg-white rounded-xl p-12 shadow-sm max-w-md mx-auto">
+          <div
+            class="bg-slate-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-6"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="h-10 w-10 text-slate-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+          <h3 class="text-xl font-semibold text-slate-800 mb-2">
+            No products found
+          </h3>
+          <p class="text-slate-600 mb-6">
+            Try adjusting your search keyword or use one of the quick filters
+            above
+          </p>
+          <button
+            onclick="document.getElementById('searchInput').focus()"
+            class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg text-sm font-medium transition"
+          >
+            Start New Search
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Image Modal -->
+    <div
+      id="imageModal"
+      class="hidden fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4"
+      onclick="closeModal()"
+    >
+      <div class="relative max-w-3xl max-h-[90vh]">
+        <button
+          onclick="closeModal()"
+          class="absolute -top-10 right-0 text-white hover:text-slate-300"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="h-8 w-8"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+        <img
+          id="modalImage"
+          src=""
+          alt="Product"
+          class="max-w-full max-h-[90vh] object-contain rounded-lg"
+        />
+      </div>
+    </div>
+
+    <script>
+      // Demo data dengan lebih banyak produk untuk menunjukkan tabel
+      const demoData = {
+        success: true,
+        data: [
+          {
+            item: "TR Pillow Block Bearing UCP306 30mm 1pc",
+            harga: "Rp 177.489",
+            source: "www.monotaro.id",
+            link: "https://www.google.com/search?ibp=oshop&q=BEARING,UCP,26-05-05-330&prds=productid:17498218279952602342",
+            image:
+              "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTDXAHsvC1K93bH9OSSP2cNGTqlpqqGXTdOVp2DVIDIO-4bfAxvjvd3j63sTbvF2q4liGIYVGuRJyCXpFAntUOrGjurnL_GpaIE2Pqk6zKtX46GoqF2XZIelQ",
+          },
+          {
+            item: "SKF Bearing 6205 2RSH 25x52x15mm Deep Groove Ball Bearing",
+            harga: "Rp 125.000",
+            source: "www.tokopedia.com",
+            link: "https://www.tokopedia.com/skf/6205-2rsh",
+            image:
+              "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQzFqRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
+          },
+          {
+            item: "NTN Bearing 6304ZZ 20x52x15mm Double Shielded",
+            harga: "Rp 89.900",
+            source: "www.bukalapak.com",
+            link: "https://www.bukalapak.com/ntn-6304zz",
+            image:
+              "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTzFqRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
+          },
+          {
+            item: "FAG Bearing 6206 2Z 30x62x16mm",
+            harga: "Rp 145.000",
+            source: "www.blibli.com",
+            link: "https://www.blibli.com/fag-6206",
+            image:
+              "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcUyRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
+          },
+          {
+            item: "NSK Bearing 6004 20x42x12mm",
+            harga: "Rp 67.500",
+            source: "www.lazada.co.id",
+            link: "https://www.lazada.co.id/nsk-6004",
+            image:
+              "https://encrypted-tbn4.gstatic.com/shopping?q=tbn:ANd9GcVzFqRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
+          },
+          {
+            item: "Timken Bearing LM11949/LM11910 Tapered Roller",
+            harga: "Rp 234.000",
+            source: "www.ralali.com",
+            link: "https://www.ralali.com/timken-lm11949",
+            image:
+              "https://encrypted-tbn5.gstatic.com/shopping?q=tbn:ANd9GcWzFqRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
+          },
+          {
+            item: "Nachi Bearing 6201ZZ 12x32x10mm",
+            harga: "Rp 45.000",
+            source: "www.jdid.id",
+            link: "https://www.jdid.id/nachi-6201zz",
+            image:
+              "https://encrypted-tbn6.gstatic.com/shopping?q=tbn:ANd9GcXzFqRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
+          },
+          {
+            item: "KOYO Bearing 6305 25x62x17mm",
+            harga: "Rp 98.500",
+            source: "www.monotaro.id",
+            link: "https://www.monotaro.id/koyo-6305",
+            image:
+              "https://encrypted-tbn7.gstatic.com/shopping?q=tbn:ANd9GcYzFqRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
+          },
+        ],
+      };
+
+      // Store current products for export
+      let currentProducts = [];
+      let filteredProducts = [];
+      let activeFilter = null;
+
+      // Fungsi untuk parse harga dari string Rp ke number
+      function parsePrice(priceString) {
+        if (!priceString) return 0;
+        // Hapus "Rp", spasi, dan titik, lalu konversi ke number
+        const numericString = priceString.replace(/[^\d]/g, "");
+        return parseInt(numericString, 10) || 0;
+      }
+
+      // Fungsi untuk format number ke Rupiah
+      function formatPrice(priceNumber) {
+        return `Rp ${priceNumber.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}`;
+      }
+
+      // Fungsi untuk menghitung dan menampilkan range harga
+      function updatePriceRangeInfo(products) {
+        if (!products || products.length === 0) return;
+
+        const prices = products.map((p) => parsePrice(p.harga));
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+
+        document.getElementById("minPriceDisplay").textContent =
+          formatPrice(minPrice);
+        document.getElementById("maxPriceDisplay").textContent =
+          formatPrice(maxPrice);
+      }
+
+      // Fungsi untuk apply filter harga
+      function applyPriceFilter(type) {
+        if (!currentProducts || currentProducts.length === 0) {
+          showError("No products to filter");
+          return;
+        }
+
+        activeFilter = type;
+
+        // Update button active states
+        document
+          .getElementById("filterTermurah")
+          .classList.remove("filter-active", "bg-blue-600", "text-white");
+        document
+          .getElementById("filterTermahal")
+          .classList.remove("filter-active", "bg-blue-600", "text-white");
+
+        if (type === "termurah") {
+          document
+            .getElementById("filterTermurah")
+            .classList.add("filter-active", "bg-blue-600", "text-white");
+          document.getElementById("activeFilterText").textContent = "Termurah";
+        } else {
+          document
+            .getElementById("filterTermahal")
+            .classList.add("filter-active", "bg-blue-600", "text-white");
+          document.getElementById("activeFilterText").textContent = "Termahal";
+        }
+
+        // Sort products
+        const sortedProducts = [...currentProducts].sort((a, b) => {
+          const priceA = parsePrice(a.harga);
+          const priceB = parsePrice(b.harga);
+
+          if (type === "termurah") {
+            return priceA - priceB; // Ascending
+          } else {
+            return priceB - priceA; // Descending
+          }
+        });
+
+        filteredProducts = sortedProducts;
+
+        // Display sorted products
+        displayProductRows(filteredProducts);
+
+        // Show active filter indicator
+        document
+          .getElementById("activeFilterIndicator")
+          .classList.remove("hidden");
+        document.getElementById("activeFilterIndicator").classList.add("flex");
+      }
+
+      // Fungsi untuk reset filter
+      function resetPriceFilter() {
+        activeFilter = null;
+        filteredProducts = [...currentProducts];
+
+        // Reset button states
+        document
+          .getElementById("filterTermurah")
+          .classList.remove("filter-active", "bg-blue-600", "text-white");
+        document
+          .getElementById("filterTermahal")
+          .classList.remove("filter-active", "bg-blue-600", "text-white");
+
+        // Hide active filter indicator
+        document
+          .getElementById("activeFilterIndicator")
+          .classList.add("hidden");
+        document
+          .getElementById("activeFilterIndicator")
+          .classList.remove("flex");
+
+        // Display original products
+        displayProductRows(currentProducts);
+      }
+
+      // Fungsi untuk display product rows ke table
+      function displayProductRows(products) {
+        const tableBody = document.getElementById("productTableBody");
+        tableBody.innerHTML = "";
+
+        products.forEach((product, index) => {
+          const row = createTableRow(product, index);
+          tableBody.appendChild(row);
+        });
+
+        // Update result count
+        document.getElementById("resultCount").textContent =
+          `${products.length} products`;
+      }
+
+      async function searchProducts() {
+        const keyword = document.getElementById("searchInput").value.trim();
+
+        if (!keyword) {
+          showError("Please enter a product keyword");
+          return;
+        }
+
+        // Update keyword display
+        document.getElementById("searchKeyword").textContent = keyword;
+
+        // Show loading, hide results and error
+        document.getElementById("loading").classList.remove("hidden");
+        document.getElementById("resultsContainer").classList.add("hidden");
+        document.getElementById("emptyState").classList.add("hidden");
+        document.getElementById("errorMessage").classList.add("hidden");
+
+        // Hide filter section initially
+        document.getElementById("filterSection").classList.add("hidden");
+
+        // Reset filter state
+        resetPriceFilter();
+
+        try {
+          const WEBHOOK_URLS = [
+            "https://wa.togu.co.id/webhook/40232f3c-2c98-43ef-b0c0-feaf28146c00",
+            "http://192.168.1.96:5678/webhook/40232f3c-2c98-43ef-b0c0-feaf28146c00",
+          ];
+
+          let response = null;
+
+          for (const url of WEBHOOK_URLS) {
+            try {
+              console.log("Trying:", url);
+
+              response = await axios.post(
+                url,
+                { keyword },
+                {
+                  headers: { "Content-Type": "application/json" },
+                  timeout: 5000,
+                },
+              );
+
+              break; // ✅ berhenti kalau sukses
+            } catch (err) {
+              console.warn("Failed:", url);
+            }
+          }
+
+          if (!response) {
+            showError("All webhook endpoints failed");
+            document.getElementById("loading").classList.add("hidden");
+            return;
+          }
+
+          if (response?.data?.[0]?.success) {
+            document.getElementById("loading").classList.add("hidden");
+            displayProducts(response.data[0], keyword);
+          } else {
+            showError("Invalid response format from server");
+            document.getElementById("loading").classList.add("hidden");
+          }
+        } catch (error) {
+          console.error("Error:", error);
+
+          let errorMsg = "Server error";
+
+          if (error.response) {
+            errorMsg = `Server error: ${error.response.status} - ${error.response.statusText}`;
+          }
+
+          showError(errorMsg);
+          document.getElementById("loading").classList.add("hidden");
+        }
+      }
+
+      function displayProducts(response, keyword) {
+        const resultsContainer = document.getElementById("resultsContainer");
+        const emptyState = document.getElementById("emptyState");
+
+        // Store products for export
+        currentProducts = response.data || [];
+        filteredProducts = [...currentProducts];
+
+        if (!currentProducts || currentProducts.length === 0) {
+          resultsContainer.classList.add("hidden");
+          emptyState.classList.remove("hidden");
+          return;
+        }
+
+        // Update price range info
+        updatePriceRangeInfo(currentProducts);
+
+        // Show filter section
+        document.getElementById("filterSection").classList.remove("hidden");
+
+        // Display product count
+        document.getElementById("resultCount").textContent =
+          `${currentProducts.length} products`;
+
+        // Display products
+        displayProductRows(currentProducts);
+
+        // Show results container
+        resultsContainer.classList.remove("hidden");
+        emptyState.classList.add("hidden");
+      }
+
+      function createTableRow(product, index) {
+        const row = document.createElement("tr");
+        row.className = "product-row hover:bg-slate-50";
+
+        // Default image if product image is not available
+        const imageUrl =
+          product.image || "https://via.placeholder.com/60x60?text=No+Image";
+
+        // Sanitize link untuk atribut HTML
+        const sanitizedLink = product.link.replace(/"/g, "&quot;");
+
+        row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="relative group">
+                        <img 
+                            src="${imageUrl}" 
+                            alt="${product.item.replace(/"/g, "&quot;")}"
+                            class="product-image w-12 h-12 object-cover rounded-lg shadow-sm border border-slate-200 cursor-pointer"
+                            onclick="openImageModal('${imageUrl.replace(/'/g, "\\'")}')"
+                            onerror="this.src='https://via.placeholder.com/60x60?text=No+Image'"
+                        >
+                        <span class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition whitespace-nowrap">
+                            Click to enlarge
+                        </span>
+                    </div>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="text-sm font-medium text-slate-900 max-w-md">
+                        ${product.item.replace(/"/g, "&quot;")}
+                    </div>
+                    <div class="text-xs text-slate-500 mt-1 truncate max-w-md">
+                        ${product.link.replace(/"/g, "&quot;")}
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="text-sm font-bold text-green-700 bg-green-50 px-3 py-1.5 rounded-full">
+                        ${product.harga}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                        <span class="text-sm text-slate-600 bg-slate-100 px-3 py-1.5 rounded-full truncate max-w-[150px]">
+                            ${product.source.replace(/"/g, "&quot;")}
+                        </span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center gap-2">
+                        <a 
+                            href="${sanitizedLink}"
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-xs font-medium transition flex items-center gap-1"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                                <path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                            </svg>
+                            Visit
+                        </a>
+                        <button 
+                            onclick='copyProductLink("${sanitizedLink}")'
+                            class="bg-slate-100 hover:bg-slate-200 text-slate-700 p-1.5 rounded-lg transition"
+                            title="Copy link"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                                <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                            </svg>
+                        </button>
+                    </div>
+                </td>
+            `;
+
+        return row;
+      }
+
+      // Quick search function
+      function quickSearch(keyword) {
+        document.getElementById("searchInput").value = keyword;
+        searchProducts();
+      }
+
+      // Reset search
+      function resetSearch() {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("resultsContainer").classList.add("hidden");
+        document.getElementById("emptyState").classList.remove("hidden");
+        document.getElementById("errorMessage").classList.add("hidden");
+        document.getElementById("filterSection").classList.add("hidden");
+        currentProducts = [];
+        filteredProducts = [];
+        activeFilter = null;
+      }
+
+      // Image modal functions
+      function openImageModal(imageUrl) {
+        const modal = document.getElementById("imageModal");
+        const modalImage = document.getElementById("modalImage");
+        modalImage.src = imageUrl;
+        modal.classList.remove("hidden");
+      }
+
+      function closeModal() {
+        document.getElementById("imageModal").classList.add("hidden");
+      }
+
+      // Copy product link
+      function copyProductLink(link) {
+        navigator.clipboard
+          .writeText(link)
+          .then(() => {
+            showNotification("Link copied to clipboard!");
+          })
+          .catch(() => {
+            alert("Failed to copy link");
+          });
+      }
+
+      // Export to CSV
+      function exportToCSV() {
+        const productsToExport =
+          filteredProducts.length > 0 ? filteredProducts : currentProducts;
+
+        if (productsToExport.length === 0) {
+          showError("No data to export");
+          return;
+        }
+
+        // Create CSV content
+        let csvContent = "Product Name,Price,Source,Link\n";
+
+        productsToExport.forEach((product) => {
+          // Escape quotes and commas
+          const item = product.item.replace(/"/g, '""');
+          const harga = product.harga.replace(/"/g, '""');
+          const source = product.source.replace(/"/g, '""');
+          const link = product.link.replace(/"/g, '""');
+
+          csvContent += `"${item}","${harga}","${source}","${link}"\n`;
+        });
+
+        // Download CSV
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const link = document.createElement("a");
+        const url = URL.createObjectURL(blob);
+        link.setAttribute("href", url);
+        link.setAttribute(
+          "download",
+          `product_search_${new Date().getTime()}.csv`,
+        );
+        link.style.visibility = "hidden";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        showNotification("CSV file downloaded!");
+      }
+
+      // Copy table to clipboard
+      function copyToClipboard() {
+        const productsToCopy =
+          filteredProducts.length > 0 ? filteredProducts : currentProducts;
+
+        if (productsToCopy.length === 0) {
+          showError("No data to copy");
+          return;
+        }
+
+        let tableText = "Product Name\tPrice\tSource\tLink\n";
+
+        productsToCopy.forEach((product) => {
+          tableText += `${product.item}\t${product.harga}\t${product.source}\t${product.link}\n`;
+        });
+
+        navigator.clipboard
+          .writeText(tableText)
+          .then(() => {
+            showNotification("Table copied to clipboard!");
+          })
+          .catch(() => {
+            alert("Failed to copy table");
+          });
+      }
+
+      // Show notification
+      function showNotification(message) {
+        const notification = document.createElement("div");
+        notification.className =
+          "fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg animate-fade-in-up z-50";
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+          notification.remove();
+        }, 3000);
+      }
+
+      function showError(message) {
+        const errorMessage = document.getElementById("errorMessage");
+        const errorText = document.getElementById("errorText");
+        errorText.textContent = message;
+        errorMessage.classList.remove("hidden");
+
+        setTimeout(() => {
+          errorMessage.classList.add("hidden");
+        }, 5000);
+      }
+
+      // Enable search on Enter key
+      document
+        .getElementById("searchInput")
+        .addEventListener("keypress", function (e) {
+          if (e.key === "Enter") {
+            searchProducts();
+          }
+        });
+
+      // Close modal with Escape key
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          closeModal();
+        }
+      });
+
+      // Load demo data on page load
+      window.addEventListener("load", function () {
+        // Uncomment untuk menampilkan demo produk saat load
+        // displayProducts(demoData, "bearing");
+        document.getElementById("searchKeyword").textContent = "bearing";
+      });
+    </script>
+  </body>
+</html>
