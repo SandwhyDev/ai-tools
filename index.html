@@ -43,20 +43,20 @@
       class="flex justify-between items-center px-8 py-6 border-b border-white/10"
     >
       <h1 class="text-2xl font-bold text-primary tracking-wide">
-        🤖 AI Productivity Tools
+        🤖 TMP Productivity Tools
       </h1>
     </header>
 
     <!-- Main -->
     <main class="px-8 py-12">
       <!-- Title -->
-      <div class="mb-12">
+      <!-- <div class="mb-12">
         <h2 id="greeting" class="text-3xl font-bold mb-3"></h2>
         <p class="text-gray-400 max-w-lg">
           Gunakan AI tools untuk mempercepat pekerjaan Anda. Sistem dirancang
           modular dan siap dikembangkan.
         </p>
-      </div>
+      </div> -->
 
       <!-- Menu Cards -->
       <div id="menuContainer" class="grid md:grid-cols-2 gap-10">
@@ -117,15 +117,15 @@
     <!-- JS -->
     <script>
       // Greeting otomatis berdasarkan jam
-      const hour = new Date().getHours();
-      let greeting = "Welcome";
+      // const hour = new Date().getHours();
+      // let greeting = "Welcome";
 
-      if (hour < 12) greeting = "Good Morning ☀️";
-      else if (hour < 18) greeting = "Good Afternoon 🚀";
-      else greeting = "Good Evening 🌙";
+      // if (hour < 12) greeting = "Good Morning ☀️";
+      // else if (hour < 18) greeting = "Good Afternoon 🚀";
+      // else greeting = "Good Evening 🌙";
 
-      document.getElementById("greeting").innerText =
-        greeting + ", Ready to Boost Productivity?";
+      // document.getElementById("greeting").innerText =
+      //   greeting + ", Ready to Boost Productivity?";
 
       // Hover animation smooth
       const cards = document.querySelectorAll(".menu-card");
