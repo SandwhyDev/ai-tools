@@ -1,184 +1,152 @@
 <!doctype html>
-<html lang="id">
+<html lang="en" class="scroll-smooth">
   <head>
     <meta charset="UTF-8" />
-    <title>Article Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Tools Dashboard</title>
 
-    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  </head>
-
-  <body class="bg-gray-100 min-h-screen p-6">
-    <div class="max-w-4xl mx-auto space-y-6">
-      <!-- FORM -->
-      <div class="bg-white rounded-2xl shadow p-6">
-        <h2 class="text-xl font-semibold mb-4">📝 Generate Artikel</h2>
-
-        <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">Topik Artikel</label>
-          <input
-            id="topicInput"
-            type="text"
-            placeholder="Contoh: ERP di perusahaan manufaktur"
-            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
-          />
-        </div>
-
-        <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">Jumlah Kata</label>
-          <input
-            id="wordCountInput"
-            type="number"
-            value="800"
-            class="w-full border rounded-lg px-3 py-2"
-          />
-        </div>
-
-        <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">
-            Catatan Tambahan (opsional)
-          </label>
-          <textarea
-            id="notesInput"
-            rows="3"
-            placeholder="Tidak ada"
-            class="w-full border rounded-lg px-3 py-2"
-          ></textarea>
-        </div>
-
-        <button
-          onclick="sendToN8n()"
-          class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-medium"
-        >
-          🚀 Generate & Kirim ke n8n
-        </button>
-      </div>
-
-      <!-- PREVIEW -->
-      <div class="bg-white rounded-2xl shadow p-10">
-        <div class="flex justify-between items-center mb-8">
-          <h2 class="text-xl font-semibold">👀 Preview Artikel</h2>
-
-          <div id="copyButtons" class="hidden space-x-2">
-            <button
-              onclick="copyMarkdown()"
-              class="bg-gray-200 px-3 py-1 rounded-lg text-sm hover:bg-gray-300"
-            >
-              📋 Copy Markdown
-            </button>
-
-            <button
-              onclick="copyHTML()"
-              class="bg-gray-200 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 hidden"
-            >
-              📄 Copy HTML
-            </button>
-          </div>
-        </div>
-
-        <div class="overflow-x-auto">
-          <article
-            id="preview"
-            class="prose prose-lg max-w-none prose-h1:text-4xl prose-h1:font-bold prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-p:leading-relaxed prose-p:text-gray-700 prose-strong:text-gray-900 prose-ul:my-4 prose-table:table-auto prose-table:w-full prose-th:bg-gray-100 prose-th:p-3 prose-td:p-3 prose-td:border prose-th:border prose-table:border prose-table:rounded-lg"
-          >
-            <p class="text-gray-400 italic">Artikel akan muncul di sini…</p>
-          </article>
-        </div>
-      </div>
-    </div>
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
 
     <script>
-      let latestMarkdown = "";
-      let latestHTML = "";
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: "#00F5FF",
+              secondary: "#8B5CF6",
+              darkbg: "#0F172A",
+            },
+            boxShadow: {
+              neon: "0 0 25px rgba(0,245,255,0.4)",
+            },
+          },
+        },
+      };
+    </script>
 
-      async function sendToN8n() {
-        const topic = document.getElementById("topicInput").value.trim();
-        const wordCount =
-          document.getElementById("wordCountInput").value || 800;
-        let notes = document.getElementById("notesInput").value.trim();
-
-        if (!topic) {
-          alert("Topik wajib diisi");
-          return;
-        }
-
-        if (!notes) notes = "Tidak ada";
-
-        const payload = {
-          topic,
-          word_count: Number(wordCount),
-          additional_notes: notes,
-        };
-
-        const preview = document.getElementById("preview");
-        preview.innerHTML =
-          '<p class="italic text-gray-400">⏳ Generating artikel...</p>';
-
-        document.getElementById("copyButtons").classList.add("hidden");
-
-        try {
-          const primaryUrl =
-            "https://wa.togu.co.id/webhook-test/60e19351-16ce-4d55-976d-b537b553face";
-
-          const fallbackUrl =
-            "http://192.168.1.96:5678/webhook-test/60e19351-16ce-4d55-976d-b537b553face";
-
-          let res;
-
-          // 🔹 1️⃣ Coba domain dulu
-          try {
-            res = await fetch(primaryUrl, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(payload),
-            });
-
-            if (!res.ok) {
-              throw new Error("Primary endpoint gagal");
-            }
-          } catch (primaryError) {
-            console.warn("Primary gagal, mencoba fallback IP...");
-
-            // 🔹 2️⃣ Jika gagal, pakai IP
-            res = await fetch(fallbackUrl, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(payload),
-            });
-
-            if (!res.ok) {
-              throw new Error("Fallback endpoint juga gagal");
-            }
-          }
-
-          const data = await res.json();
-          const output = data.output;
-
-          latestMarkdown = output.content;
-          latestHTML = marked.parse(output.content);
-
-          preview.innerHTML = latestHTML;
-
-          document.getElementById("copyButtons").classList.remove("hidden");
-        } catch (err) {
-          preview.innerHTML = '<p class="text-red-600">❌ Server error</p>';
-          console.error(err);
-        }
+    <style>
+      body {
+        background: radial-gradient(circle at 10% 10%, #1e293b, #0f172a 60%);
       }
 
-      function copyMarkdown() {
-        navigator.clipboard.writeText(latestMarkdown);
-        alert("✅ Markdown berhasil dicopy!");
+      .glass {
+        backdrop-filter: blur(15px);
+        background: rgba(255, 255, 255, 0.05);
       }
+    </style>
+  </head>
 
-      function copyHTML() {
-        navigator.clipboard.writeText(latestHTML);
-        alert("✅ HTML berhasil dicopy!");
-      }
+  <body class="min-h-screen text-white font-sans">
+    <!-- Header -->
+    <header
+      class="flex justify-between items-center px-8 py-6 border-b border-white/10"
+    >
+      <h1 class="text-2xl font-bold text-primary tracking-wide">
+        🤖 AI Productivity Tools
+      </h1>
+    </header>
+
+    <!-- Main -->
+    <main class="px-8 py-12">
+      <!-- Title -->
+      <div class="mb-12">
+        <h2 id="greeting" class="text-3xl font-bold mb-3"></h2>
+        <p class="text-gray-400 max-w-lg">
+          Gunakan AI tools untuk mempercepat pekerjaan Anda. Sistem dirancang
+          modular dan siap dikembangkan.
+        </p>
+      </div>
+
+      <!-- Menu Cards -->
+      <div id="menuContainer" class="grid md:grid-cols-2 gap-10">
+        <!-- Generate Article -->
+        <div
+          class="menu-card glass p-8 rounded-2xl border border-white/10 hover:border-primary transition duration-300 hover:shadow-neon"
+        >
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">📝 Generate Article</h3>
+            <span
+              class="text-xs bg-primary/20 text-primary px-3 py-1 rounded-full"
+            >
+              AI Writer
+            </span>
+          </div>
+
+          <p class="text-gray-400 mb-6">
+            Buat artikel otomatis dengan bantuan AI untuk kebutuhan blog, SEO,
+            atau konten bisnis.
+          </p>
+
+          <a
+            href="/article/"
+            class="inline-block bg-primary text-black font-semibold px-6 py-2 rounded-xl hover:scale-105 transition"
+          >
+            Open Tool →
+          </a>
+        </div>
+
+        <!-- Image to Excel -->
+        <div
+          class="menu-card glass p-8 rounded-2xl border border-white/10 hover:border-secondary transition duration-300 hover:shadow-neon"
+        >
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold">🖼️ Image to Excel</h3>
+            <span
+              class="text-xs bg-secondary/20 text-secondary px-3 py-1 rounded-full"
+            >
+              OCR Convert
+            </span>
+          </div>
+
+          <p class="text-gray-400 mb-6">
+            Konversi gambar (tabel / screenshot data) menjadi file Excel secara
+            otomatis dan rapi.
+          </p>
+
+          <a
+            href="/convert-excel/"
+            class="inline-block bg-secondary text-white font-semibold px-6 py-2 rounded-xl hover:scale-105 transition"
+          >
+            Start Convert →
+          </a>
+        </div>
+      </div>
+    </main>
+
+    <!-- JS -->
+    <script>
+      // Greeting otomatis berdasarkan jam
+      const hour = new Date().getHours();
+      let greeting = "Welcome";
+
+      if (hour < 12) greeting = "Good Morning ☀️";
+      else if (hour < 18) greeting = "Good Afternoon 🚀";
+      else greeting = "Good Evening 🌙";
+
+      document.getElementById("greeting").innerText =
+        greeting + ", Ready to Boost Productivity?";
+
+      // Hover animation smooth
+      const cards = document.querySelectorAll(".menu-card");
+
+      cards.forEach((card) => {
+        card.addEventListener("mouseenter", () => {
+          card.style.transform = "translateY(-6px)";
+        });
+        card.addEventListener("mouseleave", () => {
+          card.style.transform = "translateY(0px)";
+        });
+      });
+
+      /*
+      Cara tambah menu baru nanti:
+
+      1. Copy 1 div dengan class "menu-card"
+      2. Ganti judul
+      3. Ganti href
+      4. Done ✅
+    */
     </script>
   </body>
 </html>
