@@ -110,6 +110,20 @@
           <span id="btnText">Konversi ke Excel</span>
           <div id="btnLoader" class="loading mx-auto hidden"></div>
         </button>
+
+        <!-- Category Selection -->
+        <div class="mb-4 hidden" id="categoryWrapper">
+          <label class="block text-sm font-semibold text-gray-700 my-2">
+            Category
+          </label>
+          <select
+            id="categorySelect"
+            class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="inquiry" selected>Inquiry</option>
+            <option value="rab">RAB</option>
+          </select>
+        </div>
       </div>
 
       <!-- Results Table -->

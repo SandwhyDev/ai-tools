@@ -133,6 +133,8 @@ const btnText = document.getElementById("btnText");
 const btnLoader = document.getElementById("btnLoader");
 const UploadArea = document.getElementById("uploadArea");
 const startOver = document.getElementById("startOver");
+const categoryWrapper = document.getElementById("categoryWrapper");
+const categorySelect = document.getElementById("categorySelect");
 
 let uploadedImage = null;
 
@@ -162,6 +164,7 @@ function handleFile(file) {
     resultsContainer.classList.add("hidden");
     UploadArea.classList.add("hidden");
     startOver.classList.remove("hidden");
+    categoryWrapper.classList.remove("hidden"); // tampilkan category
   };
   reader.readAsDataURL(file);
 }
@@ -367,7 +370,10 @@ function populateTable(data) {
 ===================================================== */
 const postImage = async (url, image) => {
   const formData = new FormData();
+  const category = categorySelect.value || "inquiry";
+
   formData.append("image", image);
+  formData.append("category", category);
 
   const response = await fetch(url, {
     method: "POST",
@@ -471,6 +477,7 @@ startOver.addEventListener("click", function () {
   convertBtn.classList.add("hidden");
   resultsContainer.classList.add("hidden");
   startOver.classList.add("hidden");
+  categoryWrapper.classList.add("hidden"); // tampilkan category
 });
 
 /* =====================================================
