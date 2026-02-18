@@ -164,7 +164,7 @@ function handleFile(file) {
     resultsContainer.classList.add("hidden");
     UploadArea.classList.add("hidden");
     startOver.classList.remove("hidden");
-    categoryWrapper.classList.remove("hidden"); // tampilkan category
+    // categoryWrapper.classList.remove("hidden"); // tampilkan category
   };
   reader.readAsDataURL(file);
 }
