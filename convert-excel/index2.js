@@ -338,8 +338,17 @@ function populateTable(data) {
       const td = document.createElement("td");
       td.className = "border border-gray-300 px-4 py-2";
 
-      const value = item[key];
-      td.textContent = formatCellValue(key, value);
+      let value = item[key];
+
+      // jika value adalah object (misal SPESIFIKASI)
+      if (typeof value === "object" && value !== null) {
+        value = Object.entries(value)
+          .map(([k, v]) => `${k}: ${v}`) // bikin "key: value"
+          .join("\n"); // tiap properti di baris baru
+        td.style.whiteSpace = "pre-line"; // supaya \n tampil di HTML
+      }
+
+      td.textContent = value;
 
       const currencyKeywords = [
         "harga",
@@ -426,6 +435,7 @@ convertBtn.addEventListener("click", async function () {
     }
 
     const final = data[0]?.items ?? data;
+
     populateTable(final);
 
     resultsContainer.classList.remove("hidden");
