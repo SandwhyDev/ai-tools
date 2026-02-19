@@ -4,14 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TMP Tools</title>
-    <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="/images/logo2.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="/images/logo2.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/images/logo2.png" />
-
-    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-
     <script>
       tailwind.config = {
         theme: {
@@ -23,25 +17,385 @@
             },
             boxShadow: {
               neon: "0 0 25px rgba(0,245,255,0.4)",
+              "neon-purple": "0 0 25px rgba(139,92,246,0.4)",
             },
           },
         },
       };
     </script>
-
     <style>
+      * {
+        box-sizing: border-box;
+      }
+
       body {
         background: radial-gradient(circle at 10% 10%, #1e293b, #0f172a 60%);
+        overflow-x: hidden;
       }
 
       .glass {
         backdrop-filter: blur(15px);
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      /* ── Animated Icon Containers ── */
+      .icon-wrap {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      /* Article icon – floating pen + lines */
+      .icon-article {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 245, 255, 0.15),
+          rgba(0, 245, 255, 0.05)
+        );
+        border: 1px solid rgba(0, 245, 255, 0.3);
+      }
+
+      .icon-article svg {
+        animation: floatUpDown 2.8s ease-in-out infinite;
+        filter: drop-shadow(0 0 8px #00f5ff);
+      }
+
+      /* Pencil writing line animation */
+      .writing-line {
+        stroke-dasharray: 40;
+        stroke-dashoffset: 40;
+        animation: writeIn 1.5s ease-out infinite;
+      }
+      .writing-line:nth-child(2) {
+        animation-delay: 0.3s;
+      }
+      .writing-line:nth-child(3) {
+        animation-delay: 0.6s;
+      }
+
+      @keyframes writeIn {
+        0% {
+          stroke-dashoffset: 40;
+          opacity: 0;
+        }
+        20% {
+          opacity: 1;
+        }
+        60% {
+          stroke-dashoffset: 0;
+          opacity: 1;
+        }
+        100% {
+          stroke-dashoffset: 0;
+          opacity: 0.3;
+        }
+      }
+
+      /* Image to Excel icon – scan effect */
+      .icon-excel {
+        background: linear-gradient(
+          135deg,
+          rgba(139, 92, 246, 0.15),
+          rgba(139, 92, 246, 0.05)
+        );
+        border: 1px solid rgba(139, 92, 246, 0.3);
+      }
+
+      .scan-line {
+        animation: scanMove 2s ease-in-out infinite;
+      }
+
+      @keyframes scanMove {
+        0%,
+        100% {
+          transform: translateY(-12px);
+          opacity: 0;
+        }
+        20% {
+          opacity: 1;
+        }
+        80% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(12px);
+          opacity: 0;
+        }
+      }
+
+      .grid-cell {
+        animation: cellPop 1.8s ease-in-out infinite;
+      }
+      .grid-cell:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .grid-cell:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .grid-cell:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      .grid-cell:nth-child(4) {
+        animation-delay: 0.6s;
+      }
+      .grid-cell:nth-child(5) {
+        animation-delay: 0.8s;
+      }
+      .grid-cell:nth-child(6) {
+        animation-delay: 1s;
+      }
+
+      @keyframes cellPop {
+        0%,
+        100% {
+          opacity: 0.2;
+          transform: scale(0.85);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      /* Search icon – pulse rings */
+      .icon-search {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 245, 255, 0.1),
+          rgba(139, 92, 246, 0.1)
+        );
+        border: 1px solid rgba(100, 200, 255, 0.3);
+      }
+
+      .search-pulse {
+        transform-origin: 50% 48%;
+        animation: pulseRing 2s ease-out infinite;
+      }
+      .search-pulse:nth-child(2) {
+        animation-delay: 0.5s;
+      }
+      .search-pulse:nth-child(3) {
+        animation-delay: 1s;
+      }
+
+      @keyframes pulseRing {
+        0% {
+          transform: scale(0.7);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(1.4);
+          opacity: 0;
+        }
+      }
+
+      .magnifier-bounce {
+        animation: magnBounce 2s ease-in-out infinite;
+      }
+
+      @keyframes magnBounce {
+        0%,
+        100% {
+          transform: translate(0, 0) rotate(0deg);
+        }
+        30% {
+          transform: translate(-2px, -3px) rotate(-5deg);
+        }
+        70% {
+          transform: translate(2px, 2px) rotate(5deg);
+        }
+      }
+
+      /* Float animation shared */
+      @keyframes floatUpDown {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+
+      /* Card lift */
+      .menu-card {
+        transition:
+          transform 0.35s cubic-bezier(0.23, 1.35, 0.52, 0.98),
+          box-shadow 0.3s ease,
+          border-color 0.3s ease;
+        cursor: default;
+      }
+      .menu-card:hover {
+        transform: translateY(-8px) scale(1.01);
+      }
+
+      /* Glowing border sweep on hover */
+      .menu-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 1rem;
+        padding: 1px;
+        background: linear-gradient(
+          135deg,
+          transparent,
+          rgba(0, 245, 255, 0.5),
+          transparent
+        );
+        -webkit-mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.4s;
+      }
+      .menu-card:hover::before {
+        opacity: 1;
+      }
+
+      /* Particle dots floating in background */
+      .particle {
+        position: fixed;
+        border-radius: 50%;
+        pointer-events: none;
+        animation: particleDrift linear infinite;
+        opacity: 0.25;
+      }
+
+      @keyframes particleDrift {
+        0% {
+          transform: translateY(100vh) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.3;
+        }
+        90% {
+          opacity: 0.2;
+        }
+        100% {
+          transform: translateY(-100px) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      /* Badge pulse */
+      .badge-live {
+        animation: badgePulse 2s ease-in-out infinite;
+      }
+      @keyframes badgePulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 6px rgba(0, 245, 255, 0);
+        }
+      }
+
+      /* Button shine */
+      .btn-primary {
+        position: relative;
+        overflow: hidden;
+        background: #00f5ff;
+        color: #0f172a;
+        font-weight: 700;
+        padding: 10px 24px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        display: inline-block;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .btn-primary::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.4),
+          transparent
+        );
+        transform: skewX(-20deg);
+        animation: btnShine 3s ease-in-out infinite;
+      }
+      @keyframes btnShine {
+        0% {
+          left: -75%;
+        }
+        40%,
+        100% {
+          left: 125%;
+        }
+      }
+
+      .btn-secondary {
+        position: relative;
+        overflow: hidden;
+        background: #8b5cf6;
+        color: #fff;
+        font-weight: 700;
+        padding: 10px 24px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        display: inline-block;
+        transition: transform 0.2s;
+      }
+      .btn-secondary::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transform: skewX(-20deg);
+        animation: btnShine 3s ease-in-out infinite;
+        animation-delay: 1s;
+      }
+
+      .btn-outline {
+        border: 1.5px solid #00f5ff;
+        color: #00f5ff;
+        font-weight: 700;
+        padding: 10px 24px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        display: inline-block;
+        transition:
+          background 0.3s,
+          color 0.3s;
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-outline:hover {
+        background: #00f5ff;
+        color: #0f172a;
       }
     </style>
   </head>
 
   <body class="min-h-screen text-white font-sans">
+    <!-- Floating background particles -->
+    <div id="particles"></div>
+
     <!-- Header -->
     <header
       class="flex justify-between items-center px-8 py-6 border-b border-white/10"
@@ -60,130 +414,335 @@
 
     <!-- Main -->
     <main class="px-8 py-12">
-      <!-- Title -->
-      <!-- <div class="mb-12">
-        <h2 id="greeting" class="text-3xl font-bold mb-3"></h2>
-        <p class="text-gray-400 max-w-lg">
-          Gunakan AI tools untuk mempercepat pekerjaan Anda. Sistem dirancang
-          modular dan siap dikembangkan.
-        </p>
-      </div> -->
-
-      <!-- Menu Cards -->
       <div id="menuContainer" class="grid md:grid-cols-2 gap-10">
-        <!-- Generate Articles -->
+        <!-- ── Generate Article ── -->
         <div
-          class="menu-card glass p-8 rounded-2xl border border-white/10 hover:border-primary transition duration-300 hover:shadow-neon"
+          class="menu-card glass relative p-8 rounded-2xl border border-white/10 hover:border-primary hover:shadow-neon"
         >
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">📝 Generate Article</h3>
-            <span
-              class="text-xs bg-primary/20 text-primary px-3 py-1 rounded-full"
-            >
-              AI Writer
-            </span>
+          <div class="flex items-start gap-5 mb-5">
+            <!-- Animated Icon -->
+            <div class="icon-wrap icon-article">
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 40 40"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <!-- Pencil body -->
+                <rect
+                  x="24"
+                  y="4"
+                  width="8"
+                  height="22"
+                  rx="2"
+                  transform="rotate(15 24 4)"
+                  fill="#00F5FF"
+                  opacity="0.85"
+                />
+                <polygon points="21,30 25,28 23,34" fill="#00F5FF" />
+                <!-- Writing lines -->
+                <line
+                  class="writing-line"
+                  x1="5"
+                  y1="18"
+                  x2="18"
+                  y2="18"
+                  stroke="#00F5FF"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+                <line
+                  class="writing-line"
+                  x1="5"
+                  y1="23"
+                  x2="16"
+                  y2="23"
+                  stroke="#00F5FF"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+                <line
+                  class="writing-line"
+                  x1="5"
+                  y1="28"
+                  x2="14"
+                  y2="28"
+                  stroke="#00F5FF"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </div>
+
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="text-xl font-semibold">Generate Article</h3>
+                <span
+                  class="badge-live text-xs bg-primary/20 text-primary px-3 py-0.5 rounded-full"
+                  >AI Writer</span
+                >
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed">
+                Buat artikel otomatis dengan bantuan AI untuk kebutuhan blog,
+                SEO, atau konten bisnis.
+              </p>
+            </div>
           </div>
 
-          <p class="text-gray-400 mb-6">
-            Buat artikel otomatis dengan bantuan AI untuk kebutuhan blog, SEO,
-            atau konten bisnis.
-          </p>
-
-          <a
-            href="/article/"
-            class="inline-block bg-primary text-black font-semibold px-6 py-2 rounded-xl hover:scale-105 transition"
-          >
-            Generate Article →
-          </a>
+          <a href="/article/" class="btn-primary">Generate Article →</a>
         </div>
 
-        <!-- Image to Excel -->
+        <!-- ── Image to Excel ── -->
         <div
-          class="menu-card glass p-8 rounded-2xl border border-white/10 hover:border-secondary transition duration-300 hover:shadow-neon"
+          class="menu-card glass relative p-8 rounded-2xl border border-white/10 hover:border-secondary hover:shadow-neon-purple"
         >
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">🖼️ Image to Excel</h3>
-            <span
-              class="text-xs bg-secondary/20 text-secondary px-3 py-1 rounded-full"
-            >
-              OCR Convert
-            </span>
+          <div class="flex items-start gap-5 mb-5">
+            <!-- Animated Icon -->
+            <div class="icon-wrap icon-excel">
+              <svg
+                width="44"
+                height="44"
+                viewBox="0 0 44 44"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <!-- Image frame -->
+                <rect
+                  x="3"
+                  y="3"
+                  width="22"
+                  height="18"
+                  rx="3"
+                  stroke="#8B5CF6"
+                  stroke-width="1.5"
+                  opacity="0.7"
+                />
+                <!-- Mountain in image -->
+                <polyline
+                  points="5,17 10,10 15,14 18,9 22,17"
+                  stroke="#8B5CF6"
+                  stroke-width="1.5"
+                  stroke-linejoin="round"
+                  opacity="0.7"
+                />
+                <!-- Scan line -->
+                <line
+                  class="scan-line"
+                  x1="3"
+                  y1="12"
+                  x2="25"
+                  y2="12"
+                  stroke="#8B5CF6"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                />
+                <!-- Arrow right -->
+                <path
+                  d="M27 22 L33 22 M30 19 L33 22 L30 25"
+                  stroke="#8B5CF6"
+                  stroke-width="1.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <!-- Excel grid -->
+                <rect
+                  x="34"
+                  y="12"
+                  width="7"
+                  height="6"
+                  rx="1"
+                  class="grid-cell"
+                  fill="#8B5CF6"
+                  opacity="0.6"
+                />
+                <rect
+                  x="34"
+                  y="19"
+                  width="7"
+                  height="6"
+                  rx="1"
+                  class="grid-cell"
+                  fill="#8B5CF6"
+                  opacity="0.6"
+                />
+                <rect
+                  x="34"
+                  y="26"
+                  width="7"
+                  height="6"
+                  rx="1"
+                  class="grid-cell"
+                  fill="#8B5CF6"
+                  opacity="0.6"
+                />
+                <rect
+                  x="26"
+                  y="12"
+                  width="7"
+                  height="6"
+                  rx="1"
+                  class="grid-cell"
+                  fill="#8B5CF6"
+                  opacity="0.6"
+                />
+                <rect
+                  x="26"
+                  y="19"
+                  width="7"
+                  height="6"
+                  rx="1"
+                  class="grid-cell"
+                  fill="#8B5CF6"
+                  opacity="0.6"
+                />
+                <rect
+                  x="26"
+                  y="26"
+                  width="7"
+                  height="6"
+                  rx="1"
+                  class="grid-cell"
+                  fill="#8B5CF6"
+                  opacity="0.6"
+                />
+              </svg>
+            </div>
+
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="text-xl font-semibold">Image to Excel</h3>
+                <span
+                  class="text-xs bg-secondary/20 text-secondary px-3 py-0.5 rounded-full"
+                  >OCR Convert</span
+                >
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed">
+                Ekstrak data dari gambar (invoice, inquiry, tabel, screenshot)
+                dan ubah menjadi Excel otomatis yang rapi dan siap diproses.
+              </p>
+            </div>
           </div>
 
-          <p class="text-gray-400 mb-6">
-            Ekstrak data dari gambar (invoice, inquiry, tabel, screenshot) dan
-            ubah menjadi Excel otomatis yang rapi dan siap diproses.
-          </p>
-
-          <a
-            href="/convert-excel/"
-            class="inline-block bg-secondary text-white font-semibold px-6 py-2 rounded-xl hover:scale-105 transition"
-          >
-            Start Convert →
-          </a>
+          <a href="/convert-excel/" class="btn-secondary">Start Convert →</a>
         </div>
 
-        <!-- Image to Excel -->
+        <!-- ── Search Product ── -->
         <div
-          class="menu-card glass p-8 rounded-2xl border border-white/10 hover:border-secondary transition duration-300 hover:shadow-neon"
+          class="menu-card glass relative p-8 rounded-2xl border border-white/10 hover:border-primary hover:shadow-neon"
         >
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="text-xl font-semibold">🔍 Search Product</h3>
-            <span
-              class="text-xs bg-secondary/20 text-secondary px-3 py-1 rounded-full"
-            >
-              Product Search
-            </span>
+          <div class="flex items-start gap-5 mb-5">
+            <!-- Animated Icon -->
+            <div class="icon-wrap icon-search">
+              <svg
+                width="44"
+                height="44"
+                viewBox="0 0 44 44"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <!-- Pulse rings behind magnifier -->
+                <circle
+                  class="search-pulse"
+                  cx="19"
+                  cy="19"
+                  r="10"
+                  stroke="#00F5FF"
+                  stroke-width="1"
+                  fill="none"
+                />
+                <circle
+                  class="search-pulse"
+                  cx="19"
+                  cy="19"
+                  r="10"
+                  stroke="#8B5CF6"
+                  stroke-width="1"
+                  fill="none"
+                />
+                <circle
+                  class="search-pulse"
+                  cx="19"
+                  cy="19"
+                  r="10"
+                  stroke="#00F5FF"
+                  stroke-width="0.8"
+                  fill="none"
+                />
+
+                <!-- Magnifier glass -->
+                <g class="magnifier-bounce">
+                  <circle
+                    cx="19"
+                    cy="19"
+                    r="9"
+                    stroke="#00F5FF"
+                    stroke-width="2"
+                    fill="rgba(0,245,255,0.08)"
+                  />
+                  <line
+                    x1="26"
+                    y1="26"
+                    x2="33"
+                    y2="33"
+                    stroke="#00F5FF"
+                    stroke-width="2.5"
+                    stroke-linecap="round"
+                  />
+                  <!-- Inner highlight -->
+                  <circle cx="16" cy="16" r="3" fill="rgba(0,245,255,0.2)" />
+                </g>
+              </svg>
+            </div>
+
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="text-xl font-semibold">Search Product</h3>
+                <span
+                  class="text-xs bg-secondary/20 text-secondary px-3 py-0.5 rounded-full"
+                  >Product Search</span
+                >
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed">
+                Cari produk berdasarkan keyword atau deskripsi, dan dapatkan
+                informasi lengkapnya.
+              </p>
+            </div>
           </div>
 
-          <p class="text-gray-400 mb-6">
-            Cari produk berdasarkan keyword atau deskripsi, dan dapatkan
-            informasi lengkapnya.
-          </p>
-
-          <a
-            href="/search-product/"
-            class="inline-block border border-primary text-primary font-semibold px-6 py-2 rounded-xl hover:bg-primary hover:text-black transition duration-300"
-          >
-            Start Search →
-          </a>
+          <a href="/search-product/" class="btn-outline">Start Search →</a>
         </div>
       </div>
     </main>
 
-    <!-- JS -->
     <script>
-      // Greeting otomatis berdasarkan jam
-      // const hour = new Date().getHours();
-      // let greeting = "Welcome";
+      // Generate floating background particles
+      const container = document.getElementById("particles");
+      const colors = ["#00F5FF", "#8B5CF6", "#ffffff"];
+      for (let i = 0; i < 22; i++) {
+        const p = document.createElement("div");
+        p.className = "particle";
+        const size = Math.random() * 4 + 2;
+        p.style.cssText = `
+          width: ${size}px; height: ${size}px;
+          background: ${colors[Math.floor(Math.random() * colors.length)]};
+          left: ${Math.random() * 100}vw;
+          animation-duration: ${Math.random() * 15 + 12}s;
+          animation-delay: ${Math.random() * 10}s;
+          filter: blur(${size > 4 ? 1 : 0}px);
+        `;
+        container.appendChild(p);
+      }
 
-      // if (hour < 12) greeting = "Good Morning ☀️";
-      // else if (hour < 18) greeting = "Good Afternoon 🚀";
-      // else greeting = "Good Evening 🌙";
-
-      // document.getElementById("greeting").innerText =
-      //   greeting + ", Ready to Boost Productivity?";
-
-      // Hover animation smooth
-      const cards = document.querySelectorAll(".menu-card");
-
-      cards.forEach((card) => {
+      // Card hover lift
+      document.querySelectorAll(".menu-card").forEach((card) => {
         card.addEventListener("mouseenter", () => {
-          card.style.transform = "translateY(-6px)";
+          card.style.transform = "translateY(-8px) scale(1.01)";
         });
         card.addEventListener("mouseleave", () => {
-          card.style.transform = "translateY(0px)";
+          card.style.transform = "translateY(0) scale(1)";
         });
       });
-
-      /*
-      Cara tambah menu baru nanti:
-
-      1. Copy 1 div dengan class "menu-card"
-      2. Ganti judul
-      3. Ganti href
-      4. Done ✅
-    */
     </script>
   </body>
 </html>
