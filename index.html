@@ -260,7 +260,7 @@
         opacity: 1;
       }
 
-      /* Particle dots floating in background */
+      /* Particle dots floating from bottom only */
       .particle {
         position: fixed;
         border-radius: 50%;
@@ -271,17 +271,17 @@
 
       @keyframes particleDrift {
         0% {
-          transform: translateY(100vh) rotate(0deg);
+          transform: translateY(0) rotate(0deg);
           opacity: 0;
         }
         10% {
           opacity: 0.3;
         }
-        90% {
+        85% {
           opacity: 0.2;
         }
         100% {
-          transform: translateY(-100px) rotate(720deg);
+          transform: translateY(-100vh) rotate(720deg);
           opacity: 0;
         }
       }
@@ -716,7 +716,7 @@
     </main>
 
     <script>
-      // Generate floating background particles
+      // Generate floating background particles from bottom
       const container = document.getElementById("particles");
       const colors = ["#00F5FF", "#8B5CF6", "#ffffff"];
       for (let i = 0; i < 22; i++) {
@@ -727,8 +727,8 @@
           width: ${size}px; height: ${size}px;
           background: ${colors[Math.floor(Math.random() * colors.length)]};
           left: ${Math.random() * 100}vw;
+          bottom: ${Math.random() * 10}px;
           animation-duration: ${Math.random() * 15 + 12}s;
-          animation-delay: ${Math.random() * 10}s;
           filter: blur(${size > 4 ? 1 : 0}px);
         `;
         container.appendChild(p);
