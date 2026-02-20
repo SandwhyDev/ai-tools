@@ -336,19 +336,47 @@ function populateTable(data) {
 
     allKeys.forEach((key) => {
       const td = document.createElement("td");
+
+      console.log(key);
+
       td.className = "border border-gray-300 px-4 py-2";
+      td.style.whiteSpace = "normal"; // 🔥 override nowrap
+      td.style.wordBreak = "break-word"; // 🔥 biar panjang tetap wrap
+      td.style.verticalAlign = "top";
 
       let value = item[key];
 
-      // jika value adalah object (misal SPESIFIKASI)
-      if (typeof value === "object" && value !== null) {
-        value = Object.entries(value)
-          .map(([k, v]) => `${k}: ${v}`) // bikin "key: value"
-          .join("\n"); // tiap properti di baris baru
-        td.style.whiteSpace = "pre-line"; // supaya \n tampil di HTML
+      if (value === null || value === undefined) {
+        value = "-";
       }
 
-      td.textContent = value;
+      // 🔥 STRING YANG ADA \n
+      else if (typeof value === "string" && value.includes("\n")) {
+        value = value.replace(/\n/g, "<br>");
+      }
+
+      // ARRAY
+      else if (Array.isArray(value)) {
+        value = value
+          .map((v) => {
+            if (typeof v === "object" && v !== null) {
+              return Object.entries(v)
+                .map(([k, val]) => `${k}: ${val}`)
+                .join(", ");
+            }
+            return v;
+          })
+          .join("<br>");
+      }
+
+      // OBJECT
+      else if (typeof value === "object") {
+        value = Object.entries(value)
+          .map(([k, v]) => `${k}: ${v}`)
+          .join("<br>");
+      }
+
+      td.innerHTML = value;
 
       const currencyKeywords = [
         "harga",
@@ -372,6 +400,8 @@ function populateTable(data) {
 
     tableBody.appendChild(row);
   });
+
+  resultsContainer.classList.remove("hidden");
 }
 
 /* =====================================================
@@ -433,6 +463,8 @@ convertBtn.addEventListener("click", async function () {
       alert("Server error");
       return;
     }
+
+    // data  =
 
     const final = data[0]?.items ?? data;
 
