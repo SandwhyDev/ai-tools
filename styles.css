@@ -1,0 +1,387 @@
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        background: radial-gradient(circle at 10% 10%, #1e293b, #0f172a 60%);
+        overflow-x: hidden;
+      }
+
+      .glass {
+        backdrop-filter: blur(15px);
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      /* ── Animated Icon Containers ── */
+      .icon-wrap {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        flex-shrink: 0;
+      }
+
+      /* Article icon – floating pen + lines */
+      .icon-article {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 245, 255, 0.15),
+          rgba(0, 245, 255, 0.05)
+        );
+        border: 1px solid rgba(0, 245, 255, 0.3);
+      }
+
+      .icon-article svg {
+        animation: floatUpDown 2.8s ease-in-out infinite;
+        filter: drop-shadow(0 0 8px #00f5ff);
+      }
+
+      /* Pencil writing line animation */
+      .writing-line {
+        stroke-dasharray: 40;
+        stroke-dashoffset: 40;
+        animation: writeIn 1.5s ease-out infinite;
+      }
+      .writing-line:nth-child(2) {
+        animation-delay: 0.3s;
+      }
+      .writing-line:nth-child(3) {
+        animation-delay: 0.6s;
+      }
+
+      @keyframes writeIn {
+        0% {
+          stroke-dashoffset: 40;
+          opacity: 0;
+        }
+        20% {
+          opacity: 1;
+        }
+        60% {
+          stroke-dashoffset: 0;
+          opacity: 1;
+        }
+        100% {
+          stroke-dashoffset: 0;
+          opacity: 0.3;
+        }
+      }
+
+      /* Image to Excel icon – scan effect */
+      .icon-excel {
+        background: linear-gradient(
+          135deg,
+          rgba(139, 92, 246, 0.15),
+          rgba(139, 92, 246, 0.05)
+        );
+        border: 1px solid rgba(139, 92, 246, 0.3);
+      }
+
+      .scan-line {
+        animation: scanMove 2s ease-in-out infinite;
+      }
+
+      @keyframes scanMove {
+        0%,
+        100% {
+          transform: translateY(-12px);
+          opacity: 0;
+        }
+        20% {
+          opacity: 1;
+        }
+        80% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(12px);
+          opacity: 0;
+        }
+      }
+
+      .grid-cell {
+        animation: cellPop 1.8s ease-in-out infinite;
+      }
+      .grid-cell:nth-child(1) {
+        animation-delay: 0s;
+      }
+      .grid-cell:nth-child(2) {
+        animation-delay: 0.2s;
+      }
+      .grid-cell:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+      .grid-cell:nth-child(4) {
+        animation-delay: 0.6s;
+      }
+      .grid-cell:nth-child(5) {
+        animation-delay: 0.8s;
+      }
+      .grid-cell:nth-child(6) {
+        animation-delay: 1s;
+      }
+
+      @keyframes cellPop {
+        0%,
+        100% {
+          opacity: 0.2;
+          transform: scale(0.85);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      /* Search icon – pulse rings */
+      .icon-search {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 245, 255, 0.1),
+          rgba(139, 92, 246, 0.1)
+        );
+        border: 1px solid rgba(100, 200, 255, 0.3);
+      }
+
+      .search-pulse {
+        transform-origin: 50% 48%;
+        animation: pulseRing 2s ease-out infinite;
+      }
+      .search-pulse:nth-child(2) {
+        animation-delay: 0.5s;
+      }
+      .search-pulse:nth-child(3) {
+        animation-delay: 1s;
+      }
+
+      @keyframes pulseRing {
+        0% {
+          transform: scale(0.7);
+          opacity: 0.8;
+        }
+        100% {
+          transform: scale(1.4);
+          opacity: 0;
+        }
+      }
+
+      .magnifier-bounce {
+        animation: magnBounce 2s ease-in-out infinite;
+      }
+
+      @keyframes magnBounce {
+        0%,
+        100% {
+          transform: translate(0, 0) rotate(0deg);
+        }
+        30% {
+          transform: translate(-2px, -3px) rotate(-5deg);
+        }
+        70% {
+          transform: translate(2px, 2px) rotate(5deg);
+        }
+      }
+
+      /* Float animation shared */
+      @keyframes floatUpDown {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+
+      /* Card lift */
+      .menu-card {
+        transition:
+          transform 0.35s cubic-bezier(0.23, 1.35, 0.52, 0.98),
+          box-shadow 0.3s ease,
+          border-color 0.3s ease;
+        cursor: default;
+      }
+      .menu-card:hover {
+        transform: translateY(-8px) scale(1.01);
+      }
+
+      /* Glowing border sweep on hover */
+      .menu-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        border-radius: 1rem;
+        padding: 1px;
+        background: linear-gradient(
+          135deg,
+          transparent,
+          rgba(0, 245, 255, 0.5),
+          transparent
+        );
+        -webkit-mask:
+          linear-gradient(#fff 0 0) content-box,
+          linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.4s;
+      }
+      .menu-card:hover::before {
+        opacity: 1;
+      }
+
+      /* Particle dots floating from bottom only */
+      .particle {
+        position: fixed;
+        border-radius: 50%;
+        pointer-events: none;
+        animation: particleDrift linear infinite;
+        opacity: 0.25;
+      }
+
+      @keyframes particleDrift {
+        0% {
+          transform: translateY(0) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 0.3;
+        }
+        85% {
+          opacity: 0.2;
+        }
+        100% {
+          transform: translateY(-100vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+
+      /* Badge pulse */
+      .badge-live {
+        animation: badgePulse 2s ease-in-out infinite;
+      }
+      @keyframes badgePulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(0, 245, 255, 0.4);
+        }
+        50% {
+          box-shadow: 0 0 0 6px rgba(0, 245, 255, 0);
+        }
+      }
+
+      /* Button shine */
+      .btn-primary {
+        position: relative;
+        overflow: hidden;
+        background: #00f5ff;
+        color: #0f172a;
+        font-weight: 700;
+        padding: 10px 24px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        display: inline-block;
+        transition:
+          transform 0.2s,
+          box-shadow 0.2s;
+      }
+      .btn-primary::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.4),
+          transparent
+        );
+        transform: skewX(-20deg);
+        animation: btnShine 3s ease-in-out infinite;
+      }
+      @keyframes btnShine {
+        0% {
+          left: -75%;
+        }
+        40%,
+        100% {
+          left: 125%;
+        }
+      }
+
+      .btn-secondary {
+        position: relative;
+        overflow: hidden;
+        background: #8b5cf6;
+        color: #fff;
+        font-weight: 700;
+        padding: 10px 24px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        display: inline-block;
+        transition: transform 0.2s;
+      }
+      .btn-secondary::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -75%;
+        width: 50%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        transform: skewX(-20deg);
+        animation: btnShine 3s ease-in-out infinite;
+        animation-delay: 1s;
+      }
+
+      .btn-outline {
+        border: 1.5px solid #00f5ff;
+        color: #00f5ff;
+        font-weight: 700;
+        padding: 10px 24px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        display: inline-block;
+        transition:
+          background 0.3s,
+          color 0.3s;
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-outline:hover {
+        background: #00f5ff;
+        color: #0f172a;
+      }
+.eagle-peck {
+  transform-origin: bottom center;
+  animation: peck 1s cubic-bezier(0.4, 0.0, 0.2, 1) 0.8s forwards;
+}
+
+@keyframes peck {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  35% {
+    transform: rotate(16deg);
+  }
+
+  65% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+}
