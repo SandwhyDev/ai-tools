@@ -29,6 +29,16 @@
         </div>
 
         <div class="mb-4">
+          <label class="block text-sm font-medium mb-1">Keyword</label>
+          <input
+            id="keywordInput"
+            type="text"
+            placeholder="Contoh: ERP perusahaan manufaktur"
+            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
+          />
+        </div>
+
+        <div class="mb-4">
           <label class="block text-sm font-medium mb-1">Jumlah Kata</label>
           <input
             id="wordCountInput"
@@ -97,6 +107,7 @@
 
       async function sendToN8n() {
         const topic = document.getElementById("topicInput").value.trim();
+        const keyword = document.getElementById("keywordInput").value.trim();
         const wordCount =
           document.getElementById("wordCountInput").value || 800;
         let notes = document.getElementById("notesInput").value.trim();
@@ -106,10 +117,16 @@
           return;
         }
 
+        if (!keyword) {
+          alert("Keyword wajib diisi");
+          return;
+        }
+
         if (!notes) notes = "Tidak ada";
 
         const payload = {
           topic,
+          keyword,
           word_count: Number(wordCount),
           additional_notes: notes,
         };
@@ -160,7 +177,8 @@
           }
 
           const data = await res.json();
-          const output = data.output;
+
+          const output = data;
 
           latestMarkdown = output.content;
           latestHTML = marked.parse(output.content);
@@ -168,6 +186,8 @@
           preview.innerHTML = latestHTML;
 
           document.getElementById("copyButtons").classList.remove("hidden");
+
+          preview.scrollIntoView({ behavior: "smooth" });
         } catch (err) {
           preview.innerHTML = '<p class="text-red-600">❌ Server error</p>';
           console.error(err);

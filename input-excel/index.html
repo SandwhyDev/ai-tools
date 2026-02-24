@@ -1,0 +1,1346 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Upload Excel – Stock Data</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --ink: #0d0d0d;
+        --paper: #f5f1e8;
+        --accent: #e85d28;
+        --accent2: #2563eb;
+        --muted: #7a7268;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Syne", sans-serif;
+        background: var(--paper);
+        color: var(--ink);
+        min-height: 100vh;
+      }
+      .mono {
+        font-family: "DM Mono", monospace;
+      }
+      input,
+      select,
+      textarea {
+        font-family: "DM Mono", monospace;
+        font-size: 0.875rem;
+      }
+      .field-label {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 0.7rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .input-base {
+        width: 100%;
+        background: #fff;
+        border: 1.5px solid #d6d0c4;
+        border-radius: 4px;
+        padding: 10px 14px;
+        color: var(--ink);
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+        outline: none;
+      }
+      .input-base:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(232, 93, 40, 0.12);
+      }
+      .drop-zone {
+        border: 2px dashed #c9c3b8;
+        border-radius: 8px;
+        transition: all 0.2s;
+        cursor: pointer;
+        position: relative;
+      }
+      .drop-zone.drag-over {
+        border-color: var(--accent);
+        background: rgba(232, 93, 40, 0.04);
+      }
+      .drop-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+      }
+      .btn-primary {
+        background: var(--ink);
+        color: var(--paper);
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        border: none;
+        border-radius: 4px;
+        padding: 12px 32px;
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          transform 0.1s;
+      }
+      .btn-primary:hover {
+        background: var(--accent);
+      }
+      .btn-primary:active {
+        transform: scale(0.98);
+      }
+      .btn-primary:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+      .btn-secondary {
+        background: transparent;
+        color: var(--ink);
+        font-family: "Syne", sans-serif;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        border: 1.5px solid var(--ink);
+        border-radius: 4px;
+        padding: 10px 24px;
+        cursor: pointer;
+        transition: all 0.15s;
+        font-size: 0.85rem;
+      }
+      .btn-secondary:hover {
+        background: var(--ink);
+        color: var(--paper);
+      }
+      .table-wrap {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.78rem;
+      }
+      th {
+        background: var(--ink);
+        color: var(--paper);
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 0.65rem;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        padding: 10px 14px;
+        text-align: left;
+        white-space: nowrap;
+      }
+      td {
+        font-family: "DM Mono", monospace;
+        padding: 9px 14px;
+        border-bottom: 1px solid #e8e3d9;
+        color: var(--ink);
+        white-space: nowrap;
+      }
+      tr:hover td {
+        background: rgba(232, 93, 40, 0.04);
+      }
+      .stripe td {
+        background: #faf8f4;
+      }
+      .section-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 8px 0;
+      }
+      .section-divider span {
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--muted);
+        white-space: nowrap;
+      }
+      .section-divider::before,
+      .section-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #d6d0c4;
+      }
+      .toast {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        background: var(--ink);
+        color: var(--paper);
+        font-family: "DM Mono", monospace;
+        font-size: 0.8rem;
+        padding: 12px 22px;
+        border-radius: 6px;
+        opacity: 0;
+        transform: translateY(12px);
+        transition: all 0.3s;
+        pointer-events: none;
+        z-index: 9999;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+      .step-num {
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: var(--ink);
+        color: var(--paper);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.72rem;
+        font-weight: 800;
+        flex-shrink: 0;
+      }
+
+      /* ── Contact Search Autocomplete (shared styles) ── */
+      .search-wrapper {
+        position: relative;
+      }
+      .search-input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      .search-input-wrap .input-base {
+        padding-right: 76px;
+      }
+      .search-status {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-family: "DM Mono", monospace;
+        font-size: 0.68rem;
+        color: var(--muted);
+        pointer-events: none;
+      }
+      .spinner {
+        width: 14px;
+        height: 14px;
+        border: 2px solid #d6d0c4;
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      .dropdown {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: #fff;
+        border: 1.5px solid var(--ink);
+        border-radius: 6px;
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.13);
+        z-index: 1000;
+        max-height: 260px;
+        overflow-y: auto;
+        display: none;
+      }
+      .dropdown.open {
+        display: block;
+      }
+
+      .dropdown-item {
+        padding: 10px 14px;
+        cursor: pointer;
+        border-bottom: 1px solid #f0ece4;
+        transition: background 0.1s;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .dropdown-item:last-child {
+        border-bottom: none;
+      }
+      .dropdown-item:hover,
+      .dropdown-item.active {
+        background: rgba(232, 93, 40, 0.07);
+      }
+      .dropdown-item .item-name {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 0.82rem;
+        color: var(--ink);
+      }
+      .dropdown-item .item-uid {
+        font-family: "DM Mono", monospace;
+        font-size: 0.63rem;
+        color: var(--muted);
+        letter-spacing: 0.02em;
+      }
+      .dropdown-item .item-meta {
+        font-family: "DM Mono", monospace;
+        font-size: 0.67rem;
+        color: var(--accent2);
+      }
+      .dropdown-empty {
+        padding: 14px;
+        text-align: center;
+        font-family: "DM Mono", monospace;
+        font-size: 0.75rem;
+        color: var(--muted);
+      }
+
+      /* Contact chip */
+      .contact-chip {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        background: #fff;
+        border: 1.5px solid #16a34a;
+        border-radius: 4px;
+        padding: 8px 14px;
+        margin-top: 6px;
+      }
+      .contact-chip.show {
+        display: flex;
+      }
+      .chip-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--ink);
+        color: var(--paper);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 0.7rem;
+        flex-shrink: 0;
+        text-transform: uppercase;
+      }
+      .chip-info {
+        flex: 1;
+      }
+      .chip-info .chip-name {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 0.82rem;
+      }
+      .chip-info .chip-uid {
+        font-family: "DM Mono", monospace;
+        font-size: 0.63rem;
+        color: var(--muted);
+      }
+      .chip-clear {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--muted);
+        font-size: 1rem;
+        padding: 2px 4px;
+        transition: color 0.15s;
+        line-height: 1;
+      }
+      .chip-clear:hover {
+        color: var(--accent);
+      }
+
+      mark {
+        background: rgba(232, 93, 40, 0.18);
+        color: var(--ink);
+        border-radius: 2px;
+        padding: 0 1px;
+      }
+
+      /* ── Lightbox ── */
+      #lightboxOverlay.show {
+        opacity: 1 !important;
+        pointer-events: all !important;
+      }
+
+      /* ── Loader Overlay ── */
+      #loaderOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(13, 13, 13, 0.55);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 99999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s;
+      }
+      #loaderOverlay.show {
+        opacity: 1;
+        pointer-events: all;
+      }
+      #loaderBox {
+        background: var(--paper);
+        border: 2px solid var(--ink);
+        border-radius: 10px;
+        padding: 36px 52px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 18px;
+        box-shadow: 6px 6px 0 var(--ink);
+        transform: translateY(10px);
+        transition: transform 0.25s;
+        min-width: 240px;
+        text-align: center;
+      }
+      #loaderOverlay.show #loaderBox {
+        transform: translateY(0);
+      }
+      #loaderSpinner {
+        width: 44px;
+        height: 44px;
+        border: 3.5px solid #d6d0c4;
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+      }
+      #loaderLabel {
+        font-family: "Syne", sans-serif;
+        font-weight: 700;
+        font-size: 0.88rem;
+        letter-spacing: 0.04em;
+        color: var(--ink);
+        margin: 0;
+      }
+      #loaderSub {
+        font-family: "DM Mono", monospace;
+        font-size: 0.7rem;
+        color: var(--muted);
+        margin: -8px 0 0;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Header -->
+    <header
+      style="border-bottom: 2px solid var(--ink); padding: 0 40px"
+      class="flex items-center justify-between h-14"
+    >
+      <div class="flex items-center gap-3">
+        <div
+          style="
+            width: 10px;
+            height: 10px;
+            background: var(--accent);
+            border-radius: 50%;
+          "
+        ></div>
+        <span
+          style="font-weight: 800; font-size: 0.95rem; letter-spacing: 0.04em"
+          >STOCK IMPORT</span
+        >
+      </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-6 py-10">
+      <form id="mainForm" onsubmit="handleSubmit(event)">
+        <!-- SECTION 1 -->
+        <div class="section-divider mb-6">
+          <div class="step-num">1</div>
+          <span>Informasi Dokumen</span>
+        </div>
+
+        <div
+          class="grid grid-cols-1 gap-5 mb-8"
+          style="grid-template-columns: 1fr 1fr"
+        >
+          <div>
+            <label class="field-label block mb-2">Name</label>
+            <input
+              type="text"
+              name="name"
+              class="input-base"
+              placeholder="Stock import 2025"
+              required
+            />
+          </div>
+
+          <div>
+            <label class="field-label block mb-2">Subject</label>
+            <input
+              type="text"
+              name="subject"
+              class="input-base"
+              placeholder="Stok April 2025"
+              required
+            />
+          </div>
+
+          <!-- ── OWNER SEARCH ── -->
+          <div>
+            <label class="field-label block mb-2">Owner</label>
+            <input type="hidden" name="owner_id" id="ownerIdHidden" />
+            <div class="search-wrapper">
+              <div class="search-input-wrap">
+                <input
+                  type="text"
+                  id="ownerSearch"
+                  class="input-base"
+                  placeholder="Ketik nama / email owner…"
+                  autocomplete="off"
+                  oninput="onContactInput('owner')"
+                  onkeydown="onContactKeydown(event, 'owner')"
+                  onfocus="
+                    if (state.owner.results.length) openDropdown('owner');
+                  "
+                />
+                <div class="search-status" id="ownerStatus"></div>
+              </div>
+              <div class="dropdown" id="ownerDropdown"></div>
+            </div>
+            <div class="contact-chip" id="ownerChip">
+              <div class="chip-avatar" id="ownerAvatar"></div>
+              <div class="chip-info">
+                <div class="chip-name" id="ownerChipName"></div>
+                <div class="chip-uid" id="ownerChipUid"></div>
+              </div>
+              <button
+                type="button"
+                class="chip-clear"
+                onclick="clearContact('owner')"
+                title="Hapus pilihan"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <!-- ── PIC SEARCH ── -->
+          <div>
+            <label class="field-label block mb-2">PIC</label>
+            <input type="hidden" name="pic_id" id="picIdHidden" />
+            <div class="search-wrapper">
+              <div class="search-input-wrap">
+                <input
+                  type="text"
+                  id="picSearch"
+                  class="input-base"
+                  placeholder="Ketik nama / email PIC…"
+                  autocomplete="off"
+                  oninput="onContactInput('pic')"
+                  onkeydown="onContactKeydown(event, 'pic')"
+                  onfocus="if (state.pic.results.length) openDropdown('pic');"
+                />
+                <div class="search-status" id="picStatus"></div>
+              </div>
+              <div class="dropdown" id="picDropdown"></div>
+            </div>
+            <div class="contact-chip" id="picChip">
+              <div class="chip-avatar" id="picAvatar"></div>
+              <div class="chip-info">
+                <div class="chip-name" id="picChipName"></div>
+                <div class="chip-uid" id="picChipUid"></div>
+              </div>
+              <button
+                type="button"
+                class="chip-clear"
+                onclick="clearContact('pic')"
+                title="Hapus pilihan"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label class="field-label block mb-2">Category</label>
+            <select name="category" class="input-base" required>
+              <option value="penawaran" selected>penawaran</option>
+              <option value="pricetag">pricetag</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="field-label block mb-2">Type</label>
+            <select name="type" class="input-base" required>
+              <option value="in" selected>Barang Masuk</option>
+              <option value="out">Barang Keluar</option>
+            </select>
+          </div>
+
+          <div class="col-span-2">
+            <label class="field-label block mb-2">Note</label>
+            <textarea
+              name="note"
+              class="input-base"
+              rows="2"
+              placeholder="Tambahkan catatan (opsional)…"
+            ></textarea>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between mb-3">
+          <p
+            id="rowCount"
+            class="mono"
+            style="font-size: 0.78rem; color: var(--muted)"
+          ></p>
+          <button
+            type="button"
+            onclick="downloadSample()"
+            class="btn-secondary"
+          >
+            ↓ Download Template
+          </button>
+        </div>
+
+        <!-- SECTION 2 -->
+        <div class="section-divider mb-6">
+          <div class="step-num">2</div>
+          <span>Upload File Excel</span>
+        </div>
+
+        <div
+          class="drop-zone flex flex-col items-center justify-center py-10 mb-3"
+          id="dropZone"
+        >
+          <input
+            type="file"
+            id="excelFile"
+            accept=".xlsx,.xls,.csv"
+            onchange="handleFile(event)"
+          />
+          <svg
+            width="36"
+            height="36"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            style="color: var(--muted); margin-bottom: 10px"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="1.5"
+              d="M12 16V4m0 0L8 8m4-4 4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2"
+            />
+          </svg>
+          <p style="font-weight: 700; font-size: 0.9rem; margin-bottom: 4px">
+            Drag & drop atau klik untuk pilih file
+          </p>
+          <p class="mono" style="font-size: 0.72rem; color: var(--muted)">
+            .xlsx · .xls · .csv
+          </p>
+        </div>
+
+        <div
+          id="fileInfo"
+          class="hidden mb-6 flex items-center gap-3 p-3 rounded"
+          style="background: #fff; border: 1.5px solid #d6d0c4"
+        >
+          <svg
+            width="20"
+            height="20"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            style="color: #16a34a; flex-shrink: 0"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"
+            />
+          </svg>
+          <div class="flex-1">
+            <p
+              id="fileName"
+              class="mono"
+              style="font-size: 0.8rem; font-weight: 600"
+            ></p>
+            <p
+              id="fileSize"
+              class="mono"
+              style="font-size: 0.7rem; color: var(--muted)"
+            ></p>
+          </div>
+          <button
+            type="button"
+            onclick="clearFile()"
+            style="
+              color: var(--muted);
+              font-size: 1rem;
+              background: none;
+              border: none;
+              cursor: pointer;
+            "
+          >
+            ✕
+          </button>
+        </div>
+
+        <!-- SECTION 3 -->
+        <div id="previewSection" class="hidden">
+          <div class="section-divider mb-6">
+            <div class="step-num">3</div>
+            <span>Preview Data</span>
+          </div>
+          <div
+            class="table-wrap mb-8 rounded overflow-hidden"
+            style="border: 1.5px solid var(--ink)"
+          >
+            <table id="previewTable"></table>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <div
+          class="flex items-center gap-4 pt-4"
+          style="border-top: 1.5px solid #d6d0c4"
+        >
+          <button type="submit" id="submitBtn" class="btn-primary">
+            Submit Import →
+          </button>
+          <button type="reset" onclick="resetAll()" class="btn-secondary">
+            Reset
+          </button>
+        </div>
+      </form>
+
+      <!-- Result JSON -->
+      <div id="resultSection" class="hidden mt-10">
+        <div class="mb-4" style="border-top: 1.5px solid #d6d0c4">
+          <span></span>
+        </div>
+        <pre
+          id="resultJSON"
+          class="mono rounded p-5 overflow-x-auto"
+          style="
+            background: var(--ink);
+            color: #a8e6cf;
+            font-size: 0.75rem;
+            line-height: 1.7;
+            border-radius: 6px;
+          "
+        ></pre>
+      </div>
+    </main>
+
+    <!-- Image Lightbox -->
+    <div
+      id="lightboxOverlay"
+      onclick="closeLightbox()"
+      style="
+        position: fixed;
+        inset: 0;
+        background: rgba(13, 13, 13, 0.85);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 999999;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        backdrop-filter: blur(6px);
+      "
+    >
+      <div
+        onclick="event.stopPropagation()"
+        style="position: relative; max-width: 90vw; max-height: 90vh"
+      >
+        <img
+          id="lightboxImg"
+          src=""
+          alt="preview"
+          style="
+            max-width: 90vw;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 6px;
+            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+            display: block;
+            transition: opacity 0.2s;
+          "
+        />
+        <button
+          onclick="closeLightbox()"
+          style="
+            position: absolute;
+            top: -14px;
+            right: -14px;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--ink);
+            color: var(--paper);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: background 0.15s;
+          "
+          onmouseover="this.style.background = 'var(--accent)'"
+          onmouseout="this.style.background = 'var(--ink)'"
+        >
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Loader Overlay -->
+    <div id="loaderOverlay">
+      <div id="loaderBox">
+        <div id="loaderSpinner"></div>
+        <p id="loaderLabel">Mengirim data…</p>
+        <p id="loaderSub">Mohon tunggu sebentar</p>
+      </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      /* ══════════════════════════════════════════════════════
+         CONFIG
+      ══════════════════════════════════════════════════════ */
+      const API_BASE = "http://192.168.1.228:9008/api";
+      const JWT_TOKEN =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHAiOiJ0cnVtcyIsInVzZXIiOnsidW5pcXVlX2lkIjoiOGNiYTg4YTMyODY1MjgwZWY3MjdlMGJhY2M1NmU1NDUiLCJ1bmlxdWVfY29kZSI6IlBFT1BMRSA2MTc5MzM5NSIsImdpZCI6bnVsbCwicGxhdGZvcm0iOiJ3ZWIiLCJpZGVudGlmaWVyIjoid2ViLWNocm9tZS05YXM4ZGgxIn0sInR5cGUiOiJzdXBlcnVzZXIiLCJpYXQiOjE3NzA2MzUwNDd9.ikBXxzFJ-fRmnPSGmB2tAJzaSr0nx4O8jnVI4RAiqaE";
+
+      /* ══════════════════════════════════════════════════════
+         LOADER
+      ══════════════════════════════════════════════════════ */
+      function showLoader(label, sub) {
+        document.getElementById("loaderLabel").textContent =
+          label || "Mengirim data…";
+        document.getElementById("loaderSub").textContent =
+          sub || "Mohon tunggu sebentar";
+        document.getElementById("loaderOverlay").classList.add("show");
+        document.getElementById("submitBtn").disabled = true;
+      }
+
+      function hideLoader() {
+        document.getElementById("loaderOverlay").classList.remove("show");
+        document.getElementById("submitBtn").disabled = false;
+      }
+
+      /* ══════════════════════════════════════════════════════
+         SHARED CONTACT SEARCH ENGINE
+      ══════════════════════════════════════════════════════ */
+
+      // Per-field state
+      const state = {
+        owner: { results: [], selected: null, activeIdx: -1, timer: null },
+        pic: { results: [], selected: null, activeIdx: -1, timer: null },
+      };
+
+      // DOM refs per field
+      const dom = {
+        owner: {
+          search: () => document.getElementById("ownerSearch"),
+          dropdown: () => document.getElementById("ownerDropdown"),
+          hidden: () => document.getElementById("ownerIdHidden"),
+          chip: () => document.getElementById("ownerChip"),
+          avatar: () => document.getElementById("ownerAvatar"),
+          chipName: () => document.getElementById("ownerChipName"),
+          chipUid: () => document.getElementById("ownerChipUid"),
+          status: () => document.getElementById("ownerStatus"),
+        },
+        pic: {
+          search: () => document.getElementById("picSearch"),
+          dropdown: () => document.getElementById("picDropdown"),
+          hidden: () => document.getElementById("picIdHidden"),
+          chip: () => document.getElementById("picChip"),
+          avatar: () => document.getElementById("picAvatar"),
+          chipName: () => document.getElementById("picChipName"),
+          chipUid: () => document.getElementById("picChipUid"),
+          status: () => document.getElementById("picStatus"),
+        },
+      };
+
+      function onContactInput(field) {
+        const q = dom[field].search().value.trim();
+        const st = state[field];
+
+        if (st.selected) {
+          st.selected = null;
+          dom[field].hidden().value = "";
+          dom[field].chip().classList.remove("show");
+          dom[field].search().style.color = "";
+        }
+
+        st.activeIdx = -1;
+
+        if (q.length < 2) {
+          closeDropdown(field);
+          setStatus(field, "");
+          return;
+        }
+
+        setStatus(field, '<div class="spinner"></div>');
+        clearTimeout(st.timer);
+        st.timer = setTimeout(() => fetchContact(field, q), 350);
+      }
+
+      async function fetchContact(field, keyword) {
+        try {
+          const res = await fetch(`${API_BASE}/search`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${JWT_TOKEN}`,
+            },
+            body: JSON.stringify({
+              table: "contacts",
+              keyword: keyword,
+              limit: 10,
+              offset: 1,
+            }),
+          });
+
+          if (!res.ok) throw new Error("HTTP " + res.status);
+
+          const json = await res.json();
+          const rows = Array.isArray(json)
+            ? json
+            : Array.isArray(json.data)
+              ? json.data
+              : Array.isArray(json.results)
+                ? json.results
+                : [];
+
+          state[field].results = rows;
+          renderDropdown(field, keyword, rows);
+          setStatus(
+            field,
+            rows.length ? `<span>${rows.length} hasil</span>` : "",
+          );
+        } catch (err) {
+          console.error(`[${field} search]`, err);
+          dom[field].dropdown().innerHTML = `
+            <div class="dropdown-empty" style="color:var(--accent)">
+              ⚠ Gagal menghubungi server.<br>
+              <span style="font-size:0.65rem">${escHtml(err.message)}</span>
+            </div>`;
+          openDropdown(field);
+          setStatus(field, "");
+        }
+      }
+
+      function renderDropdown(field, keyword, items) {
+        const drop = dom[field].dropdown();
+        drop.innerHTML = "";
+
+        if (!items.length) {
+          drop.innerHTML = `<div class="dropdown-empty">Tidak ada hasil untuk "<b>${escHtml(keyword)}</b>"</div>`;
+          openDropdown(field);
+          return;
+        }
+
+        items.forEach((item) => {
+          const name =
+            item.name ||
+            item.nama ||
+            item.full_name ||
+            item.contact_name ||
+            "—";
+          const uid = item.unique_id || "";
+          const email = item.email || item.mail || "";
+          const phone = item.phone || item.hp || item.mobile || "";
+          const sub = [email, phone].filter(Boolean).join(" · ");
+
+          const div = document.createElement("div");
+          div.className = "dropdown-item";
+          div.innerHTML = `
+            <span class="item-name">${highlight(name, keyword)}</span>
+            ${sub ? `<span class="item-meta">${escHtml(sub)}</span>` : ""}
+          `;
+          div.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            selectContact(field, item);
+          });
+          drop.appendChild(div);
+        });
+
+        openDropdown(field);
+      }
+
+      function selectContact(field, item) {
+        const name =
+          item.name || item.nama || item.full_name || item.contact_name || "—";
+        const uid = item.unique_id || "";
+        const email = item.email || item.mail || "";
+        const phone = item.phone || item.hp || item.mobile || "";
+        const sub = [email, phone].filter(Boolean).join(" · ");
+
+        state[field].selected = item;
+        dom[field].hidden().value = uid;
+
+        dom[field].search().value = name;
+        dom[field].search().style.color = "var(--muted)";
+
+        dom[field].avatar().textContent = name.charAt(0).toUpperCase();
+        dom[field].chipName().textContent = name;
+        dom[field].chipUid().textContent = sub ?? "";
+        dom[field].chip().classList.add("show");
+
+        closeDropdown(field);
+        setStatus(field, "");
+
+        const label = field === "owner" ? "Owner" : "PIC";
+        showToast(`✓ ${label} dipilih: ${name}`);
+      }
+
+      function clearContact(field) {
+        state[field].selected = null;
+        state[field].results = [];
+        dom[field].hidden().value = "";
+        dom[field].search().value = "";
+        dom[field].search().style.color = "";
+        dom[field].chip().classList.remove("show");
+        dom[field].avatar().textContent = "";
+        dom[field].chipName().textContent = "";
+        dom[field].chipUid().textContent = "";
+        closeDropdown(field);
+        setStatus(field, "");
+        dom[field].search().focus();
+      }
+
+      function onContactKeydown(e, field) {
+        const items = dom[field].dropdown().querySelectorAll(".dropdown-item");
+        if (!items.length) return;
+
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          state[field].activeIdx = Math.min(
+            state[field].activeIdx + 1,
+            items.length - 1,
+          );
+          updateActive(field, items);
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          state[field].activeIdx = Math.max(state[field].activeIdx - 1, 0);
+          updateActive(field, items);
+        } else if (e.key === "Enter") {
+          e.preventDefault();
+          const idx = state[field].activeIdx;
+          if (idx >= 0 && state[field].results[idx])
+            selectContact(field, state[field].results[idx]);
+        } else if (e.key === "Escape") {
+          closeDropdown(field);
+        }
+      }
+
+      function updateActive(field, items) {
+        const idx = state[field].activeIdx;
+        items.forEach((el, i) => el.classList.toggle("active", i === idx));
+        if (idx >= 0) items[idx].scrollIntoView({ block: "nearest" });
+      }
+
+      function openDropdown(field) {
+        dom[field].dropdown().classList.add("open");
+      }
+      function closeDropdown(field) {
+        dom[field].dropdown().classList.remove("open");
+        state[field].activeIdx = -1;
+      }
+      function setStatus(field, html) {
+        dom[field].status().innerHTML = html;
+      }
+
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".search-wrapper")) {
+          closeDropdown("owner");
+          closeDropdown("pic");
+        }
+      });
+
+      /* helpers */
+      function highlight(text, kw) {
+        if (!kw) return escHtml(text);
+        const re = new RegExp("(" + escReg(kw) + ")", "gi");
+        return escHtml(text).replace(re, "<mark>$1</mark>");
+      }
+      function escHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;")
+          .replace(/"/g, "&quot;");
+      }
+      function escReg(s) {
+        return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      }
+
+      /* ══════════════════════════════
+         EXCEL UPLOAD
+      ══════════════════════════════ */
+      let uploadedFile = null;
+      let parsedData = [];
+
+      const dz = document.getElementById("dropZone");
+      dz.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dz.classList.add("drag-over");
+      });
+      dz.addEventListener("dragleave", () => dz.classList.remove("drag-over"));
+      dz.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dz.classList.remove("drag-over");
+        const f = e.dataTransfer.files[0];
+        if (f) processFile(f);
+      });
+
+      function handleFile(e) {
+        const f = e.target.files[0];
+        if (f) processFile(f);
+      }
+
+      function processFile(file) {
+        uploadedFile = file;
+
+        document.getElementById("fileName").textContent = file.name;
+        document.getElementById("fileSize").textContent =
+          (file.size / 1024).toFixed(1) + " KB";
+        document.getElementById("fileInfo").classList.remove("hidden");
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const wb = XLSX.read(new Uint8Array(e.target.result), {
+            type: "array",
+          });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const json = XLSX.utils.sheet_to_json(ws, { defval: "" });
+          parsedData = json;
+          renderTable(json);
+          showToast("✓ File berhasil dibaca — " + json.length + " baris");
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      /* Deteksi apakah nilai adalah gambar (URL atau base64) */
+      /* Deteksi kolom gambar berdasarkan nama header */
+      function isImageKey(key) {
+        return /gambar|image|img|foto|photo|picture|thumbnail|thumb/i.test(
+          String(key),
+        );
+      }
+
+      function renderCell(val, isImg) {
+        const s = String(val ?? "").trim();
+        if (isImg && s) {
+          // Normalkan src: tambah https:// jika hanya // di depan
+          const src = /^\/\//.test(s) ? "https:" + s : s;
+          const safeVal = s.replace(/"/g, "&quot;");
+          return `
+            <div style="display:flex;flex-direction:column;align-items:center;gap:6px;padding:4px 0">
+              <img
+                src="${src}"
+                alt="preview"
+                loading="lazy"
+                referrerpolicy="no-referrer"
+                crossorigin="anonymous"
+                onload="this.nextElementSibling.style.display='none'"
+                onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                style="width:64px;height:64px;object-fit:cover;border-radius:6px;border:1.5px solid #e8e3d9;cursor:pointer;flex-shrink:0;background:#faf8f4"
+                onclick="openImagePreview('${safeVal}')"
+              />
+              <span style="display:none;width:64px;height:64px;border-radius:6px;border:1.5px dashed #d6d0c4;align-items:center;justify-content:center;font-size:0.58rem;color:var(--muted);flex-shrink:0;text-align:center;padding:4px;flex-direction:column;gap:2px">
+                <span>⚠</span><span>Gagal muat</span>
+              </span>
+             
+            </div>`;
+        }
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
+
+      function renderTable(data) {
+        if (!data.length) return;
+        document.getElementById("previewSection").classList.remove("hidden");
+        document.getElementById("rowCount").textContent =
+          data.length + " baris ditemukan";
+
+        const keys = Object.keys(data[0]);
+        const imgFlags = keys.map(isImageKey); // true/false per kolom
+        const maxRows = Math.min(data.length, 50);
+        let html =
+          "<thead><tr>" +
+          keys.map((k) => `<th>${k}</th>`).join("") +
+          "</tr></thead><tbody>";
+        for (let i = 0; i < maxRows; i++) {
+          const cls = i % 2 ? ' class="stripe"' : "";
+          html +=
+            `<tr${cls}>` +
+            keys
+              .map((k, j) => `<td>${renderCell(data[i][k], imgFlags[j])}</td>`)
+              .join("") +
+            "</tr>";
+        }
+        if (data.length > maxRows)
+          html += `<tr><td colspan="${keys.length}" style="text-align:center;color:var(--muted);font-style:italic;padding:12px">… +${data.length - maxRows} baris lagi</td></tr>`;
+        html += "</tbody>";
+        document.getElementById("previewTable").innerHTML = html;
+      }
+
+      /* ── Image Lightbox ── */
+      function openImagePreview(src) {
+        const normalised = /^\/\//.test(src) ? "https:" + src : src;
+        const img = document.getElementById("lightboxImg");
+        img.src = ""; // reset dulu agar onload/onerror trigger ulang
+        img.style.opacity = "0";
+        img.src = normalised;
+        img.onload = () => (img.style.opacity = "1");
+        img.onerror = () => {
+          img.alt = "Gambar tidak dapat dimuat";
+          img.style.opacity = "1";
+        };
+        document.getElementById("lightboxOverlay").classList.add("show");
+      }
+      function closeLightbox() {
+        document.getElementById("lightboxOverlay").classList.remove("show");
+        setTimeout(() => {
+          document.getElementById("lightboxImg").src = "";
+        }, 250);
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeLightbox();
+      });
+
+      function clearFile() {
+        uploadedFile = null;
+        parsedData = [];
+        document.getElementById("excelFile").value = "";
+        document.getElementById("fileInfo").classList.add("hidden");
+        document.getElementById("previewSection").classList.add("hidden");
+        document.getElementById("previewTable").innerHTML = "";
+        document.getElementById("resultSection").classList.add("hidden");
+      }
+
+      /* ══════════════════════════════
+         SUBMIT
+      ══════════════════════════════ */
+      async function handleSubmit(e) {
+        e.preventDefault();
+
+        if (!document.getElementById("ownerIdHidden").value) {
+          showToast("⚠ Pilih Owner terlebih dahulu");
+          document.getElementById("ownerSearch").focus();
+          return;
+        }
+        if (!document.getElementById("picIdHidden").value) {
+          showToast("⚠ Pilih PIC terlebih dahulu");
+          document.getElementById("picSearch").focus();
+          return;
+        }
+        if (!uploadedFile) {
+          showToast("⚠ Upload file Excel terlebih dahulu");
+          return;
+        }
+
+        const fd = new FormData(e.target);
+
+        const formData = new FormData();
+        formData.append("name", fd.get("name"));
+        formData.append("subject", fd.get("subject"));
+        formData.append("owner_id", fd.get("owner_id"));
+        formData.append("note", fd.get("note") ?? "");
+        formData.append("pic_id", fd.get("pic_id"));
+        formData.append("category", fd.get("category"));
+        formData.append("type", fd.get("type"));
+        formData.append("file", uploadedFile);
+
+        const previewPayload = {
+          name: fd.get("name"),
+          subject: fd.get("subject"),
+          owner_id: fd.get("owner_id"),
+          note: fd.get("note") ?? "",
+          pic_id: fd.get("pic_id"),
+          category: fd.get("category"),
+          type: fd.get("type"),
+          files: uploadedFile.name,
+        };
+
+        showLoader("Mengirim data ke server…", uploadedFile.name);
+
+        try {
+          const res = await fetch(`${API_BASE}/import-catalogue`, {
+            method: "POST",
+            headers: { Authorization: `Bearer ${JWT_TOKEN}` },
+            body: formData,
+          });
+
+          const result = await res.json();
+
+          if (!res.ok) throw new Error(result?.message || "HTTP " + res.status);
+
+          document.getElementById("resultJSON").textContent = "Berhasil";
+          document.getElementById("resultSection").classList.remove("hidden");
+          document
+            .getElementById("resultSection")
+            .scrollIntoView({ behavior: "smooth" });
+          showToast("✓ Import berhasil!");
+        } catch (err) {
+          console.error("[submit]", err);
+          document.getElementById("resultJSON").textContent = JSON.stringify(
+            { request: previewPayload, error: err.message },
+            null,
+            2,
+          );
+          document.getElementById("resultSection").classList.remove("hidden");
+          document
+            .getElementById("resultSection")
+            .scrollIntoView({ behavior: "smooth" });
+          showToast("⚠ Gagal: " + err.message);
+        } finally {
+          hideLoader();
+        }
+      }
+
+      function resetAll() {
+        clearFile();
+        clearContact("owner");
+        clearContact("pic");
+        document.getElementById("resultSection").classList.add("hidden");
+      }
+
+      function downloadSample() {
+        const link = document.createElement("a");
+        link.href = "../template-pricetag.xlsx";
+        link.download = "template-pricetag.xlsx";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        showToast("↓ Template diunduh");
+      }
+
+      function showToast(msg) {
+        const t = document.getElementById("toast");
+        t.textContent = msg;
+        t.classList.add("show");
+        setTimeout(() => t.classList.remove("show"), 3000);
+      }
+    </script>
+  </body>
+</html>
