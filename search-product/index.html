@@ -253,7 +253,7 @@
               >
             </div>
 
-            <!-- <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 class="h-5 w-5 text-green-600"
@@ -275,7 +275,7 @@
               >
                 0
               </span>
-            </div> -->
+            </div>
 
             <div class="flex items-center gap-2">
               <span class="font-semibold text-slate-800">Keyword:</span>
@@ -656,7 +656,7 @@
             displayProducts(response.data[0], keyword);
 
             // SELALU update perusahaan
-            // displayCompanies(response.data?.[1]?.perusahaan || []);
+            displayCompanies(response.data?.[1]?.perusahaan || []);
           } else {
             showError("Invalid response format from server");
             document.getElementById("loading").classList.add("hidden");
