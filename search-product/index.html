@@ -249,8 +249,34 @@
               <span
                 id="resultCount"
                 class="bg-blue-100 text-blue-800 px-2.5 py-0.5 rounded-full text-sm font-medium"
-              ></span>
+                >0</span
+              >
             </div>
+
+            <div class="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="h-5 w-5 text-green-600"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  d="M10 2a4 4 0 014 4v1h1a3 3 0 013 3v5a3 3 0 01-3 3H5a3 3 0 01-3-3v-5a3 3 0 013-3h1V6a4 4 0 014-4z"
+                />
+              </svg>
+
+              <span class="font-semibold text-slate-800">
+                Total Companies:
+              </span>
+
+              <span
+                id="companyCount"
+                class="bg-green-100 text-green-800 px-2.5 py-0.5 rounded-full text-sm font-medium"
+              >
+                0
+              </span>
+            </div>
+
             <div class="flex items-center gap-2">
               <span class="font-semibold text-slate-800">Keyword:</span>
               <span
@@ -355,6 +381,18 @@
             Copy Table
           </button>
         </div>
+
+        <!-- Company Section -->
+        <div
+          id="companySection"
+          class="hidden bg-white rounded-xl shadow-lg p-6 mt-6"
+        >
+          <h2 class="text-lg font-semibold text-slate-800 mb-4">
+            Principal / Distributor / Importir
+          </h2>
+
+          <div id="companyList" class="space-y-3"></div>
+        </div>
       </div>
 
       <!-- Empty State -->
@@ -431,77 +469,6 @@
     </div>
 
     <script>
-      // Demo data dengan lebih banyak produk untuk menunjukkan tabel
-      const demoData = {
-        success: true,
-        data: [
-          {
-            item: "TR Pillow Block Bearing UCP306 30mm 1pc",
-            harga: "Rp 177.489",
-            source: "www.monotaro.id",
-            link: "https://www.google.com/search?ibp=oshop&q=BEARING,UCP,26-05-05-330&prds=productid:17498218279952602342",
-            image:
-              "https://encrypted-tbn2.gstatic.com/shopping?q=tbn:ANd9GcTDXAHsvC1K93bH9OSSP2cNGTqlpqqGXTdOVp2DVIDIO-4bfAxvjvd3j63sTbvF2q4liGIYVGuRJyCXpFAntUOrGjurnL_GpaIE2Pqk6zKtX46GoqF2XZIelQ",
-          },
-          {
-            item: "SKF Bearing 6205 2RSH 25x52x15mm Deep Groove Ball Bearing",
-            harga: "Rp 125.000",
-            source: "www.tokopedia.com",
-            link: "https://www.tokopedia.com/skf/6205-2rsh",
-            image:
-              "https://encrypted-tbn1.gstatic.com/shopping?q=tbn:ANd9GcQzFqRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
-          },
-          {
-            item: "NTN Bearing 6304ZZ 20x52x15mm Double Shielded",
-            harga: "Rp 89.900",
-            source: "www.bukalapak.com",
-            link: "https://www.bukalapak.com/ntn-6304zz",
-            image:
-              "https://encrypted-tbn3.gstatic.com/shopping?q=tbn:ANd9GcTzFqRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
-          },
-          {
-            item: "FAG Bearing 6206 2Z 30x62x16mm",
-            harga: "Rp 145.000",
-            source: "www.blibli.com",
-            link: "https://www.blibli.com/fag-6206",
-            image:
-              "https://encrypted-tbn0.gstatic.com/shopping?q=tbn:ANd9GcUyRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
-          },
-          {
-            item: "NSK Bearing 6004 20x42x12mm",
-            harga: "Rp 67.500",
-            source: "www.lazada.co.id",
-            link: "https://www.lazada.co.id/nsk-6004",
-            image:
-              "https://encrypted-tbn4.gstatic.com/shopping?q=tbn:ANd9GcVzFqRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
-          },
-          {
-            item: "Timken Bearing LM11949/LM11910 Tapered Roller",
-            harga: "Rp 234.000",
-            source: "www.ralali.com",
-            link: "https://www.ralali.com/timken-lm11949",
-            image:
-              "https://encrypted-tbn5.gstatic.com/shopping?q=tbn:ANd9GcWzFqRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
-          },
-          {
-            item: "Nachi Bearing 6201ZZ 12x32x10mm",
-            harga: "Rp 45.000",
-            source: "www.jdid.id",
-            link: "https://www.jdid.id/nachi-6201zz",
-            image:
-              "https://encrypted-tbn6.gstatic.com/shopping?q=tbn:ANd9GcXzFqRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
-          },
-          {
-            item: "KOYO Bearing 6305 25x62x17mm",
-            harga: "Rp 98.500",
-            source: "www.monotaro.id",
-            link: "https://www.monotaro.id/koyo-6305",
-            image:
-              "https://encrypted-tbn7.gstatic.com/shopping?q=tbn:ANd9GcYzFqRnKGgZBq8xQxZrL9XQhFdXqQHqGjq8xQ",
-          },
-        ],
-      };
-
       // Store current products for export
       let currentProducts = [];
       let filteredProducts = [];
@@ -667,7 +634,7 @@
                 { keyword },
                 {
                   headers: { "Content-Type": "application/json" },
-                  timeout: 5000,
+                  // timeout: 5000,
                 },
               );
 
@@ -677,7 +644,7 @@
             }
           }
 
-          if (!response) {
+          if (!response.data) {
             showError("All webhook endpoints failed");
             document.getElementById("loading").classList.add("hidden");
             return;
@@ -685,7 +652,11 @@
 
           if (response?.data?.[0]?.success) {
             document.getElementById("loading").classList.add("hidden");
+
             displayProducts(response.data[0], keyword);
+
+            // SELALU update perusahaan
+            displayCompanies(response.data?.[1]?.perusahaan || []);
           } else {
             showError("Invalid response format from server");
             document.getElementById("loading").classList.add("hidden");
@@ -734,6 +705,70 @@
         // Show results container
         resultsContainer.classList.remove("hidden");
         emptyState.classList.add("hidden");
+      }
+
+      function displayCompanies(companies) {
+        const section = document.getElementById("companySection");
+        const list = document.getElementById("companyList");
+
+        list.innerHTML = "";
+
+        document.getElementById("companyCount").textContent =
+          companies.length || 0;
+
+        console.log("companies ", companies);
+
+        if (!companies || companies.length === 0) {
+          section.classList.add("hidden");
+          return;
+        }
+
+        companies.forEach((company) => {
+          const div = document.createElement("div");
+
+          div.className =
+            "border rounded-lg p-3 flex items-center justify-between hover:bg-slate-50";
+
+          div.innerHTML = `
+      <div class="flex items-center gap-3">
+
+        <img
+          src="${company.icon || "https://via.placeholder.com/40"}"
+          class="w-10 h-10 rounded object-contain border"
+          onerror="this.src='https://via.placeholder.com/40'"
+        />
+
+        <div class="flex flex-col max-w-md">
+
+          <div class="font-medium text-slate-800">
+            ${company.company_name}
+          </div>
+
+          <div 
+            class="text-sm text-gray-500 truncate"
+            title="${company.website}"
+          >
+            ${company.website}
+          </div>
+
+      </div>
+
+
+    
+
+      </div>
+
+      <a href="${company.website}"
+         target="_blank"
+         class="text-blue-600 text-sm font-medium hover:underline">
+         Visit →
+      </a>
+    `;
+
+          list.appendChild(div);
+        });
+
+        section.classList.remove("hidden");
       }
 
       function createTableRow(product, index) {
@@ -967,7 +1002,7 @@
       window.addEventListener("load", function () {
         // Uncomment untuk menampilkan demo produk saat load
         // displayProducts(demoData, "bearing");
-        document.getElementById("searchKeyword").textContent = "bearing";
+        // document.getElementById("searchKeyword").textContent = "bearing";
       });
     </script>
   </body>
