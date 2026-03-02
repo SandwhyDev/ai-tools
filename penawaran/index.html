@@ -6,115 +6,599 @@
     <title>Upload Penawaran Harga</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      * { font-family: "IBM Plex Sans", sans-serif; }
-      :root {
-        --bg: #0a0c10; --surface: #111318; --surface2: #1a1d24;
-        --border: #2a2d36; --accent: #00d4aa; --accent2: #0099ff;
-        --text: #e2e8f0; --muted: #64748b; --danger: #ef4444; --success: #22c55e;
+      * {
+        font-family: "IBM Plex Sans", sans-serif;
       }
-      body { background: var(--bg); color: var(--text); min-height: 100vh; }
+      :root {
+        --bg: #0a0c10;
+        --surface: #111318;
+        --surface2: #1a1d24;
+        --border: #2a2d36;
+        --accent: #00d4aa;
+        --accent2: #0099ff;
+        --text: #e2e8f0;
+        --muted: #64748b;
+        --danger: #ef4444;
+        --success: #22c55e;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
+      }
       .grid-bg {
-        background-image: linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+        background-image:
+          linear-gradient(rgba(0, 212, 170, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 212, 170, 0.03) 1px, transparent 1px);
         background-size: 40px 40px;
       }
-      .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; }
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+      }
       .input-field {
-        background: var(--surface2); border: 1px solid var(--border); border-radius: 8px;
-        color: var(--text); padding: 10px 14px; width: 100%; font-size: 14px;
-        transition: border-color 0.2s, box-shadow 0.2s; outline: none;
-      }
-      .input-field:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,212,170,0.1); }
-      .input-field::placeholder { color: var(--muted); }
-      select.input-field option { background: #1a1d24; }
-      .contact-wrap { position: relative; }
-      .contact-input-row {
-        display: flex; align-items: center; background: var(--surface2);
-        border: 1px solid var(--border); border-radius: 8px;
-        transition: border-color 0.2s, box-shadow 0.2s; overflow: hidden;
-      }
-      .contact-input-row:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,212,170,0.1); }
-      .contact-input-row.selected { border-color: rgba(0,212,170,0.4); background: rgba(0,212,170,0.04); }
-      .contact-input-row.error { border-color: var(--danger) !important; }
-      .contact-search-input { flex:1; background:transparent; border:none; outline:none; color:var(--text); padding:10px 14px; font-size:14px; font-family:"IBM Plex Sans",sans-serif; min-width:0; }
-      .contact-search-input::placeholder { color: var(--muted); }
-      .contact-clear-btn { padding:0 10px; height:38px; background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:14px; display:none; align-items:center; justify-content:center; transition:color 0.15s; }
-      .contact-clear-btn:hover { color: var(--danger); }
-      .contact-status { font-size:11px; color:var(--muted); margin-top:4px; min-height:16px; display:flex; align-items:center; gap:6px; }
-      .contact-status .spin-sm { width:10px; height:10px; border:1.5px solid rgba(0,212,170,0.2); border-top-color:var(--accent); border-radius:50%; animation:spin 0.6s linear infinite; display:inline-block; flex-shrink:0; }
-      .contact-dropdown { position:absolute; top:calc(100% + 4px); left:0; right:0; background:#1a1d24; border:1px solid var(--border); border-radius:10px; z-index:999; overflow:hidden; box-shadow:0 16px 40px rgba(0,0,0,0.5); display:none; max-height:260px; overflow-y:auto; }
-      .contact-dropdown.open { display:block; animation:dropIn 0.18s ease; }
-      @keyframes dropIn { from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
-      .contact-dropdown::-webkit-scrollbar { width:6px; }
-      .contact-dropdown::-webkit-scrollbar-thumb { background:#374151; border-radius:3px; }
-      .dropdown-item { display:flex; align-items:center; gap:10px; padding:10px 14px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.04); transition:background 0.1s; }
-      .dropdown-item:last-child { border-bottom:none; }
-      .dropdown-item:hover, .dropdown-item.focused { background:rgba(0,212,170,0.07); }
-      .dropdown-avatar { width:30px; height:30px; background:rgba(0,212,170,0.12); border:1px solid rgba(0,212,170,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:600; color:var(--accent); flex-shrink:0; text-transform:uppercase; }
-      .dropdown-item-name { font-size:13px; font-weight:500; color:var(--text); }
-      .dropdown-item-sub { font-size:11px; color:var(--muted); margin-top:1px; }
-      .dropdown-empty { padding:18px 14px; font-size:12px; color:var(--muted); text-align:center; }
-      .dropdown-loading { padding:14px; display:flex; align-items:center; gap:10px; font-size:12px; color:var(--muted); }
-      .selected-chip { display:flex; align-items:center; gap:8px; padding:6px 10px 6px 14px; background:rgba(0,212,170,0.08); border-radius:6px; font-size:13px; font-weight:500; color:var(--accent); flex:1; }
-      mark { background:rgba(0,212,170,0.25); color:var(--accent); border-radius:2px; }
-      .label { font-size:12px; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:6px; display:block; }
-      .drop-zone { border:2px dashed var(--border); border-radius:12px; transition:all 0.3s; cursor:pointer; background:var(--surface2); position:relative; }
-      .drop-zone:hover, .drop-zone.drag-over { border-color:var(--accent); background:rgba(0,212,170,0.04); box-shadow:0 0 30px rgba(0,212,170,0.08); }
-      .excel-preview { background:#1e2128; border:1px solid #2e3440; border-radius:10px; overflow:hidden; font-family:"IBM Plex Mono",monospace; }
-      .excel-header { background:#252931; border-bottom:1px solid #2e3440; padding:10px 16px; display:flex; align-items:center; gap:10px; }
-      .excel-dot { width:10px; height:10px; border-radius:50%; }
-      .excel-filename { color:#9ca3af; font-size:12px; }
-      .excel-toolbar { background:#1a1e26; border-bottom:1px solid #2e3440; padding:6px 12px; display:flex; gap:16px; font-size:11px; color:#6b7280; font-family:"IBM Plex Sans",sans-serif; }
-      .excel-sheet-tabs { background:#161920; border-bottom:1px solid #2e3440; padding:0 12px; display:flex; font-size:11px; }
-      .sheet-tab { padding:6px 14px; color:#6b7280; border-right:1px solid #2e3440; cursor:pointer; }
-      .sheet-tab.active { color:var(--accent); border-bottom:2px solid var(--accent); background:#1e2128; margin-bottom:-1px; }
-      .excel-table-wrap { overflow:auto; max-height:320px; }
-      .excel-table-wrap::-webkit-scrollbar { width:8px; height:8px; }
-      .excel-table-wrap::-webkit-scrollbar-track { background:#161920; }
-      .excel-table-wrap::-webkit-scrollbar-thumb { background:#374151; border-radius:4px; }
-      .excel-table { border-collapse:collapse; min-width:100%; font-size:12px; }
-      .excel-table .row-num { background:#1a1e26; color:#4b5563; padding:4px 10px; border-right:1px solid #2e3440; border-bottom:1px solid #2a2d36; text-align:center; min-width:40px; font-size:11px; user-select:none; }
-      .excel-table thead th { background:#1a1e26; color:#6b7280; padding:5px 12px; border-right:1px solid #2e3440; border-bottom:1px solid #2e3440; text-align:center; font-size:11px; font-weight:500; white-space:nowrap; position:sticky; top:0; z-index:1; user-select:none; }
-      .excel-table td { color:#d1d5db; padding:4px 12px; border-right:1px solid #252931; border-bottom:1px solid #252931; white-space:nowrap; max-width:200px; overflow:hidden; text-overflow:ellipsis; }
-      .excel-table tr:nth-child(even) td { background:rgba(255,255,255,0.01); }
-      .excel-table tr:hover td { background:rgba(0,212,170,0.06) !important; }
-      .excel-num { color:#60a5fa; text-align:right; }
-      .excel-header-cell { color:#fbbf24; font-weight:600; background:rgba(251,191,36,0.05) !important; }
-      .btn-primary { background:var(--accent); color:#0a0c10; font-weight:600; font-size:14px; padding:12px 28px; border-radius:8px; border:none; cursor:pointer; transition:all 0.2s; display:flex; align-items:center; gap:8px; }
-      .btn-primary:hover { background:#00b894; transform:translateY(-1px); box-shadow:0 8px 24px rgba(0,212,170,0.25); }
-      .btn-primary:disabled { background:#374151; color:#6b7280; transform:none; box-shadow:none; cursor:not-allowed; }
-      .btn-ghost { background:transparent; color:var(--muted); font-size:13px; padding:10px 20px; border-radius:8px; border:1px solid var(--border); cursor:pointer; transition:all 0.2s; }
-      .btn-ghost:hover { border-color:var(--muted); color:var(--text); }
-      .badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:999px; font-size:11px; font-weight:500; }
-      .badge-excel { background:rgba(34,197,94,0.12); color:#22c55e; border:1px solid rgba(34,197,94,0.2); }
-      .toast { position:fixed; bottom:24px; right:24px; z-index:9999; padding:14px 20px; border-radius:10px; font-size:14px; font-weight:500; display:flex; align-items:center; gap:10px; transform:translateY(80px); opacity:0; transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1); max-width:360px; }
-      .toast.show { transform:translateY(0); opacity:1; }
-      .toast-success { background:#052e16; border:1px solid #166534; color:#4ade80; }
-      .toast-error { background:#1c0a0a; border:1px solid #7f1d1d; color:#f87171; }
-      .step-indicator { display:flex; align-items:center; gap:0; margin-bottom:32px; }
-      .step { display:flex; align-items:center; gap:8px; font-size:12px; font-weight:500; color:var(--muted); }
-      .step.active { color:var(--accent); } .step.done { color:var(--success); }
-      .step-num { width:24px; height:24px; border-radius:50%; background:var(--surface2); border:1px solid var(--border); display:flex; align-items:center; justify-content:center; font-size:11px; }
-      .step.active .step-num { background:rgba(0,212,170,0.15); border-color:var(--accent); color:var(--accent); }
-      .step.done .step-num { background:rgba(34,197,94,0.15); border-color:var(--success); color:var(--success); }
-      .step-line { flex:1; height:1px; background:var(--border); margin:0 12px; max-width:60px; }
-      .spinner { width:16px; height:16px; border:2px solid rgba(0,0,0,0.2); border-top-color:#0a0c10; border-radius:50%; animation:spin 0.6s linear infinite; }
-      @keyframes spin { to { transform:rotate(360deg); } }
-      .fade-in { animation:fadeIn 0.4s ease forwards; }
-      @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-      .info-chip { background:rgba(0,153,255,0.08); border:1px solid rgba(0,153,255,0.2); border-radius:6px; padding:8px 12px; font-size:12px; color:#60a5fa; display:flex; align-items:center; gap:8px; }
-      .progress-bar { height:3px; background:var(--border); border-radius:999px; overflow:hidden; margin-top:8px; }
-      .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),var(--accent2)); border-radius:999px; transition:width 0.5s ease; }
-
-      /* ── Download Template Button ── */
-      .btn-template {
-        display: inline-flex; align-items: center; gap: 7px;
-        padding: 9px 16px;
-        background: rgba(251,191,36,0.06);
-        border: 1px solid rgba(251,191,36,0.22);
+        background: var(--surface2);
+        border: 1px solid var(--border);
         border-radius: 8px;
-        font-size: 12px; font-weight: 600;
+        color: var(--text);
+        padding: 10px 14px;
+        width: 100%;
+        font-size: 14px;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        outline: none;
+      }
+      .input-field:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+      }
+      .input-field::placeholder {
+        color: var(--muted);
+      }
+      /* date input color fix */
+      input[type="date"].input-field {
+        color-scheme: dark;
+      }
+      input[type="date"].input-field::-webkit-calendar-picker-indicator {
+        filter: invert(0.6) sepia(1) saturate(2) hue-rotate(130deg);
+        cursor: pointer;
+        opacity: 0.7;
+      }
+      input[type="date"].input-field::-webkit-calendar-picker-indicator:hover {
+        opacity: 1;
+      }
+      select.input-field option {
+        background: #1a1d24;
+      }
+      .contact-wrap {
+        position: relative;
+      }
+      .contact-input-row {
+        display: flex;
+        align-items: center;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        transition:
+          border-color 0.2s,
+          box-shadow 0.2s;
+        overflow: hidden;
+      }
+      .contact-input-row:focus-within {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px rgba(0, 212, 170, 0.1);
+      }
+      .contact-input-row.selected {
+        border-color: rgba(0, 212, 170, 0.4);
+        background: rgba(0, 212, 170, 0.04);
+      }
+      .contact-input-row.error {
+        border-color: var(--danger) !important;
+      }
+      .contact-search-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text);
+        padding: 10px 14px;
+        font-size: 14px;
+        font-family: "IBM Plex Sans", sans-serif;
+        min-width: 0;
+      }
+      .contact-search-input::placeholder {
+        color: var(--muted);
+      }
+      .contact-clear-btn {
+        padding: 0 10px;
+        height: 38px;
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+        font-size: 14px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.15s;
+      }
+      .contact-clear-btn:hover {
+        color: var(--danger);
+      }
+      .contact-status {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 4px;
+        min-height: 16px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .contact-status .spin-sm {
+        width: 10px;
+        height: 10px;
+        border: 1.5px solid rgba(0, 212, 170, 0.2);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+        display: inline-block;
+        flex-shrink: 0;
+      }
+      .contact-dropdown {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: #1a1d24;
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        z-index: 999;
+        overflow: hidden;
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+        display: none;
+        max-height: 260px;
+        overflow-y: auto;
+      }
+      .contact-dropdown.open {
+        display: block;
+        animation: dropIn 0.18s ease;
+      }
+      @keyframes dropIn {
+        from {
+          opacity: 0;
+          transform: translateY(-6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .contact-dropdown::-webkit-scrollbar {
+        width: 6px;
+      }
+      .contact-dropdown::-webkit-scrollbar-thumb {
+        background: #374151;
+        border-radius: 3px;
+      }
+      .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        transition: background 0.1s;
+      }
+      .dropdown-item:last-child {
+        border-bottom: none;
+      }
+      .dropdown-item:hover,
+      .dropdown-item.focused {
+        background: rgba(0, 212, 170, 0.07);
+      }
+      .dropdown-avatar {
+        width: 30px;
+        height: 30px;
+        background: rgba(0, 212, 170, 0.12);
+        border: 1px solid rgba(0, 212, 170, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--accent);
+        flex-shrink: 0;
+        text-transform: uppercase;
+      }
+      .dropdown-item-name {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+      }
+      .dropdown-item-sub {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 1px;
+      }
+      .dropdown-empty {
+        padding: 18px 14px;
+        font-size: 12px;
+        color: var(--muted);
+        text-align: center;
+      }
+      .dropdown-loading {
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .selected-chip {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px 6px 14px;
+        background: rgba(0, 212, 170, 0.08);
+        border-radius: 6px;
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--accent);
+        flex: 1;
+      }
+      mark {
+        background: rgba(0, 212, 170, 0.25);
+        color: var(--accent);
+        border-radius: 2px;
+      }
+      .label {
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 6px;
+        display: block;
+      }
+      .drop-zone {
+        border: 2px dashed var(--border);
+        border-radius: 12px;
+        transition: all 0.3s;
+        cursor: pointer;
+        background: var(--surface2);
+        position: relative;
+      }
+      .drop-zone:hover,
+      .drop-zone.drag-over {
+        border-color: var(--accent);
+        background: rgba(0, 212, 170, 0.04);
+        box-shadow: 0 0 30px rgba(0, 212, 170, 0.08);
+      }
+      .excel-preview {
+        background: #1e2128;
+        border: 1px solid #2e3440;
+        border-radius: 10px;
+        overflow: hidden;
+        font-family: "IBM Plex Mono", monospace;
+      }
+      .excel-header {
+        background: #252931;
+        border-bottom: 1px solid #2e3440;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .excel-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .excel-filename {
+        color: #9ca3af;
+        font-size: 12px;
+      }
+      .excel-toolbar {
+        background: #1a1e26;
+        border-bottom: 1px solid #2e3440;
+        padding: 6px 12px;
+        display: flex;
+        gap: 16px;
+        font-size: 11px;
+        color: #6b7280;
+        font-family: "IBM Plex Sans", sans-serif;
+      }
+      .excel-sheet-tabs {
+        background: #161920;
+        border-bottom: 1px solid #2e3440;
+        padding: 0 12px;
+        display: flex;
+        font-size: 11px;
+      }
+      .sheet-tab {
+        padding: 6px 14px;
+        color: #6b7280;
+        border-right: 1px solid #2e3440;
+        cursor: pointer;
+      }
+      .sheet-tab.active {
+        color: var(--accent);
+        border-bottom: 2px solid var(--accent);
+        background: #1e2128;
+        margin-bottom: -1px;
+      }
+      .excel-table-wrap {
+        overflow: auto;
+        max-height: 320px;
+      }
+      .excel-table-wrap::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      .excel-table-wrap::-webkit-scrollbar-track {
+        background: #161920;
+      }
+      .excel-table-wrap::-webkit-scrollbar-thumb {
+        background: #374151;
+        border-radius: 4px;
+      }
+      .excel-table {
+        border-collapse: collapse;
+        min-width: 100%;
+        font-size: 12px;
+      }
+      .excel-table .row-num {
+        background: #1a1e26;
+        color: #4b5563;
+        padding: 4px 10px;
+        border-right: 1px solid #2e3440;
+        border-bottom: 1px solid #2a2d36;
+        text-align: center;
+        min-width: 40px;
+        font-size: 11px;
+        user-select: none;
+      }
+      .excel-table thead th {
+        background: #1a1e26;
+        color: #6b7280;
+        padding: 5px 12px;
+        border-right: 1px solid #2e3440;
+        border-bottom: 1px solid #2e3440;
+        text-align: center;
+        font-size: 11px;
+        font-weight: 500;
+        white-space: nowrap;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        user-select: none;
+      }
+      .excel-table td {
+        color: #d1d5db;
+        padding: 4px 12px;
+        border-right: 1px solid #252931;
+        border-bottom: 1px solid #252931;
+        white-space: nowrap;
+        max-width: 200px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .excel-table tr:nth-child(even) td {
+        background: rgba(255, 255, 255, 0.01);
+      }
+      .excel-table tr:hover td {
+        background: rgba(0, 212, 170, 0.06) !important;
+      }
+      .excel-num {
+        color: #60a5fa;
+        text-align: right;
+      }
+      .excel-header-cell {
+        color: #fbbf24;
+        font-weight: 600;
+        background: rgba(251, 191, 36, 0.05) !important;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: #0a0c10;
+        font-weight: 600;
+        font-size: 14px;
+        padding: 12px 28px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .btn-primary:hover {
+        background: #00b894;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 24px rgba(0, 212, 170, 0.25);
+      }
+      .btn-primary:disabled {
+        background: #374151;
+        color: #6b7280;
+        transform: none;
+        box-shadow: none;
+        cursor: not-allowed;
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--muted);
+        font-size: 13px;
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-ghost:hover {
+        border-color: var(--muted);
+        color: var(--text);
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 500;
+      }
+      .badge-excel {
+        background: rgba(34, 197, 94, 0.12);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+      }
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 9999;
+        padding: 14px 20px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transform: translateY(80px);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        max-width: 360px;
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .toast-success {
+        background: #052e16;
+        border: 1px solid #166534;
+        color: #4ade80;
+      }
+      .toast-error {
+        background: #1c0a0a;
+        border: 1px solid #7f1d1d;
+        color: #f87171;
+      }
+      .step-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0;
+        margin-bottom: 32px;
+      }
+      .step {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        color: var(--muted);
+      }
+      .step.active {
+        color: var(--accent);
+      }
+      .step.done {
+        color: var(--success);
+      }
+      .step-num {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+      }
+      .step.active .step-num {
+        background: rgba(0, 212, 170, 0.15);
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .step.done .step-num {
+        background: rgba(34, 197, 94, 0.15);
+        border-color: var(--success);
+        color: var(--success);
+      }
+      .step-line {
+        flex: 1;
+        height: 1px;
+        background: var(--border);
+        margin: 0 12px;
+        max-width: 60px;
+      }
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        border-top-color: #0a0c10;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+      .fade-in {
+        animation: fadeIn 0.4s ease forwards;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .info-chip {
+        background: rgba(0, 153, 255, 0.08);
+        border: 1px solid rgba(0, 153, 255, 0.2);
+        border-radius: 6px;
+        padding: 8px 12px;
+        font-size: 12px;
+        color: #60a5fa;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .progress-bar {
+        height: 3px;
+        background: var(--border);
+        border-radius: 999px;
+        overflow: hidden;
+        margin-top: 8px;
+      }
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--accent), var(--accent2));
+        border-radius: 999px;
+        transition: width 0.5s ease;
+      }
+      .btn-template {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 9px 16px;
+        background: rgba(251, 191, 36, 0.06);
+        border: 1px solid rgba(251, 191, 36, 0.22);
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
         color: #fbbf24;
         text-decoration: none;
         white-space: nowrap;
@@ -123,72 +607,515 @@
         cursor: pointer;
       }
       .btn-template:hover {
-        background: rgba(251,191,36,0.13);
-        border-color: rgba(251,191,36,0.42);
+        background: rgba(251, 191, 36, 0.13);
+        border-color: rgba(251, 191, 36, 0.42);
         transform: translateY(-1px);
-        box-shadow: 0 4px 16px rgba(251,191,36,0.1);
+        box-shadow: 0 4px 16px rgba(251, 191, 36, 0.1);
       }
-      .btn-template svg { flex-shrink: 0; }
+      .attach-drop-zone {
+        border: 2px dashed var(--border);
+        border-radius: 10px;
+        padding: 20px;
+        background: var(--surface2);
+        cursor: pointer;
+        transition: all 0.25s;
+        text-align: center;
+      }
+      .attach-drop-zone:hover,
+      .attach-drop-zone.drag-over {
+        border-color: var(--accent);
+        background: rgba(0, 212, 170, 0.04);
+        box-shadow: 0 0 20px rgba(0, 212, 170, 0.07);
+      }
+      .attach-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .attach-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: var(--surface2);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 12px;
+        transition: border-color 0.2s;
+        animation: fadeIn 0.25s ease;
+      }
+      .attach-item:hover {
+        border-color: rgba(0, 212, 170, 0.25);
+      }
+      .attach-thumb {
+        width: 72px;
+        height: 72px;
+        border-radius: 8px;
+        flex-shrink: 0;
+        background: #1a1d24;
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .attach-thumb img {
+        width: 72px;
+        height: 72px;
+        object-fit: cover;
+        border-radius: 8px;
+        display: block;
+      }
+      .attach-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .attach-name {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .attach-meta {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
+      .attach-remove {
+        background: transparent;
+        border: none;
+        color: var(--muted);
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: all 0.15s;
+        flex-shrink: 0;
+      }
+      .attach-remove:hover {
+        background: rgba(239, 68, 68, 0.12);
+        color: #f87171;
+      }
+      .attach-type-badge {
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        flex-shrink: 0;
+      }
+      .lightbox-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.88);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+        backdrop-filter: blur(6px);
+      }
+      .lightbox-overlay.open {
+        display: flex;
+        animation: fadeIn 0.2s ease;
+      }
+      .lightbox-inner {
+        position: relative;
+        max-width: 90vw;
+        max-height: 90vh;
+      }
+      .lightbox-inner img {
+        max-width: 90vw;
+        max-height: 85vh;
+        border-radius: 10px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+        object-fit: contain;
+      }
+      .lightbox-close {
+        position: absolute;
+        top: -14px;
+        right: -14px;
+        width: 32px;
+        height: 32px;
+        background: #1a1d24;
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        color: var(--text);
+        font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .lightbox-close:hover {
+        background: var(--danger);
+        border-color: var(--danger);
+      }
+      .lightbox-caption {
+        text-align: center;
+        margin-top: 12px;
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .attach-count-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        background: rgba(0, 212, 170, 0.1);
+        color: var(--accent);
+        border: 1px solid rgba(0, 212, 170, 0.2);
+      }
+
+      /* date range row */
+      .date-range-divider {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 11px;
+        padding-top: 2px;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .date-range-divider svg {
+        flex-shrink: 0;
+      }
+
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
     </style>
   </head>
   <body class="grid-bg">
     <div class="max-w-4xl mx-auto px-4 py-10">
-
       <!-- Header -->
       <div class="mb-8 fade-in">
         <div class="flex items-center gap-3 mb-2">
-          <div style="width:36px;height:36px;background:rgba(0,212,170,0.12);border:1px solid rgba(0,212,170,0.25);border-radius:8px;display:flex;align-items:center;justify-content:center;">
-            <svg width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/>
-              <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10,9 9,9 8,9"/>
+          <div
+            style="
+              width: 36px;
+              height: 36px;
+              background: rgba(0, 212, 170, 0.12);
+              border: 1px solid rgba(0, 212, 170, 0.25);
+              border-radius: 8px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            "
+          >
+            <svg
+              width="18"
+              height="18"
+              fill="none"
+              stroke="var(--accent)"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              />
+              <polyline points="14,2 14,8 20,8" />
+              <line x1="16" y1="13" x2="8" y2="13" />
+              <line x1="16" y1="17" x2="8" y2="17" />
+              <polyline points="10,9 9,9 8,9" />
             </svg>
           </div>
           <div>
-            <h1 style="font-size:20px;font-weight:600;color:var(--text)">Upload Penawaran Harga</h1>
-            <p style="font-size:12px;color:var(--muted)">Kirim dokumen penawaran dalam format Excel</p>
+            <h1 style="font-size: 20px; font-weight: 600; color: var(--text)">
+              Upload Penawaran Harga
+            </h1>
+            <p style="font-size: 12px; color: var(--muted)">
+              Kirim dokumen penawaran dalam format Excel
+            </p>
           </div>
         </div>
       </div>
 
       <!-- Steps -->
       <div class="step-indicator fade-in">
-        <div class="step active" id="step1"><div class="step-num">1</div><span>Informasi</span></div>
+        <div class="step active" id="step1">
+          <div class="step-num">1</div>
+          <span>Informasi</span>
+        </div>
         <div class="step-line"></div>
-        <div class="step" id="step2"><div class="step-num">2</div><span>Upload File</span></div>
+        <div class="step" id="step2">
+          <div class="step-num">2</div>
+          <span>Upload File</span>
+        </div>
         <div class="step-line"></div>
-        <div class="step" id="step3"><div class="step-num">3</div><span>Preview</span></div>
+        <div class="step" id="step3">
+          <div class="step-num">3</div>
+          <span>Preview</span>
+        </div>
         <div class="step-line"></div>
-        <div class="step" id="step4"><div class="step-num">4</div><span>Kirim</span></div>
+        <div class="step" id="step4">
+          <div class="step-num">4</div>
+          <span>Kirim</span>
+        </div>
       </div>
 
       <form id="mainForm" novalidate>
         <div class="grid grid-cols-1 gap-6">
-
           <!-- Section 1: Detail -->
           <div class="card p-6 fade-in">
-            <div class="flex items-center gap-2 mb-5" style="padding-bottom:16px;border-bottom:1px solid var(--border)">
-              <svg width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-              <span style="font-size:13px;font-weight:600;color:var(--text)">Detail Penawaran</span>
+            <div
+              class="flex items-center gap-2 mb-5"
+              style="
+                padding-bottom: 16px;
+                border-bottom: 1px solid var(--border);
+              "
+            >
+              <svg
+                width="14"
+                height="14"
+                fill="none"
+                stroke="var(--accent)"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v4l3 3" />
+              </svg>
+              <span
+                style="font-size: 13px; font-weight: 600; color: var(--text)"
+                >Detail Penawaran</span
+              >
             </div>
-            <div class="grid grid-cols-1 gap-4" style="grid-template-columns:1fr 1fr">
+
+            <div
+              class="grid grid-cols-1 gap-4"
+              style="grid-template-columns: 1fr 1fr"
+            >
+              <!-- No Referensi -->
               <div>
-                <label class="label">Nama Penawaran <span style="color:var(--danger)">*</span></label>
-                <input type="text" name="name" class="input-field" placeholder="e.g. Penawaran Jasa Konsultasi IT" required />
+                <label class="label">No Referensi</label>
+                <input
+                  type="text"
+                  name="name"
+                  class="input-field"
+                  placeholder="e.g. REF-2024-001"
+                />
               </div>
+
+              <!-- Subject -->
               <div>
-                <label class="label">Subject <span style="color:var(--danger)">*</span></label>
-                <input type="text" name="subject" class="input-field" placeholder="e.g. Proyek Sistem ERP 2025" required />
+                <label class="label">Subject</label>
+                <input
+                  type="text"
+                  name="subject"
+                  class="input-field"
+                  placeholder="Judul penawaran..."
+                />
+              </div>
+
+              <!-- ── START DATE & END DATE ── -->
+              <div>
+                <label
+                  class="label"
+                  style="display: flex; align-items: center; gap: 6px"
+                >
+                  <svg
+                    width="11"
+                    height="11"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                  Tanggal Mulai
+                </label>
+                <input
+                  type="date"
+                  name="start_date"
+                  id="start_date"
+                  class="input-field"
+                />
+              </div>
+
+              <div>
+                <label
+                  class="label"
+                  style="display: flex; align-items: center; gap: 6px"
+                >
+                  <svg
+                    width="11"
+                    height="11"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                  Tanggal Berakhir
+                </label>
+                <input
+                  type="date"
+                  name="end_date"
+                  id="end_date"
+                  class="input-field"
+                />
+                <div
+                  id="date_error"
+                  style="
+                    display: none;
+                    margin-top: 5px;
+                    font-size: 11px;
+                    color: var(--danger);
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                  "
+                >
+                  <!-- <svg
+                    width="11"
+                    height="11"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="12" />
+                    <line x1="12" y1="16" x2="12.01" y2="16" />
+                  </svg> -->
+                  <!-- Tanggal berakhir tidak boleh sebelum tanggal mulai -->
+                </div>
+              </div>
+
+              <!-- KEPADA (to_id) — auto-fill tiyasa -->
+              <div style="grid-column: span 2">
+                <label
+                  class="label"
+                  style="display: flex; align-items: center; gap: 6px"
+                >
+                  Kepada <span style="color: var(--danger)">*</span>
+                  <span id="to_id_autofill_badge"></span>
+                </label>
+                <input type="hidden" name="to_id" id="to_id_val" required />
+                <div class="contact-wrap" id="wrap_to_id">
+                  <div class="contact-input-row" id="row_to_id">
+                    <div
+                      id="to_id_skeleton"
+                      style="
+                        flex: 1;
+                        padding: 10px 14px;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                      "
+                    >
+                      <div
+                        style="
+                          width: 22px;
+                          height: 22px;
+                          border-radius: 50%;
+                          background: linear-gradient(
+                            90deg,
+                            #2a2d36 25%,
+                            #363a45 50%,
+                            #2a2d36 75%
+                          );
+                          background-size: 200% 100%;
+                          animation: shimmer 1.2s infinite;
+                          flex-shrink: 0;
+                        "
+                      ></div>
+                      <div
+                        style="
+                          flex: 1;
+                          height: 12px;
+                          border-radius: 4px;
+                          background: linear-gradient(
+                            90deg,
+                            #2a2d36 25%,
+                            #363a45 50%,
+                            #2a2d36 75%
+                          );
+                          background-size: 200% 100%;
+                          animation: shimmer 1.2s infinite;
+                          max-width: 160px;
+                        "
+                      ></div>
+                    </div>
+                    <div
+                      class="selected-chip"
+                      id="chip_to_id"
+                      style="display: none"
+                    ></div>
+                    <input
+                      type="text"
+                      class="contact-search-input"
+                      id="search_to_id"
+                      placeholder="Cari nama penerima..."
+                      autocomplete="off"
+                      style="display: none"
+                    />
+                    <button
+                      type="button"
+                      class="contact-clear-btn"
+                      id="clear_to_id"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div class="contact-status" id="status_to_id"></div>
+                  <div class="contact-dropdown" id="dropdown_to_id"></div>
+                </div>
               </div>
 
               <!-- Owner ID -->
               <div>
-                <label class="label">Owner <span style="color:var(--danger)">*</span></label>
-                <input type="hidden" name="owner_id" id="owner_id_val" />
+                <label class="label"
+                  >Owner <span style="color: var(--danger)">*</span></label
+                >
+                <input
+                  type="hidden"
+                  name="owner_id"
+                  id="owner_id_val"
+                  required
+                />
                 <div class="contact-wrap" id="wrap_owner_id">
                   <div class="contact-input-row" id="row_owner_id">
-                    <div class="selected-chip" id="chip_owner_id" style="display:none"></div>
-                    <input type="text" class="contact-search-input" id="search_owner_id" placeholder="Cari nama owner..." autocomplete="off" />
-                    <button type="button" class="contact-clear-btn" id="clear_owner_id">✕</button>
+                    <div
+                      class="selected-chip"
+                      id="chip_owner_id"
+                      style="display: none"
+                    ></div>
+                    <input
+                      type="text"
+                      class="contact-search-input"
+                      id="search_owner_id"
+                      placeholder="Cari nama owner..."
+                      autocomplete="off"
+                    />
+                    <button
+                      type="button"
+                      class="contact-clear-btn"
+                      id="clear_owner_id"
+                    >
+                      ✕
+                    </button>
                   </div>
                   <div class="contact-status" id="status_owner_id"></div>
                   <div class="contact-dropdown" id="dropdown_owner_id"></div>
@@ -197,127 +1124,430 @@
 
               <!-- PIC ID -->
               <div>
-                <label class="label">PIC <span style="color:var(--danger)">*</span></label>
-                <input type="hidden" name="pic_id" id="pic_id_val" />
+                <label class="label"
+                  >PIC <span style="color: var(--danger)">*</span></label
+                >
+                <input type="hidden" name="pic_id" id="pic_id_val" required />
                 <div class="contact-wrap" id="wrap_pic_id">
                   <div class="contact-input-row" id="row_pic_id">
-                    <div class="selected-chip" id="chip_pic_id" style="display:none"></div>
-                    <input type="text" class="contact-search-input" id="search_pic_id" placeholder="Cari nama PIC..." autocomplete="off" />
-                    <button type="button" class="contact-clear-btn" id="clear_pic_id">✕</button>
+                    <div
+                      class="selected-chip"
+                      id="chip_pic_id"
+                      style="display: none"
+                    ></div>
+                    <input
+                      type="text"
+                      class="contact-search-input"
+                      id="search_pic_id"
+                      placeholder="Cari nama PIC..."
+                      autocomplete="off"
+                    />
+                    <button
+                      type="button"
+                      class="contact-clear-btn"
+                      id="clear_pic_id"
+                    >
+                      ✕
+                    </button>
                   </div>
                   <div class="contact-status" id="status_pic_id"></div>
                   <div class="contact-dropdown" id="dropdown_pic_id"></div>
                 </div>
               </div>
 
-              <div>
-                <label class="label">Kategori <span style="color:var(--danger)">*</span></label>
-                <select name="category" class="input-field" required>
-                  <option value="">— Pilih Kategori —</option>
-                  <option value="penawaran" selected>penawaran</option>
-                  <option value="pricetag">pricetag</option>
-                </select>
-              </div>
-              <div>
-                <label class="label">Tipe <span style="color:var(--danger)">*</span></label>
-                <select name="type" class="input-field" required>
-                  <option value="">— Pilih Tipe —</option>
-                  <option value="in" selected>Barang Masuk</option>
-                  <option value="out">Barang Keluar</option>
-                </select>
-              </div>
-              <div style="grid-column:span 2">
+              <!-- Catatan -->
+              <div style="grid-column: span 2">
                 <label class="label">Catatan</label>
-                <textarea name="note" class="input-field" rows="3" placeholder="Catatan tambahan (opsional)..." style="resize:vertical"></textarea>
+                <textarea
+                  name="note"
+                  class="input-field"
+                  rows="3"
+                  placeholder="Catatan tambahan (opsional)..."
+                  style="resize: vertical"
+                ></textarea>
+              </div>
+
+              <!-- ATTACHMENTS -->
+              <div style="grid-column: span 2">
+                <div class="flex items-center justify-between mb-2">
+                  <label class="label" style="margin-bottom: 0">
+                    Lampiran
+                    <span
+                      style="
+                        color: var(--muted);
+                        font-size: 10px;
+                        text-transform: none;
+                        letter-spacing: 0;
+                        margin-left: 6px;
+                      "
+                      >(gambar, PDF, dokumen — opsional)</span
+                    >
+                  </label>
+                  <span
+                    class="attach-count-badge"
+                    id="attachCountBadge"
+                    style="display: none"
+                  >
+                    <svg
+                      width="11"
+                      height="11"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+                      />
+                    </svg>
+                    <span id="attachCountText">0 file</span>
+                  </span>
+                </div>
+                <div
+                  class="attach-drop-zone"
+                  id="attachDropZone"
+                  onclick="document.getElementById('attachInput').click()"
+                >
+                  <input
+                    type="file"
+                    id="attachInput"
+                    multiple
+                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar"
+                    style="display: none"
+                    onchange="handleAttachments(this.files)"
+                  />
+                  <div
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      gap: 8px;
+                      pointer-events: none;
+                    "
+                  >
+                    <div
+                      style="
+                        width: 40px;
+                        height: 40px;
+                        background: rgba(0, 153, 255, 0.08);
+                        border: 1px solid rgba(0, 153, 255, 0.2);
+                        border-radius: 10px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
+                    >
+                      <svg
+                        width="20"
+                        height="20"
+                        fill="none"
+                        stroke="#60a5fa"
+                        stroke-width="1.5"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+                        />
+                      </svg>
+                    </div>
+                    <p
+                      style="
+                        font-size: 13px;
+                        font-weight: 500;
+                        color: var(--text);
+                      "
+                    >
+                      Drag & drop lampiran di sini
+                    </p>
+                    <p style="font-size: 11px; color: var(--muted)">
+                      atau klik untuk memilih — gambar, PDF, Word, Excel, dll.
+                      Bisa multiple files
+                    </p>
+                  </div>
+                </div>
+                <div class="attach-list" id="attachList"></div>
               </div>
             </div>
           </div>
 
-          <!-- Section 2: Upload -->
+          <!-- Section 2: Upload Excel -->
           <div class="card p-6 fade-in">
-            <div class="flex items-center gap-2 mb-5" style="padding-bottom:16px;border-bottom:1px solid var(--border)">
-              <svg width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17,8 12,3 7,8"/><line x1="12" y1="3" x2="12" y2="15"/>
+            <div
+              class="flex items-center gap-2 mb-5"
+              style="
+                padding-bottom: 16px;
+                border-bottom: 1px solid var(--border);
+              "
+            >
+              <svg
+                width="14"
+                height="14"
+                fill="none"
+                stroke="var(--accent)"
+                stroke-width="2"
+                viewBox="0 0 24 24"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17,8 12,3 7,8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
               </svg>
-              <span style="font-size:13px;font-weight:600;color:var(--text)">File Excel</span>
+              <span
+                style="font-size: 13px; font-weight: 600; color: var(--text)"
+                >File Excel</span
+              >
             </div>
-
-            <!-- Info + Download Template -->
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
-              <div class="info-chip" style="flex:1;min-width:180px">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 16px;
+                flex-wrap: wrap;
+              "
+            >
+              <div class="info-chip" style="flex: 1; min-width: 180px">
+                <svg
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
                 </svg>
                 Hanya file Excel yang diterima (.xlsx, .xls) — Maks 20MB
               </div>
               <a href="/template-pricetag.xlsx" download class="btn-template">
-                <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                  <polyline points="7,10 12,15 17,10"/>
-                  <line x1="12" y1="15" x2="12" y2="3"/>
+                <svg
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7,10 12,15 17,10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
                 Download Template
               </a>
             </div>
-
-            <div class="drop-zone p-8 text-center" id="dropZone" onclick="document.getElementById('fileInput').click()">
-              <input type="file" id="fileInput" name="files" accept=".xlsx,.xls" style="display:none" onchange="handleFile(this.files[0])" />
+            <div
+              class="drop-zone p-8 text-center"
+              id="dropZone"
+              onclick="document.getElementById('fileInput').click()"
+            >
+              <input
+                type="file"
+                id="fileInput"
+                name="files"
+                accept=".xlsx,.xls"
+                style="display: none"
+                onchange="handleFile(this.files[0])"
+              />
               <div id="dropContent">
-                <div style="width:56px;height:56px;background:rgba(0,212,170,0.08);border:1px solid rgba(0,212,170,0.2);border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-                  <svg width="24" height="24" fill="none" stroke="var(--accent)" stroke-width="1.5" viewBox="0 0 24 24">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14,2 14,8 20,8"/><path d="M8 13h8M8 17h5"/>
+                <div
+                  style="
+                    width: 56px;
+                    height: 56px;
+                    background: rgba(0, 212, 170, 0.08);
+                    border: 1px solid rgba(0, 212, 170, 0.2);
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin: 0 auto 16px;
+                  "
+                >
+                  <svg
+                    width="24"
+                    height="24"
+                    fill="none"
+                    stroke="var(--accent)"
+                    stroke-width="1.5"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                    />
+                    <polyline points="14,2 14,8 20,8" />
+                    <path d="M8 13h8M8 17h5" />
                   </svg>
                 </div>
-                <p style="font-size:14px;font-weight:500;color:var(--text);margin-bottom:6px">Drag & drop file Excel di sini</p>
-                <p style="font-size:12px;color:var(--muted)">atau klik untuk browse file</p>
+                <p
+                  style="
+                    font-size: 14px;
+                    font-weight: 500;
+                    color: var(--text);
+                    margin-bottom: 6px;
+                  "
+                >
+                  Drag & drop file Excel di sini
+                </p>
+                <p style="font-size: 12px; color: var(--muted)">
+                  atau klik untuk browse file
+                </p>
               </div>
-              <div id="fileInfo" style="display:none">
-                <div style="display:flex;align-items:center;justify-content:center;gap:12px">
-                  <div style="width:48px;height:48px;background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);border-radius:10px;display:flex;align-items:center;justify-content:center">
-                    <svg width="22" height="22" fill="none" stroke="#22c55e" stroke-width="1.5" viewBox="0 0 24 24">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14,2 14,8 20,8"/>
+              <div id="fileInfo" style="display: none">
+                <div
+                  style="
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 12px;
+                  "
+                >
+                  <div
+                    style="
+                      width: 48px;
+                      height: 48px;
+                      background: rgba(34, 197, 94, 0.1);
+                      border: 1px solid rgba(34, 197, 94, 0.25);
+                      border-radius: 10px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                    "
+                  >
+                    <svg
+                      width="22"
+                      height="22"
+                      fill="none"
+                      stroke="#22c55e"
+                      stroke-width="1.5"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                      />
+                      <polyline points="14,2 14,8 20,8" />
                     </svg>
                   </div>
-                  <div style="text-align:left">
-                    <p id="fileName" style="font-size:14px;font-weight:500;color:var(--text)"></p>
-                    <p id="fileSize" style="font-size:12px;color:var(--muted)"></p>
-                    <div class="progress-bar" id="parseProgress" style="display:none;width:160px">
-                      <div class="progress-fill" id="progressFill" style="width:0%"></div>
+                  <div style="text-align: left">
+                    <p
+                      id="fileName"
+                      style="
+                        font-size: 14px;
+                        font-weight: 500;
+                        color: var(--text);
+                      "
+                    ></p>
+                    <p
+                      id="fileSize"
+                      style="font-size: 12px; color: var(--muted)"
+                    ></p>
+                    <div
+                      class="progress-bar"
+                      id="parseProgress"
+                      style="display: none; width: 160px"
+                    >
+                      <div
+                        class="progress-fill"
+                        id="progressFill"
+                        style="width: 0%"
+                      ></div>
                     </div>
                   </div>
-                  <button type="button" onclick="clearFile(event)" style="margin-left:8px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;padding:6px 12px;border-radius:6px;font-size:12px;cursor:pointer;">✕ Hapus</button>
+                  <button
+                    type="button"
+                    onclick="clearFile(event)"
+                    style="
+                      margin-left: 8px;
+                      background: rgba(239, 68, 68, 0.1);
+                      border: 1px solid rgba(239, 68, 68, 0.2);
+                      color: #f87171;
+                      padding: 6px 12px;
+                      border-radius: 6px;
+                      font-size: 12px;
+                      cursor: pointer;
+                    "
+                  >
+                    ✕ Hapus
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Section 3: Preview -->
-          <div id="previewSection" style="display:none" class="fade-in">
+          <div id="previewSection" style="display: none" class="fade-in">
             <div class="card p-6">
-              <div class="flex items-center justify-between mb-4" style="padding-bottom:14px;border-bottom:1px solid var(--border)">
+              <div
+                class="flex items-center justify-between mb-4"
+                style="
+                  padding-bottom: 14px;
+                  border-bottom: 1px solid var(--border);
+                "
+              >
                 <div class="flex items-center gap-2">
-                  <svg width="14" height="14" fill="none" stroke="var(--accent)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                  <span style="font-size:13px;font-weight:600;color:var(--text)">Preview Excel</span>
+                  <svg
+                    width="14"
+                    height="14"
+                    fill="none"
+                    stroke="var(--accent)"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <rect x="3" y="3" width="18" height="18" rx="2" />
+                    <path d="M3 9h18M9 21V9" />
+                  </svg>
+                  <span
+                    style="
+                      font-size: 13px;
+                      font-weight: 600;
+                      color: var(--text);
+                    "
+                    >Preview Excel</span
+                  >
                 </div>
-                <div id="previewMeta" style="font-size:11px;color:var(--muted)"></div>
+                <div
+                  id="previewMeta"
+                  style="font-size: 11px; color: var(--muted)"
+                ></div>
               </div>
               <div class="excel-preview">
                 <div class="excel-header">
-                  <div class="excel-dot" style="background:#ff5f57"></div>
-                  <div class="excel-dot" style="background:#febc2e"></div>
-                  <div class="excel-dot" style="background:#28c840"></div>
+                  <div class="excel-dot" style="background: #ff5f57"></div>
+                  <div class="excel-dot" style="background: #febc2e"></div>
+                  <div class="excel-dot" style="background: #28c840"></div>
                   <span class="excel-filename" id="excelFilename">—</span>
-                  <span class="badge badge-excel" style="margin-left:auto">
-                    <svg width="10" height="10" fill="currentColor" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
-                    Excel
-                  </span>
+                  <span class="badge badge-excel" style="margin-left: auto"
+                    ><svg
+                      width="10"
+                      height="10"
+                      fill="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                      /></svg
+                    >Excel</span
+                  >
                 </div>
-                <div class="excel-toolbar"><span>File</span><span>Edit</span><span>View</span><span>Insert</span><span>Format</span></div>
+                <div class="excel-toolbar">
+                  <span>File</span><span>Edit</span><span>View</span
+                  ><span>Insert</span><span>Format</span>
+                </div>
                 <div class="excel-sheet-tabs" id="sheetTabs"></div>
-                <div class="excel-table-wrap"><table class="excel-table" id="excelTable"></table></div>
-                <div style="background:#161920;padding:6px 14px;font-size:11px;color:var(--muted);display:flex;gap:16px;border-top:1px solid #2e3440;font-family:'IBM Plex Mono',monospace">
+                <div class="excel-table-wrap">
+                  <table class="excel-table" id="excelTable"></table>
+                </div>
+                <div
+                  style="
+                    background: #161920;
+                    padding: 6px 14px;
+                    font-size: 11px;
+                    color: var(--muted);
+                    display: flex;
+                    gap: 16px;
+                    border-top: 1px solid #2e3440;
+                    font-family: &quot;IBM Plex Mono&quot;, monospace;
+                  "
+                >
                   <span id="excelStats">—</span>
                 </div>
               </div>
@@ -327,321 +1557,842 @@
           <!-- Submit -->
           <div class="card p-6 fade-in">
             <div class="flex items-center justify-end gap-3">
-              <button type="button" class="btn-ghost" onclick="resetForm()">Reset</button>
+              <button type="button" class="btn-ghost" onclick="resetForm()">
+                Reset
+              </button>
               <button type="submit" class="btn-primary" id="submitBtn" disabled>
                 <span id="submitLabel">Kirim Penawaran</span>
-                <svg id="submitIcon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22,2 15,22 11,13 2,9"/></svg>
-                <div class="spinner" id="submitSpinner" style="display:none"></div>
+                <svg
+                  id="submitIcon"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  viewBox="0 0 24 24"
+                >
+                  <line x1="22" y1="2" x2="11" y2="13" />
+                  <polygon points="22,2 15,22 11,13 2,9" />
+                </svg>
+                <div
+                  class="spinner"
+                  id="submitSpinner"
+                  style="display: none"
+                ></div>
               </button>
             </div>
           </div>
-
         </div>
       </form>
+    </div>
+
+    <!-- Lightbox -->
+    <div
+      class="lightbox-overlay"
+      id="lightboxOverlay"
+      onclick="closeLightbox(event)"
+    >
+      <div class="lightbox-inner">
+        <button class="lightbox-close" onclick="closeLightboxBtn()">✕</button>
+        <img id="lightboxImg" src="" alt="" />
+        <div class="lightbox-caption" id="lightboxCaption"></div>
+      </div>
     </div>
 
     <div class="toast" id="toast"></div>
 
     <script>
-      const API_BASE  = "http://192.168.1.228:9008/api";
-      const JWT_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHAiOiJ0cnVtcyIsInVzZXIiOnsidW5pcXVlX2lkIjoiOGNiYTg4YTMyODY1MjgwZWY3MjdlMGJhY2M1NmU1NDUiLCJ1bmlxdWVfY29kZSI6IlBFT1BMRSA2MTc5MzM5NSIsImdpZCI6bnVsbCwicGxhdGZvcm0iOiJ3ZWIiLCJpZGVudGlmaWVyIjoid2ViLWNocm9tZS05YXM4ZGgxIn0sInR5cGUiOiJzdXBlcnVzZXIiLCJpYXQiOjE3NzA2MzUwNDd9.ikBXxzFJ-fRmnPSGmB2tAJzaSr0nx4O8jnVI4RAiqaE";
-      const API_URL   = "http://192.168.1.228:9008/api/import-catalogue";
+      const API_BASE = "http://192.168.1.228:9008/api";
+      const JWT_TOKEN =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHAiOiJ0cnVtcyIsInVzZXIiOnsidW5pcXVlX2lkIjoiOGNiYTg4YTMyODY1MjgwZWY3MjdlMGJhY2M1NmU1NDUiLCJ1bmlxdWVfY29kZSI6IlBFT1BMRSA2MTc5MzM5NSIsImdpZCI6bnVsbCwicGxhdGZvcm0iOiJ3ZWIiLCJpZGVudGlmaWVyIjoid2ViLWNocm9tZS05YXM4ZGgxIn0sInR5cGUiOiJzdXBlcnVzZXIiLCJpYXQiOjE3NzA2MzUwNDd9.ikBXxzFJ-fRmnPSGmB2tAJzaSr0nx4O8jnVI4RAiqaE";
+      const API_URL = "http://192.168.1.228:9008/api/import-catalogue";
 
       var to_id = null;
       var uploadedFile = null;
       var workbook = null;
       var currentSheet = 0;
+      var attachments = [];
 
+      // ─── INIT: auto-fill "Kepada" field with tiyasa ─────────
       window.onload = async () => {
         try {
           const res = await fetch(`${API_BASE}/search`, {
             method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${JWT_TOKEN}` },
-            body: JSON.stringify({ table: "contacts", keyword: "tiyasa", limit: 1, offset: 1 }),
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${JWT_TOKEN}`,
+            },
+            body: JSON.stringify({
+              table: "contacts",
+              keyword: "tiyasa",
+              limit: 1,
+              offset: 1,
+            }),
           });
           if (!res.ok) throw new Error("HTTP " + res.status);
           const json = await res.json();
-          to_id = json.data[0].unique_id;
-          console.log("✅ to_id loaded:", to_id);
+          const row = Array.isArray(json.data)
+            ? json.data[0]
+            : Array.isArray(json)
+              ? json[0]
+              : null;
+          if (row) {
+            state["to_id"].results = [row];
+            selectContact("to_id", row);
+            document.getElementById("to_id_autofill_badge").style.display =
+              "inline-flex";
+          } else {
+            showSkeletonFallback();
+          }
         } catch (err) {
-          console.warn("⚠ Failed to fetch default to_id:", err.message);
+          console.warn("⚠ Failed to auto-fill Kepada:", err.message);
+          showSkeletonFallback();
         }
       };
 
-      // ─── CONTACT SEARCH ──────────────────────────────────────
-      const contactFields = ["owner_id", "pic_id"];
-      const state = {};
-      contactFields.forEach(f => { state[f] = { results: [], timer: null, selected: null }; });
+      function showSkeletonFallback() {
+        const sk = document.getElementById("to_id_skeleton");
+        if (sk) sk.style.display = "none";
+        const inp = document.getElementById("search_to_id");
+        if (inp) inp.style.display = "";
+      }
 
-      function escHtml(s) { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+      // ─── DATE VALIDATION (opsional, hanya cek urutan jika keduanya diisi) ──
+      function validateDates() {
+        const start = document.getElementById("start_date").value;
+        const end = document.getElementById("end_date").value;
+        const errEl = document.getElementById("date_error");
+        const endInput = document.getElementById("end_date");
+        if (start && end && end < start) {
+          errEl.style.display = "flex";
+          endInput.style.borderColor = "var(--danger)";
+          return false;
+        }
+        errEl.style.display = "none";
+        endInput.style.borderColor = "";
+        return true;
+      }
+
+      document.getElementById("start_date").addEventListener("change", () => {
+        const start = document.getElementById("start_date").value;
+        document.getElementById("end_date").min = start || "";
+        validateDates();
+      });
+      document
+        .getElementById("end_date")
+        .addEventListener("change", validateDates);
+
+      // Helper: "YYYY-MM-DD" → unix timestamp 10 digit (detik, awal hari UTC)
+      function dateToUnix(val) {
+        if (!val) return null;
+        return Math.floor(new Date(val + "T00:00:00Z").getTime() / 1000);
+      }
+
+      // ─── ATTACHMENT HANDLING ─────────────────────────────────
+      const MAX_ATTACH_SIZE = 50 * 1024 * 1024;
+      const ALLOWED_ATTACH =
+        /\.(jpe?g|png|gif|webp|bmp|svg|pdf|doc|docx|xls|xlsx|ppt|pptx|txt|csv|zip|rar|7z)$/i;
+
+      const attachDropZone = document.getElementById("attachDropZone");
+      attachDropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        attachDropZone.classList.add("drag-over");
+      });
+      attachDropZone.addEventListener("dragleave", () =>
+        attachDropZone.classList.remove("drag-over"),
+      );
+      attachDropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        attachDropZone.classList.remove("drag-over");
+        handleAttachments(e.dataTransfer.files);
+      });
+
+      function handleAttachments(files) {
+        let added = 0;
+        [...files].forEach((file) => {
+          if (!ALLOWED_ATTACH.test(file.name)) {
+            showToast(`Format tidak didukung: ${file.name}`, "error");
+            return;
+          }
+          if (file.size > MAX_ATTACH_SIZE) {
+            showToast(`File terlalu besar (maks 50MB): ${file.name}`, "error");
+            return;
+          }
+          if (
+            attachments.find(
+              (a) => a.file.name === file.name && a.file.size === file.size,
+            )
+          ) {
+            showToast(`File sudah ditambahkan: ${file.name}`, "error");
+            return;
+          }
+          const id =
+            "attach_" + Date.now() + "_" + Math.random().toString(36).slice(2);
+          const isImage = /\.(jpe?g|png|gif|webp|bmp|svg)$/i.test(file.name);
+          const previewUrl = isImage ? URL.createObjectURL(file) : null;
+          attachments.push({ file, id, previewUrl, isImage });
+          added++;
+        });
+        if (added > 0) renderAttachList();
+        document.getElementById("attachInput").value = "";
+      }
+
+      function removeAttachment(id) {
+        const idx = attachments.findIndex((a) => a.id === id);
+        if (idx !== -1) {
+          if (attachments[idx].previewUrl)
+            URL.revokeObjectURL(attachments[idx].previewUrl);
+          attachments.splice(idx, 1);
+        }
+        renderAttachList();
+      }
+
+      function getFileTypeInfo(filename) {
+        const ext = (filename.split(".").pop() || "").toLowerCase();
+        const map = {
+          pdf: {
+            color: "#f87171",
+            bg: "rgba(239,68,68,.1)",
+            border: "rgba(239,68,68,.2)",
+            icon: "📄",
+            label: "PDF",
+          },
+          doc: {
+            color: "#60a5fa",
+            bg: "rgba(96,165,250,.1)",
+            border: "rgba(96,165,250,.2)",
+            icon: "📝",
+            label: "DOC",
+          },
+          docx: {
+            color: "#60a5fa",
+            bg: "rgba(96,165,250,.1)",
+            border: "rgba(96,165,250,.2)",
+            icon: "📝",
+            label: "DOCX",
+          },
+          xls: {
+            color: "#4ade80",
+            bg: "rgba(74,222,128,.1)",
+            border: "rgba(74,222,128,.2)",
+            icon: "📊",
+            label: "XLS",
+          },
+          xlsx: {
+            color: "#4ade80",
+            bg: "rgba(74,222,128,.1)",
+            border: "rgba(74,222,128,.2)",
+            icon: "📊",
+            label: "XLSX",
+          },
+          ppt: {
+            color: "#fb923c",
+            bg: "rgba(251,146,60,.1)",
+            border: "rgba(251,146,60,.2)",
+            icon: "📋",
+            label: "PPT",
+          },
+          pptx: {
+            color: "#fb923c",
+            bg: "rgba(251,146,60,.1)",
+            border: "rgba(251,146,60,.2)",
+            icon: "📋",
+            label: "PPTX",
+          },
+          txt: {
+            color: "#a78bfa",
+            bg: "rgba(167,139,250,.1)",
+            border: "rgba(167,139,250,.2)",
+            icon: "📃",
+            label: "TXT",
+          },
+          csv: {
+            color: "#34d399",
+            bg: "rgba(52,211,153,.1)",
+            border: "rgba(52,211,153,.2)",
+            icon: "📊",
+            label: "CSV",
+          },
+          zip: {
+            color: "#fbbf24",
+            bg: "rgba(251,191,36,.1)",
+            border: "rgba(251,191,36,.2)",
+            icon: "🗜️",
+            label: "ZIP",
+          },
+          rar: {
+            color: "#fbbf24",
+            bg: "rgba(251,191,36,.1)",
+            border: "rgba(251,191,36,.2)",
+            icon: "🗜️",
+            label: "RAR",
+          },
+        };
+        if (/^(jpe?g|png|gif|webp|bmp|svg)$/.test(ext))
+          return {
+            color: "#00d4aa",
+            bg: "rgba(0,212,170,.1)",
+            border: "rgba(0,212,170,.2)",
+            icon: "🖼️",
+            label: "IMG",
+          };
+        return (
+          map[ext] || {
+            color: "#94a3b8",
+            bg: "rgba(148,163,184,.1)",
+            border: "rgba(148,163,184,.2)",
+            icon: "📁",
+            label: ext.toUpperCase() || "FILE",
+          }
+        );
+      }
+
+      function renderAttachList() {
+        const list = document.getElementById("attachList");
+        const badge = document.getElementById("attachCountBadge");
+        const badgeText = document.getElementById("attachCountText");
+        if (!attachments.length) {
+          list.innerHTML = "";
+          badge.style.display = "none";
+          return;
+        }
+        badge.style.display = "inline-flex";
+        badgeText.textContent =
+          attachments.length + " file" + (attachments.length > 1 ? "s" : "");
+        list.innerHTML = attachments
+          .map((a) => {
+            const info = getFileTypeInfo(a.file.name);
+            const thumbHtml = a.isImage
+              ? `<div class="attach-thumb" style="cursor:pointer;" onclick="openLightbox('${a.id}')"><img src="${a.previewUrl}" alt="${escHtml(a.file.name)}" /></div>`
+              : `<div class="attach-thumb" style="background:${info.bg};border-color:${info.border};"><span style="font-size:28px;">${info.icon}</span></div>`;
+            return `<div class="attach-item" id="item_${a.id}">
+            ${thumbHtml}
+            <div class="attach-info">
+              <div class="attach-name" title="${escHtml(a.file.name)}">${escHtml(a.file.name)}</div>
+              <div class="attach-meta">${formatSize(a.file.size)}${a.isImage ? " · Klik thumbnail untuk preview" : ""}</div>
+            </div>
+            <span class="attach-type-badge" style="color:${info.color};background:${info.bg};border:1px solid ${info.border};">${info.label}</span>
+            <button type="button" class="attach-remove" onclick="removeAttachment('${a.id}')" title="Hapus">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+          </div>`;
+          })
+          .join("");
+      }
+
+      function openLightbox(id) {
+        const a = attachments.find((x) => x.id === id);
+        if (!a || !a.isImage) return;
+        document.getElementById("lightboxImg").src = a.previewUrl;
+        document.getElementById("lightboxImg").alt = a.file.name;
+        document.getElementById("lightboxCaption").textContent =
+          `${a.file.name} · ${formatSize(a.file.size)}`;
+        document.getElementById("lightboxOverlay").classList.add("open");
+      }
+      function closeLightbox(e) {
+        if (e.target === document.getElementById("lightboxOverlay"))
+          closeLightboxBtn();
+      }
+      function closeLightboxBtn() {
+        document.getElementById("lightboxOverlay").classList.remove("open");
+      }
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeLightboxBtn();
+      });
+
+      // ─── CONTACT SEARCH ──────────────────────────────────────
+      const contactFields = ["to_id", "owner_id", "pic_id"];
+      const state = {};
+      contactFields.forEach((f) => {
+        state[f] = { results: [], timer: null, selected: null };
+      });
+
+      function escHtml(s) {
+        return String(s)
+          .replace(/&/g, "&amp;")
+          .replace(/</g, "&lt;")
+          .replace(/>/g, "&gt;");
+      }
       function highlightMatch(text, kw) {
         if (!kw) return escHtml(text);
-        const re = new RegExp(`(${kw.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")})`, "gi");
+        const re = new RegExp(
+          `(${kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`,
+          "gi",
+        );
         return escHtml(text).replace(re, "<mark>$1</mark>");
       }
-      function getContactLabel(r) { return r.name||r.full_name||r.nama||r.label||r.contact_name||""; }
-      function getContactSub(r) { return r.email||r.phone||r.position||r.jabatan||""; }
-      function getInitials(n) { return n.split(" ").slice(0,2).map(w=>w[0]||"").join("").toUpperCase()||"?"; }
-      function setStatus(f,h) { document.getElementById("status_"+f).innerHTML=h; }
-      function openDropdown(f) { document.getElementById("dropdown_"+f).classList.add("open"); }
-      function closeDropdown(f) { document.getElementById("dropdown_"+f).classList.remove("open"); }
+      function getContactLabel(r) {
+        return (
+          r.name || r.full_name || r.nama || r.label || r.contact_name || ""
+        );
+      }
+      function getContactSub(r) {
+        return r.email || r.phone || r.position || r.jabatan || "";
+      }
+      function getInitials(n) {
+        return (
+          n
+            .split(" ")
+            .slice(0, 2)
+            .map((w) => w[0] || "")
+            .join("")
+            .toUpperCase() || "?"
+        );
+      }
+      function setStatus(f, h) {
+        document.getElementById("status_" + f).innerHTML = h;
+      }
+      function openDropdown(f) {
+        document.getElementById("dropdown_" + f).classList.add("open");
+      }
+      function closeDropdown(f) {
+        document.getElementById("dropdown_" + f).classList.remove("open");
+      }
 
       function renderDropdown(field, kw, rows) {
-        const dd = document.getElementById("dropdown_"+field);
-        if (!rows.length) { dd.innerHTML=`<div class="dropdown-empty">Tidak ada hasil untuk "<strong>${escHtml(kw)}</strong>"</div>`; openDropdown(field); return; }
-        dd.innerHTML = rows.map((r,i) => {
-          const name=getContactLabel(r), sub=getContactSub(r);
-          return `<div class="dropdown-item" data-field="${field}" data-idx="${i}" tabindex="-1">
+        const dd = document.getElementById("dropdown_" + field);
+        if (!rows.length) {
+          dd.innerHTML = `<div class="dropdown-empty">Tidak ada hasil untuk "<strong>${escHtml(kw)}</strong>"</div>`;
+          openDropdown(field);
+          return;
+        }
+        dd.innerHTML = rows
+          .map((r, i) => {
+            const name = getContactLabel(r),
+              sub = getContactSub(r);
+            return `<div class="dropdown-item" data-field="${field}" data-idx="${i}" tabindex="-1">
             <div class="dropdown-avatar">${getInitials(name)}</div>
-            <div style="flex:1;min-width:0">
-              <div class="dropdown-item-name">${highlightMatch(name,kw)}</div>
-              ${sub?`<div class="dropdown-item-sub">${escHtml(sub)}</div>`:""}
-            </div>
+            <div style="flex:1;min-width:0"><div class="dropdown-item-name">${highlightMatch(name, kw)}</div>${sub ? `<div class="dropdown-item-sub">${escHtml(sub)}</div>` : ""}</div>
           </div>`;
-        }).join("");
-        dd.querySelectorAll(".dropdown-item").forEach(el => {
-          el.addEventListener("mousedown", e => { e.preventDefault(); selectContact(field, state[field].results[+el.dataset.idx]); });
+          })
+          .join("");
+        dd.querySelectorAll(".dropdown-item").forEach((el) => {
+          el.addEventListener("mousedown", (e) => {
+            e.preventDefault();
+            selectContact(field, state[field].results[+el.dataset.idx]);
+          });
         });
         openDropdown(field);
       }
 
       function selectContact(field, row) {
-        const name=getContactLabel(row), id=row.unique_id;
+        const name = getContactLabel(row),
+          id = row.unique_id;
         state[field].selected = row;
-        document.getElementById(field+"_val").value = id;
-        document.getElementById("search_"+field).style.display="none";
-        document.getElementById("search_"+field).value="";
-        const chip=document.getElementById("chip_"+field);
-        chip.style.display="flex";
-        chip.innerHTML=`<div class="dropdown-avatar" style="width:22px;height:22px;font-size:9px">${getInitials(name)}</div><span style="flex:1">${escHtml(name)}</span>`;
-        document.getElementById("clear_"+field).style.display="flex";
-        document.getElementById("row_"+field).classList.add("selected");
-        document.getElementById("row_"+field).classList.remove("error");
+        document.getElementById(field + "_val").value = id;
+        // hide skeleton if present
+        const sk = document.getElementById(field + "_skeleton");
+        if (sk) sk.style.display = "none";
+        document.getElementById("search_" + field).style.display = "none";
+        document.getElementById("search_" + field).value = "";
+        const chip = document.getElementById("chip_" + field);
+        chip.style.display = "flex";
+        chip.innerHTML = `<div class="dropdown-avatar" style="width:22px;height:22px;font-size:9px">${getInitials(name)}</div><span style="flex:1">${escHtml(name)}</span>`;
+        document.getElementById("clear_" + field).style.display = "flex";
+        document.getElementById("row_" + field).classList.add("selected");
+        document.getElementById("row_" + field).classList.remove("error");
         closeDropdown(field);
-        setStatus(field,`<svg width="11" height="11" fill="none" stroke="#22c55e" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg><span style="color:#22c55e">Dipilih</span>`);
+        setStatus(
+          field,
+          `<svg width="11" height="11" fill="none" stroke="#22c55e" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20,6 9,17 4,12"/></svg><span style="color:#22c55e">Dipilih</span>`,
+        );
       }
 
       function clearContact(field) {
-        state[field].selected=null;
-        document.getElementById(field+"_val").value="";
-        document.getElementById("chip_"+field).style.display="none";
-        const inp=document.getElementById("search_"+field);
-        inp.style.display=""; inp.value=""; inp.focus();
-        document.getElementById("clear_"+field).style.display="none";
-        document.getElementById("row_"+field).classList.remove("selected");
-        closeDropdown(field); setStatus(field,"");
+        state[field].selected = null;
+        document.getElementById(field + "_val").value = "";
+        document.getElementById("chip_" + field).style.display = "none";
+        const sk = document.getElementById(field + "_skeleton");
+        if (sk) sk.style.display = "none";
+        if (field === "to_id")
+          document.getElementById("to_id_autofill_badge").style.display =
+            "none";
+        const inp = document.getElementById("search_" + field);
+        inp.style.display = "";
+        inp.value = "";
+        inp.focus();
+        document.getElementById("clear_" + field).style.display = "none";
+        document.getElementById("row_" + field).classList.remove("selected");
+        closeDropdown(field);
+        setStatus(field, "");
       }
 
       async function fetchContact(field, keyword) {
-        setStatus(field,'<div class="spin-sm"></div><span>Mencari...</span>');
-        const dd=document.getElementById("dropdown_"+field);
-        dd.innerHTML=`<div class="dropdown-loading"><div class="spin-sm"></div> Memuat data...</div>`;
+        setStatus(field, '<div class="spin-sm"></div><span>Mencari...</span>');
+        const dd = document.getElementById("dropdown_" + field);
+        dd.innerHTML = `<div class="dropdown-loading"><div class="spin-sm"></div> Memuat data...</div>`;
         openDropdown(field);
         try {
-          const res=await fetch(`${API_BASE}/search`,{
-            method:"POST",
-            headers:{"Content-Type":"application/json",Authorization:`Bearer ${JWT_TOKEN}`},
-            body:JSON.stringify({table:"contacts",keyword,limit:10,offset:1}),
+          const res = await fetch(`${API_BASE}/search`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${JWT_TOKEN}`,
+            },
+            body: JSON.stringify({
+              table: "contacts",
+              keyword,
+              limit: 10,
+              offset: 1,
+            }),
           });
-          if(!res.ok) throw new Error("HTTP "+res.status);
-          const json=await res.json();
-          const rows=Array.isArray(json)?json:Array.isArray(json.data)?json.data:Array.isArray(json.results)?json.results:[];
-          state[field].results=rows;
-          renderDropdown(field,keyword,rows);
-          setStatus(field,rows.length?`<span>${rows.length} hasil</span>`:"");
-        } catch(err) {
-          console.error(`[${field}]`,err);
-          dd.innerHTML=`<div class="dropdown-empty" style="color:#f87171">⚠ Gagal menghubungi server.<br><span style="font-size:11px;color:var(--muted)">${escHtml(err.message)}</span></div>`;
-          openDropdown(field); setStatus(field,"");
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          const json = await res.json();
+          const rows = Array.isArray(json)
+            ? json
+            : Array.isArray(json.data)
+              ? json.data
+              : Array.isArray(json.results)
+                ? json.results
+                : [];
+          state[field].results = rows;
+          renderDropdown(field, keyword, rows);
+          setStatus(
+            field,
+            rows.length ? `<span>${rows.length} hasil</span>` : "",
+          );
+        } catch (err) {
+          console.error(`[${field}]`, err);
+          dd.innerHTML = `<div class="dropdown-empty" style="color:#f87171">⚠ Gagal menghubungi server.<br><span style="font-size:11px;color:var(--muted)">${escHtml(err.message)}</span></div>`;
+          openDropdown(field);
+          setStatus(field, "");
         }
       }
 
-      contactFields.forEach(field => {
-        const inp=document.getElementById("search_"+field);
-        const clr=document.getElementById("clear_"+field);
-        inp.addEventListener("input",()=>{
-          const kw=inp.value.trim(); clearTimeout(state[field].timer);
-          if(kw.length<2){closeDropdown(field);setStatus(field,"");return;}
-          state[field].timer=setTimeout(()=>fetchContact(field,kw),350);
+      contactFields.forEach((field) => {
+        const inp = document.getElementById("search_" + field);
+        const clr = document.getElementById("clear_" + field);
+        inp.addEventListener("input", () => {
+          const kw = inp.value.trim();
+          clearTimeout(state[field].timer);
+          if (kw.length < 2) {
+            closeDropdown(field);
+            setStatus(field, "");
+            return;
+          }
+          state[field].timer = setTimeout(() => fetchContact(field, kw), 350);
         });
-        inp.addEventListener("focus",()=>{ if(inp.value.trim().length>=2&&state[field].results.length) renderDropdown(field,inp.value.trim(),state[field].results); });
-        inp.addEventListener("keydown",e=>{
-          const dd=document.getElementById("dropdown_"+field);
-          const items=[...dd.querySelectorAll(".dropdown-item")];
-          const focused=dd.querySelector(".dropdown-item.focused");
-          let idx=items.indexOf(focused);
-          if(e.key==="ArrowDown"){e.preventDefault();idx=Math.min(idx+1,items.length-1);items.forEach(i=>i.classList.remove("focused"));if(items[idx])items[idx].classList.add("focused");}
-          else if(e.key==="ArrowUp"){e.preventDefault();idx=Math.max(idx-1,0);items.forEach(i=>i.classList.remove("focused"));if(items[idx])items[idx].classList.add("focused");}
-          else if(e.key==="Enter"&&focused){e.preventDefault();selectContact(field,state[field].results[+focused.dataset.idx]);}
-          else if(e.key==="Escape")closeDropdown(field);
+        inp.addEventListener("focus", () => {
+          if (inp.value.trim().length >= 2 && state[field].results.length)
+            renderDropdown(field, inp.value.trim(), state[field].results);
         });
-        clr.addEventListener("click",()=>clearContact(field));
-        document.addEventListener("click",e=>{if(!document.getElementById("wrap_"+field).contains(e.target))closeDropdown(field);});
+        inp.addEventListener("keydown", (e) => {
+          const dd = document.getElementById("dropdown_" + field);
+          const items = [...dd.querySelectorAll(".dropdown-item")];
+          const focused = dd.querySelector(".dropdown-item.focused");
+          let idx = items.indexOf(focused);
+          if (e.key === "ArrowDown") {
+            e.preventDefault();
+            idx = Math.min(idx + 1, items.length - 1);
+            items.forEach((i) => i.classList.remove("focused"));
+            if (items[idx]) items[idx].classList.add("focused");
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            idx = Math.max(idx - 1, 0);
+            items.forEach((i) => i.classList.remove("focused"));
+            if (items[idx]) items[idx].classList.add("focused");
+          } else if (e.key === "Enter" && focused) {
+            e.preventDefault();
+            selectContact(field, state[field].results[+focused.dataset.idx]);
+          } else if (e.key === "Escape") closeDropdown(field);
+        });
+        clr.addEventListener("click", () => clearContact(field));
+        document.addEventListener("click", (e) => {
+          if (!document.getElementById("wrap_" + field).contains(e.target))
+            closeDropdown(field);
+        });
       });
 
-      // ─── FILE UPLOAD ─────────────────────────────────────────
-      const dropZone=document.getElementById("dropZone");
-      dropZone.addEventListener("dragover",e=>{e.preventDefault();dropZone.classList.add("drag-over");});
-      dropZone.addEventListener("dragleave",()=>dropZone.classList.remove("drag-over"));
-      dropZone.addEventListener("drop",e=>{e.preventDefault();dropZone.classList.remove("drag-over");const f=e.dataTransfer.files[0];if(f)handleFile(f);});
+      // ─── EXCEL FILE UPLOAD ───────────────────────────────────
+      const dropZone = document.getElementById("dropZone");
+      dropZone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropZone.classList.add("drag-over");
+      });
+      dropZone.addEventListener("dragleave", () =>
+        dropZone.classList.remove("drag-over"),
+      );
+      dropZone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropZone.classList.remove("drag-over");
+        const f = e.dataTransfer.files[0];
+        if (f) handleFile(f);
+      });
 
       function handleFile(file) {
-        if(!file)return;
-        const validTypes=["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet","application/vnd.ms-excel"];
-        if(!validTypes.includes(file.type)&&!/\.(xlsx|xls)$/i.test(file.name)){showToast("Format tidak valid. Harap upload file Excel (.xlsx atau .xls)","error");return;}
-        if(file.size>20*1024*1024){showToast("Ukuran file melebihi batas 20MB","error");return;}
-        uploadedFile=file;
-        document.getElementById("dropContent").style.display="none";
-        document.getElementById("fileInfo").style.display="block";
-        document.getElementById("fileName").textContent=file.name;
-        document.getElementById("fileSize").textContent=formatSize(file.size);
-        document.getElementById("parseProgress").style.display="block";
-        let p=0; const prog=setInterval(()=>{p=Math.min(p+15,85);document.getElementById("progressFill").style.width=p+"%";},80);
-        const reader=new FileReader();
-        reader.onload=e=>{
+        if (!file) return;
+        const validTypes = [
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "application/vnd.ms-excel",
+        ];
+        if (
+          !validTypes.includes(file.type) &&
+          !/\.(xlsx|xls)$/i.test(file.name)
+        ) {
+          showToast(
+            "Format tidak valid. Harap upload file Excel (.xlsx atau .xls)",
+            "error",
+          );
+          return;
+        }
+        if (file.size > 20 * 1024 * 1024) {
+          showToast("Ukuran file melebihi batas 20MB", "error");
+          return;
+        }
+        uploadedFile = file;
+        document.getElementById("dropContent").style.display = "none";
+        document.getElementById("fileInfo").style.display = "block";
+        document.getElementById("fileName").textContent = file.name;
+        document.getElementById("fileSize").textContent = formatSize(file.size);
+        document.getElementById("parseProgress").style.display = "block";
+        let p = 0;
+        const prog = setInterval(() => {
+          p = Math.min(p + 15, 85);
+          document.getElementById("progressFill").style.width = p + "%";
+        }, 80);
+        const reader = new FileReader();
+        reader.onload = (e) => {
           clearInterval(prog);
-          document.getElementById("progressFill").style.width="100%";
-          setTimeout(()=>{document.getElementById("parseProgress").style.display="none";},400);
-          workbook=XLSX.read(e.target.result,{type:"array"});
-          renderSheetTabs();renderSheet(0);
-          document.getElementById("previewSection").style.display="block";
-          document.getElementById("excelFilename").textContent=file.name;
-          updateSteps(3);checkSubmitReady();
-          showToast(`File "${file.name}" berhasil dimuat`,"success");
+          document.getElementById("progressFill").style.width = "100%";
+          setTimeout(() => {
+            document.getElementById("parseProgress").style.display = "none";
+          }, 400);
+          workbook = XLSX.read(e.target.result, { type: "array" });
+          renderSheetTabs();
+          renderSheet(0);
+          document.getElementById("previewSection").style.display = "block";
+          document.getElementById("excelFilename").textContent = file.name;
+          updateSteps(3);
+          checkSubmitReady();
+          showToast(`File "${file.name}" berhasil dimuat`, "success");
         };
         reader.readAsArrayBuffer(file);
         updateSteps(2);
       }
 
       function renderSheetTabs() {
-        const tabs=document.getElementById("sheetTabs"); tabs.innerHTML="";
-        workbook.SheetNames.forEach((name,i)=>{
-          const tab=document.createElement("div");
-          tab.className="sheet-tab"+(i===0?" active":"");
-          tab.textContent=name;
-          tab.onclick=()=>{document.querySelectorAll(".sheet-tab").forEach(t=>t.classList.remove("active"));tab.classList.add("active");renderSheet(i);};
+        const tabs = document.getElementById("sheetTabs");
+        tabs.innerHTML = "";
+        workbook.SheetNames.forEach((name, i) => {
+          const tab = document.createElement("div");
+          tab.className = "sheet-tab" + (i === 0 ? " active" : "");
+          tab.textContent = name;
+          tab.onclick = () => {
+            document
+              .querySelectorAll(".sheet-tab")
+              .forEach((t) => t.classList.remove("active"));
+            tab.classList.add("active");
+            renderSheet(i);
+          };
           tabs.appendChild(tab);
         });
       }
 
       function renderSheet(idx) {
-        currentSheet=idx;
-        const sheetName=workbook.SheetNames[idx];
-        const data=XLSX.utils.sheet_to_json(workbook.Sheets[sheetName],{header:1,defval:""});
-        const table=document.getElementById("excelTable"); table.innerHTML="";
-        if(!data.length){table.innerHTML='<tr><td style="color:var(--muted);padding:20px;text-align:center">Sheet kosong</td></tr>';return;}
-        const maxCols=Math.max(...data.map(r=>r.length));
-        const COLS="ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-        const thead=document.createElement("thead");
-        const hr=document.createElement("tr");
-        const corner=document.createElement("th");corner.innerHTML="#";hr.appendChild(corner);
-        for(let c=0;c<maxCols;c++){const th=document.createElement("th");th.textContent=COLS[c]||(c+1);hr.appendChild(th);}
-        thead.appendChild(hr);table.appendChild(thead);
-        const tbody=document.createElement("tbody");
-        data.slice(0,200).forEach((row,ri)=>{
-          const tr=document.createElement("tr");
-          const rn=document.createElement("td");rn.className="row-num";rn.textContent=ri+1;tr.appendChild(rn);
-          for(let c=0;c<maxCols;c++){
-            const td=document.createElement("td");const val=row[c]!==undefined?row[c]:"";
-            td.textContent=val;if(ri===0)td.className="excel-header-cell";else if(typeof val==="number")td.className="excel-num";
-            td.title=val;tr.appendChild(td);
+        currentSheet = idx;
+        const sheetName = workbook.SheetNames[idx];
+        const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {
+          header: 1,
+          defval: "",
+        });
+        const table = document.getElementById("excelTable");
+        table.innerHTML = "";
+        if (!data.length) {
+          table.innerHTML =
+            '<tr><td style="color:var(--muted);padding:20px;text-align:center">Sheet kosong</td></tr>';
+          return;
+        }
+        const maxCols = Math.max(...data.map((r) => r.length));
+        const COLS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        const thead = document.createElement("thead");
+        const hr = document.createElement("tr");
+        const corner = document.createElement("th");
+        corner.innerHTML = "#";
+        hr.appendChild(corner);
+        for (let c = 0; c < maxCols; c++) {
+          const th = document.createElement("th");
+          th.textContent = COLS[c] || c + 1;
+          hr.appendChild(th);
+        }
+        thead.appendChild(hr);
+        table.appendChild(thead);
+        const tbody = document.createElement("tbody");
+        data.slice(0, 200).forEach((row, ri) => {
+          const tr = document.createElement("tr");
+          const rn = document.createElement("td");
+          rn.className = "row-num";
+          rn.textContent = ri + 1;
+          tr.appendChild(rn);
+          for (let c = 0; c < maxCols; c++) {
+            const td = document.createElement("td");
+            const val = row[c] !== undefined ? row[c] : "";
+            td.textContent = val;
+            if (ri === 0) td.className = "excel-header-cell";
+            else if (typeof val === "number") td.className = "excel-num";
+            td.title = val;
+            tr.appendChild(td);
           }
           tbody.appendChild(tr);
         });
         table.appendChild(tbody);
-        document.getElementById("excelStats").textContent=`${data.length} baris × ${maxCols} kolom  |  Sheet: ${sheetName}`+(data.length>200?"  |  200 baris pertama":"");
-        document.getElementById("previewMeta").textContent=`${workbook.SheetNames.length} sheet`;
+        document.getElementById("excelStats").textContent =
+          `${data.length} baris × ${maxCols} kolom  |  Sheet: ${sheetName}` +
+          (data.length > 200 ? "  |  200 baris pertama" : "");
+        document.getElementById("previewMeta").textContent =
+          `${workbook.SheetNames.length} sheet`;
       }
 
       function clearFile(e) {
-        e.stopPropagation(); uploadedFile=null; workbook=null;
-        document.getElementById("fileInput").value="";
-        document.getElementById("fileInfo").style.display="none";
-        document.getElementById("dropContent").style.display="block";
-        document.getElementById("previewSection").style.display="none";
-        document.getElementById("submitBtn").disabled=true;
+        e.stopPropagation();
+        uploadedFile = null;
+        workbook = null;
+        document.getElementById("fileInput").value = "";
+        document.getElementById("fileInfo").style.display = "none";
+        document.getElementById("dropContent").style.display = "block";
+        document.getElementById("previewSection").style.display = "none";
+        document.getElementById("submitBtn").disabled = true;
         updateSteps(1);
       }
 
-      function checkSubmitReady(){document.getElementById("submitBtn").disabled=!uploadedFile;}
-      function updateSteps(active){
-        for(let i=1;i<=4;i++){
-          const el=document.getElementById("step"+i);el.className="step";
-          if(i<active)el.className="step done";else if(i===active)el.className="step active";
+      function checkSubmitReady() {
+        document.getElementById("submitBtn").disabled = !uploadedFile;
+      }
+      function updateSteps(active) {
+        for (let i = 1; i <= 4; i++) {
+          const el = document.getElementById("step" + i);
+          el.className = "step";
+          if (i < active) el.className = "step done";
+          else if (i === active) el.className = "step active";
         }
       }
 
-      document.getElementById("mainForm").addEventListener("submit", async e => {
-        e.preventDefault();
-        if(!uploadedFile){showToast("Harap upload file Excel terlebih dahulu","error");return;}
-        const form=e.target; let valid=true;
-        ["name","subject","category","type"].forEach(n=>{
-          const el=form.querySelector(`[name="${n}"]`);
-          if(!el.value.trim()){el.style.borderColor="var(--danger)";valid=false;}else el.style.borderColor="";
+      // ─── SUBMIT ──────────────────────────────────────────────
+      document
+        .getElementById("mainForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          if (!uploadedFile) {
+            showToast("Harap upload file Excel terlebih dahulu", "error");
+            return;
+          }
+
+          // Validate dates (opsional, hanya cek urutan jika keduanya diisi)
+          if (!validateDates()) {
+            showToast("Periksa kembali tanggal yang diisi", "error");
+            return;
+          }
+
+          let valid = true;
+          ["to_id", "owner_id", "pic_id"].forEach((f) => {
+            const val = document.getElementById(f + "_val").value;
+            const row = document.getElementById("row_" + f);
+            if (!val) {
+              row.classList.add("error");
+              valid = false;
+            } else row.classList.remove("error");
+          });
+          if (!valid) {
+            showToast("Lengkapi semua field yang wajib diisi", "error");
+            return;
+          }
+
+          const fd = new FormData(e.target);
+
+          // File Excel → key "excel"
+          fd.set("excel", uploadedFile, uploadedFile.name);
+          fd.set("category", "penawaran");
+          fd.set("type", "in");
+
+          // start_date & end_date → unix timestamp 10 digit (hapus field date string-nya)
+          const startUnix = dateToUnix(fd.get("start_date"));
+          const endUnix = dateToUnix(fd.get("end_date"));
+          fd.delete("start_date");
+          fd.delete("end_date");
+          if (startUnix !== null) fd.set("start_date", startUnix);
+          if (endUnix !== null) fd.set("end_date", endUnix);
+
+          // Lampiran → key "files"
+          fd.delete("files");
+          attachments.forEach((a) => {
+            fd.append("files", a.file);
+          });
+
+          console.log("📤 Payload:", {
+            name: fd.get("name"),
+            subject: fd.get("subject"),
+            owner_id: fd.get("owner_id"),
+            pic_id: fd.get("pic_id"),
+            to_id: fd.get("to_id"),
+            note: fd.get("note") ?? "",
+            start_date: fd.get("start_date") ?? "(kosong)",
+            end_date: fd.get("end_date") ?? "(kosong)",
+            category: fd.get("category"),
+            type: fd.get("type"),
+            excel_file: uploadedFile.name,
+            attachments: attachments.map((a) => a.file.name),
+          });
+
+          const btn = document.getElementById("submitBtn");
+          btn.disabled = true;
+          document.getElementById("submitLabel").textContent = "Mengirim...";
+          document.getElementById("submitIcon").style.display = "none";
+          document.getElementById("submitSpinner").style.display = "block";
+          updateSteps(4);
+
+          try {
+            const res = await fetch(API_URL, {
+              method: "POST",
+              headers: { Authorization: `Bearer ${JWT_TOKEN}` },
+              body: fd,
+            });
+            if (!res.ok)
+              throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+            const data = await res.json().catch(() => ({}));
+            console.log("✅ Response:", data);
+            showToast("Penawaran berhasil dikirim!", "success");
+            setTimeout(resetForm, 2000);
+          } catch (err) {
+            console.error("❌ Error:", err);
+            showToast(`Gagal mengirim: ${err.message}`, "error");
+            updateSteps(3);
+          } finally {
+            btn.disabled = false;
+            document.getElementById("submitLabel").textContent =
+              "Kirim Penawaran";
+            document.getElementById("submitIcon").style.display = "";
+            document.getElementById("submitSpinner").style.display = "none";
+            if (uploadedFile) btn.disabled = false;
+          }
         });
-        ["owner_id","pic_id"].forEach(f=>{
-          const val=document.getElementById(f+"_val").value;
-          const row=document.getElementById("row_"+f);
-          if(!val){row.classList.add("error");valid=false;}else row.classList.remove("error");
-        });
-        if(!valid){showToast("Lengkapi semua field yang wajib diisi","error");return;}
-
-        const fd=new FormData(form);
-        fd.set("file",uploadedFile,uploadedFile.name);
-        fd.delete("files");
-        if(to_id) fd.set("to_id", to_id);
-
-        console.log("📤 Payload:",{
-          name:fd.get("name"),subject:fd.get("subject"),
-          owner_id:fd.get("owner_id"),note:fd.get("note")??"",
-          pic_id:fd.get("pic_id"),to_id:fd.get("to_id"),
-          category:fd.get("category"),type:fd.get("type"),
-          file:uploadedFile.name,
-        });
-
-        const btn=document.getElementById("submitBtn");
-        btn.disabled=true;
-        document.getElementById("submitLabel").textContent="Mengirim...";
-        document.getElementById("submitIcon").style.display="none";
-        document.getElementById("submitSpinner").style.display="block";
-        updateSteps(4);
-
-        try {
-          const res=await fetch(API_URL,{method:"POST",headers:{Authorization:`Bearer ${JWT_TOKEN}`},body:fd});
-          if(!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
-          const data=await res.json().catch(()=>({}));
-          console.log("✅ Response:",data);
-          showToast("Penawaran berhasil dikirim!","success");
-          setTimeout(resetForm,2000);
-        } catch(err) {
-          console.error("❌ Error:",err);
-          showToast(`Gagal mengirim: ${err.message}`,"error");
-          updateSteps(3);
-        } finally {
-          btn.disabled=false;
-          document.getElementById("submitLabel").textContent="Kirim Penawaran";
-          document.getElementById("submitIcon").style.display="";
-          document.getElementById("submitSpinner").style.display="none";
-          if(uploadedFile)btn.disabled=false;
-        }
-      });
 
       function resetForm() {
         document.getElementById("mainForm").reset();
-        clearFile({stopPropagation:()=>{}});
-        contactFields.forEach(f=>clearContact(f));
+        clearFile({ stopPropagation: () => {} });
+        <!-- contactFields.forEach((f) => clearContact(f)); -->
+        attachments.forEach((a) => {
+          if (a.previewUrl) URL.revokeObjectURL(a.previewUrl);
+        });
+        attachments = [];
+        renderAttachList();
         updateSteps(1);
-        document.querySelectorAll(".input-field").forEach(el=>el.style.borderColor="");
+        document
+          .querySelectorAll(".input-field")
+          .forEach((el) => (el.style.borderColor = ""));
+        document.getElementById("date_error").style.display = "none";
       }
 
-      function formatSize(b){if(b<1024)return b+" B";if(b<1024*1024)return(b/1024).toFixed(1)+" KB";return(b/(1024*1024)).toFixed(2)+" MB";}
+      function formatSize(b) {
+        if (b < 1024) return b + " B";
+        if (b < 1024 * 1024) return (b / 1024).toFixed(1) + " KB";
+        return (b / (1024 * 1024)).toFixed(2) + " MB";
+      }
 
-      function showToast(msg,type="success"){
-        const t=document.getElementById("toast");
-        t.className=`toast toast-${type} show`;
-        t.innerHTML=`<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${type==="success"?'<polyline points="20,6 9,17 4,12"/>':`<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>`}</svg>${msg}`;
+      function showToast(msg, type = "success") {
+        const t = document.getElementById("toast");
+        t.className = `toast toast-${type} show`;
+        t.innerHTML = `<svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">${type === "success" ? '<polyline points="20,6 9,17 4,12"/>' : `<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>`}</svg>${msg}`;
         clearTimeout(t._timer);
-        t._timer=setTimeout(()=>t.classList.remove("show"),4000);
+        t._timer = setTimeout(() => t.classList.remove("show"), 4000);
       }
     </script>
   </body>
