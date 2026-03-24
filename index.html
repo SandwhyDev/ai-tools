@@ -5,6 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TMP Tools</title>
     <link rel="icon" type="image/png" sizes="32x32" href="/images/logo2.png" />
+    <!-- Open Graph (WA, FB, dll) -->
+    <meta property="og:title" content="TMP Tools" />
+    <meta
+      property="og:description"
+      content="Tools keren untuk membantu pekerjaan kamu."
+    />
+    <meta
+      property="og:image"
+      content="https://tools.trumecs.com/images/logo2.png"
+    />
+    <meta property="og:url" content="https://tools.trumecs.com" />
+    <meta property="og:type" content="website" />
+
+    <!-- (Optional) Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TMP Tools" />
+    <meta
+      name="twitter:description"
+      content="Tools keren untuk membantu pekerjaan kamu."
+    />
+    <meta
+      name="twitter:image"
+      content="https://tools.trumecs.com/images/logo2.png"
+    />
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -450,6 +474,115 @@
           <a href="/import-penawaran/" class="btn-secondary"
             >Import Sekarang →</a
           >
+        </div>
+
+        <!-- ── Google Lens ── -->
+        <div
+          class="menu-card glass relative p-8 rounded-2xl border border-white/10 hover:border-primary hover:shadow-neon"
+        >
+          <div class="flex items-start gap-5 mb-5">
+            <!-- Animated Icon -->
+            <div class="flex items-start gap-5 mb-5">
+              <!-- Animated Icon -->
+              <div class="icon-wrap icon-lens">
+                <svg
+                  width="44"
+                  height="44"
+                  viewBox="0 0 44 44"
+                  fill="none"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <!-- Outer lens ring -->
+                  <circle
+                    class="lens-spin"
+                    cx="22"
+                    cy="22"
+                    r="17"
+                    stroke="#00F5FF"
+                    stroke-width="1.5"
+                    stroke-dasharray="4 3"
+                    fill="none"
+                    opacity="0.5"
+                  />
+                  <!-- Middle ring -->
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="12"
+                    stroke="#00F5FF"
+                    stroke-width="1.5"
+                    fill="rgba(0,245,255,0.05)"
+                  />
+                  <!-- Camera aperture blades -->
+                  <path
+                    d="M22 10 C22 10 26 14 26 22 C26 30 22 34 22 34"
+                    stroke="#00F5FF"
+                    stroke-width="1"
+                    opacity="0.4"
+                  />
+                  <path
+                    d="M10 22 C10 22 14 18 22 18 C30 18 34 22 34 22"
+                    stroke="#00F5FF"
+                    stroke-width="1"
+                    opacity="0.4"
+                  />
+                  <!-- Center lens dot -->
+                  <circle cx="22" cy="22" r="4" fill="#00F5FF" opacity="0.9" />
+                  <circle cx="22" cy="22" r="2" fill="white" opacity="0.6" />
+                  <!-- Corner focus brackets -->
+                  <path
+                    d="M5 10 L5 5 L10 5"
+                    stroke="#00F5FF"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    opacity="0.8"
+                  />
+                  <path
+                    d="M34 5 L39 5 L39 10"
+                    stroke="#00F5FF"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    opacity="0.8"
+                  />
+                  <path
+                    d="M5 34 L5 39 L10 39"
+                    stroke="#00F5FF"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    opacity="0.8"
+                  />
+                  <path
+                    d="M34 39 L39 39 L39 34"
+                    stroke="#00F5FF"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    opacity="0.8"
+                  />
+                </svg>
+              </div>
+            </div>
+
+            <div>
+              <div class="flex items-center gap-2 mb-1">
+                <h3 class="text-xl font-semibold">Google Lens</h3>
+                <span
+                  class="text-xs bg-primary/20 text-primary px-3 py-0.5 rounded-full"
+                >
+                  Image Search
+                </span>
+              </div>
+              <p class="text-gray-400 text-sm leading-relaxed">
+                Cari informasi produk atau objek dari gambar menggunakan
+                teknologi Google Lens.
+              </p>
+            </div>
+          </div>
+
+          <a href="/lens/" class="btn-primary">Open Lens →</a>
         </div>
       </div>
     </main>
