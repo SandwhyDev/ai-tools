@@ -3,12 +3,74 @@
   <head>
     <meta charset="UTF-8" />
     <title>Article Generator</title>
-    <!-- Favicon -->
     <link rel="icon" type="image/png" sizes="32x32" href="/images/logo2.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/images/logo2.png" />
     <link rel="apple-touch-icon" sizes="180x180" href="/images/logo2.png" />
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+      /* ===== LIGHTBOX ===== */
+      #lightboxModal {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.25s ease;
+      }
+      #lightboxModal.open {
+        opacity: 1;
+        pointer-events: all;
+      }
+      #lightboxInner {
+        transform: scale(0.92) translateY(12px);
+        transition:
+          transform 0.28s cubic-bezier(0.34, 1.36, 0.64, 1),
+          opacity 0.25s ease;
+        opacity: 0;
+      }
+      #lightboxModal.open #lightboxInner {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+      }
+
+      /* Image zoom-in cursor */
+      .thumb-img {
+        cursor: zoom-in;
+      }
+
+      /* Close button ring */
+      #lightboxClose {
+        outline: none;
+        transition:
+          background 0.15s,
+          transform 0.15s;
+      }
+      #lightboxClose:hover {
+        background: rgba(255, 255, 255, 0.18);
+        transform: scale(1.1);
+      }
+      #lightboxClose:focus-visible {
+        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
+      }
+
+      /* ===== THUMBNAIL SKELETON ===== */
+      @keyframes shimmer {
+        0% {
+          background-position: -600px 0;
+        }
+        100% {
+          background-position: 600px 0;
+        }
+      }
+      #thumbnailSkeleton {
+        background: linear-gradient(
+          90deg,
+          #e5e7eb 25%,
+          #f3f4f6 50%,
+          #e5e7eb 75%
+        );
+        background-size: 600px 100%;
+        animation: shimmer 1.4s infinite;
+      }
+    </style>
   </head>
   <body class="bg-gray-100 min-h-screen p-6">
     <div class="max-w-4xl mx-auto space-y-6">
@@ -17,7 +79,10 @@
         <h2 class="text-xl font-semibold mb-4">📝 Generate Artikel</h2>
 
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">Topik Artikel</label>
+          <label class="block text-sm font-medium mb-1"
+            >Topik Artikel
+            <span class="text-red-500">*</span>
+          </label>
           <input
             id="topicInput"
             type="text"
@@ -27,7 +92,10 @@
         </div>
 
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">Keyword</label>
+          <label class="block text-sm font-medium mb-1"
+            >Keyword
+            <span class="text-red-500">*</span>
+          </label>
           <input
             id="keywordInput"
             type="text"
@@ -37,7 +105,10 @@
         </div>
 
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">Jumlah Kata</label>
+          <label class="block text-sm font-medium mb-1"
+            >Jumlah Kata
+            <span class="text-red-500">*</span>
+          </label>
           <input
             id="wordCountInput"
             type="number"
@@ -46,51 +117,41 @@
           />
         </div>
 
+        <!-- SEO Description -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-2"
-            >📸 Upload Foto (opsional)</label
-          >
-          <div
-            class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition cursor-pointer"
-            id="dropZone"
-          >
+          <label class="block text-sm font-medium mb-1">
+            Deskripsi SEO
+            <span class="text-red-500">*</span>
+          </label>
+          <textarea
+            id="seoDescriptionInput"
+            rows="3"
+            placeholder="Contoh: Temukan cara memilih supplier industrial terpercaya di Indonesia dengan tips dan panduan lengkap dari para ahli."
+            class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm resize-none"
+          ></textarea>
+          <p class="text-xs text-gray-400 mt-1">
+            Rekomendasi: 120–160 karakter untuk hasil SEO optimal.
+          </p>
+        </div>
+
+        <div class="mb-4">
+          <div id="thumbnailInputWrapper" class="mt-3">
+            <label class="block text-sm font-medium mb-1"
+              >Deskripsi Cover Image (opsional)</label
+            >
             <input
-              id="imageInput"
-              type="file"
-              accept="image/*"
-              class="hidden"
+              id="thumbnailPromptInput"
+              type="text"
+              placeholder="Contoh: Foto warehouse industri modern dengan forklift"
+              class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
             />
-            <div class="text-gray-500">
-              <p class="text-sm mb-2">Klik atau drag & drop foto di sini</p>
-              <p class="text-xs text-gray-400">
-                Format: JPG, PNG, WebP (Max: 5MB)
-              </p>
-            </div>
-          </div>
-          <!-- Preview Foto -->
-          <div id="imagePreviewContainer" class="hidden mt-4">
-            <div class="relative inline-block w-full">
-              <img
-                id="imagePreview"
-                src=""
-                alt="Preview"
-                class="w-full max-w-sm rounded-lg shadow"
-              />
-              <button
-                onclick="removeImage()"
-                class="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600"
-              >
-                ✕
-              </button>
-            </div>
-            <p id="imageName" class="text-sm text-gray-600 mt-2"></p>
           </div>
         </div>
 
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">
-            Catatan Tambahan (opsional)
-          </label>
+          <label class="block text-sm font-medium mb-1"
+            >Catatan Tambahan (opsional)</label
+          >
           <textarea
             id="notesInput"
             rows="3"
@@ -101,6 +162,7 @@
 
         <button
           onclick="sendToN8n()"
+          id="generateBtn"
           class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition font-medium"
         >
           🚀 Generate & Kirim ke n8n
@@ -111,7 +173,7 @@
       <div class="bg-white rounded-2xl shadow p-10">
         <div class="flex justify-between items-center mb-8">
           <h2 class="text-xl font-semibold">👀 Preview Artikel</h2>
-          <div id="copyButtons" class="hidden space-x-2">
+          <div id="copyButtons" class="hidden flex flex-wrap gap-2">
             <button
               onclick="copyMarkdown()"
               class="bg-gray-200 px-3 py-1 rounded-lg text-sm hover:bg-gray-300"
@@ -124,8 +186,80 @@
             >
               📄 Copy HTML
             </button>
+            <button
+              onclick="uploadArtikel()"
+              id="uploadBtn"
+              class="bg-green-600 text-white px-4 py-1 rounded-lg text-sm hover:bg-green-700 transition font-medium flex items-center gap-1"
+            >
+              ☁️ Upload Artikel
+            </button>
           </div>
         </div>
+
+        <!-- Toast -->
+        <div
+          id="toast"
+          class="hidden fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium transition-all duration-300"
+        ></div>
+
+        <!-- Thumbnail preview -->
+        <div id="thumbnailPreviewWrapper" class="hidden mb-8">
+          <div class="relative w-full group">
+            <div
+              id="thumbnailSkeleton"
+              class="hidden w-full h-64 rounded-xl"
+            ></div>
+
+            <img
+              id="thumbnailPreviewImg"
+              src=""
+              alt="Thumbnail Preview"
+              onclick="openLightbox(this.src)"
+              title="Klik untuk memperbesar"
+              class="thumb-img w-full max-h-96 rounded-xl border object-cover transition duration-200 group-hover:brightness-90"
+            />
+
+            <!-- Hover overlay hint -->
+            <div
+              class="pointer-events-none absolute inset-0 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200"
+            >
+              <span
+                class="bg-black/50 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm flex items-center gap-1.5"
+              >
+                🔍 Klik untuk perbesar
+              </span>
+            </div>
+
+            <!-- Regen button -->
+            <div class="absolute bottom-3 right-3">
+              <button
+                onclick="regenerateThumbnail()"
+                id="regenThumbBtn"
+                title="Generate ulang thumbnail"
+                class="bg-black/60 hover:bg-black/80 text-white text-xs px-3 py-2 rounded-lg backdrop-blur-sm transition flex items-center gap-1.5 font-medium"
+              >
+                🔄 Generate Ulang
+              </button>
+            </div>
+          </div>
+
+          <div class="mt-3 flex gap-2 items-center">
+            <input
+              id="regenPromptInput"
+              type="text"
+              placeholder="Prompt baru (opsional, kosong = pakai prompt sebelumnya)"
+              class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+            />
+            <button
+              onclick="regenerateThumbnail()"
+              id="regenSubmitBtn"
+              class="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-lg transition font-medium whitespace-nowrap"
+            >
+              🔄 Generate
+            </button>
+          </div>
+        </div>
+
         <div class="overflow-x-auto">
           <article
             id="preview"
@@ -137,176 +271,354 @@
       </div>
     </div>
 
+    <!-- ===================================================== -->
+    <!-- LIGHTBOX MODAL (redesigned)                           -->
+    <!-- ===================================================== -->
+    <div
+      id="lightboxModal"
+      class="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      style="background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(6px)"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Preview gambar"
+      onclick="closeLightbox()"
+    >
+      <!-- Inner container — click inside doesn't close -->
+      <div
+        id="lightboxInner"
+        class="relative flex flex-col items-center w-full max-w-5xl"
+        onclick="event.stopPropagation()"
+      >
+        <!-- Top bar: close + download -->
+        <div class="w-full flex items-center justify-between mb-3 px-1">
+          <!-- ESC hint -->
+          <span class="text-white/40 text-xs select-none"
+            >Tekan
+            <kbd
+              class="bg-white/10 px-1.5 py-0.5 rounded text-white/60 font-mono"
+              >ESC</kbd
+            >
+            atau klik area gelap untuk tutup</span
+          >
+
+          <div class="flex items-center gap-2">
+            <!-- Download -->
+            <a
+              id="lightboxDownload"
+              href=""
+              download
+              target="_blank"
+              class="flex items-center gap-1.5 text-white/70 hover:text-white text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition"
+            >
+              ⬇️ Download
+            </a>
+
+            <!-- Close button -->
+            <button
+              id="lightboxClose"
+              onclick="closeLightbox()"
+              aria-label="Tutup preview"
+              class="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 text-white/80 hover:text-white text-lg leading-none"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <!-- Image -->
+        <div class="relative w-full flex items-center justify-center">
+          <img
+            id="lightboxImg"
+            src=""
+            alt="Preview gambar penuh"
+            class="w-full rounded-2xl object-contain"
+            style="max-height: 80vh"
+          />
+        </div>
+
+        <!-- Bottom caption / counter (optional) -->
+        <p
+          id="lightboxCaption"
+          class="mt-3 text-white/40 text-xs text-center select-none hidden"
+        ></p>
+      </div>
+    </div>
+
     <script>
       let latestMarkdown = "";
       let latestHTML = "";
+      let latestTitle = "";
+      let latestThumbnail = "";
+      let lastUsedPrompt = "";
 
-      // ==================== IMAGE UPLOAD HANDLERS ====================
-      const dropZone = document.getElementById("dropZone");
-      const imageInput = document.getElementById("imageInput");
+      const UPLOAD_API_URL =
+        "https://migrationbe.trumecs.com/api/article/create";
+      const IMAGE_GEN_API_URL = "https://files.togu.co.id/api/generate-image";
 
-      dropZone.addEventListener("click", () => imageInput.click());
+      // const UPLOAD_API_URL = "http://192.168.1.96:5001/api/article/create1231";
+      // const IMAGE_GEN_API_URL = "http://192.168.1.238:9009/api/generate-image";
 
-      dropZone.addEventListener("dragover", (e) => {
-        e.preventDefault();
-        dropZone.classList.add("border-blue-400", "bg-blue-50");
-      });
-
-      dropZone.addEventListener("dragleave", () => {
-        dropZone.classList.remove("border-blue-400", "bg-blue-50");
-      });
-
-      dropZone.addEventListener("drop", (e) => {
-        e.preventDefault();
-        dropZone.classList.remove("border-blue-400", "bg-blue-50");
-        const files = e.dataTransfer.files;
-        if (files.length > 0) {
-          handleImageFile(files[0]);
-        }
-      });
-
-      imageInput.addEventListener("change", (e) => {
-        if (e.target.files.length > 0) {
-          handleImageFile(e.target.files[0]);
-        }
-      });
-
-      function handleImageFile(file) {
-        // Validasi ukuran file (max 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-          alert("❌ Ukuran file terlalu besar (Max: 5MB)");
-          return;
-        }
-
-        // Validasi tipe file
-        if (!file.type.startsWith("image/")) {
-          alert("❌ File harus berupa gambar");
-          return;
-        }
-
-        // Set file ke input untuk persiapan upload
-        const dataTransfer = new DataTransfer();
-        dataTransfer.items.add(file);
-        imageInput.files = dataTransfer.files;
-
-        showImagePreview(URL.createObjectURL(file), file.name);
+      // ==================== TOAST ====================
+      function showToast(message, type = "success") {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.className = `fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium transition-all duration-300 ${
+          type === "success" ? "bg-green-600" : "bg-red-600"
+        }`;
+        toast.classList.remove("hidden");
+        setTimeout(() => toast.classList.add("hidden"), 4000);
       }
 
-      function showImagePreview(imageSrc, fileName) {
-        const previewContainer = document.getElementById(
-          "imagePreviewContainer",
-        );
-        const preview = document.getElementById("imagePreview");
-        const imageName = document.getElementById("imageName");
-
-        preview.src = imageSrc;
-        imageName.textContent = `📁 ${fileName}`;
-        previewContainer.classList.remove("hidden");
+      // ==================== THUMBNAIL PREVIEW ====================
+      function setThumbnailPreview(url) {
+        const wrapper = document.getElementById("thumbnailPreviewWrapper");
+        const img = document.getElementById("thumbnailPreviewImg");
+        const skeleton = document.getElementById("thumbnailSkeleton");
+        img.src = url;
+        img.classList.remove("hidden");
+        skeleton.classList.add("hidden");
+        wrapper.classList.remove("hidden");
+        latestThumbnail = url;
       }
 
-      function removeImage() {
-        document.getElementById("imageInput").value = "";
-        document
-          .getElementById("imagePreviewContainer")
-          .classList.add("hidden");
+      // ==================== LIGHTBOX ====================
+      function openLightbox(src) {
+        const modal = document.getElementById("lightboxModal");
+        const img = document.getElementById("lightboxImg");
+        const dl = document.getElementById("lightboxDownload");
+        img.src = src;
+        dl.href = src;
+        modal.classList.add("open");
+        document.body.style.overflow = "hidden";
+        // Focus close btn for keyboard accessibility
+        setTimeout(() => document.getElementById("lightboxClose").focus(), 50);
       }
+
+      function closeLightbox() {
+        const modal = document.getElementById("lightboxModal");
+        modal.classList.remove("open");
+        document.body.style.overflow = "";
+        // Clear src after transition so old image doesn't flash next time
+        setTimeout(() => {
+          document.getElementById("lightboxImg").src = "";
+        }, 300);
+      }
+
+      // Keyboard: ESC to close
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeLightbox();
+      });
 
       // ==================== ARTICLE GENERATION ====================
       async function sendToN8n() {
+        document.getElementById("preview").innerHTML = "menunggu respon...";
         const topic = document.getElementById("topicInput").value.trim();
         const keyword = document.getElementById("keywordInput").value.trim();
         const wordCount =
           document.getElementById("wordCountInput").value || 800;
         let notes = document.getElementById("notesInput").value.trim();
+        const thumbnailPrompt = document
+          .getElementById("thumbnailPromptInput")
+          .value.trim();
 
         if (!topic) {
           alert("Topik wajib diisi");
           return;
         }
-
         if (!keyword) {
           alert("Keyword wajib diisi");
           return;
         }
-
         if (!notes) notes = "Tidak ada";
 
-        // 🔹 Buat FormData
+        lastUsedPrompt = thumbnailPrompt;
+
+        const btn = document.getElementById("generateBtn");
+        btn.disabled = true;
+        btn.textContent = "⏳ Sedang generate...";
+
+        latestTitle = "";
+        latestThumbnail = "";
+        document
+          .getElementById("thumbnailPreviewWrapper")
+          .classList.add("hidden");
+        document.getElementById("copyButtons").classList.add("hidden");
+        document.getElementById("regenPromptInput").value = "";
+
         const formData = new FormData();
         formData.append("topic", topic);
         formData.append("keyword", keyword);
         formData.append("word_count", Number(wordCount));
         formData.append("additional_notes", notes);
-
-        // 🔹 Tambahkan file image jika ada
-        if (document.getElementById("imageInput").files.length > 0) {
-          formData.append(
-            "image",
-            document.getElementById("imageInput").files[0],
-          );
-        }
-
-        const preview = document.getElementById("preview");
-        preview.innerHTML =
-          '<p class="italic text-gray-400">⏳ Generating artikel...</p>';
-        document.getElementById("copyButtons").classList.add("hidden");
+        if (thumbnailPrompt)
+          formData.append("thumbnail_prompt", thumbnailPrompt);
 
         try {
           const primaryUrl =
-            "https://wa.togu.co.id/webhook/60e19351-16ce-4d55-976d-b537b553face";
+            "https://wa.togu.co.id/webhook/bc01e8c1-2f72-4498-8fa3-53d7f6407a32";
           const fallbackUrl =
-            "http://192.168.1.96:5678/webhook/60e19351-16ce-4d55-976d-b537b553face";
+            "http://192.168.1.96:5678/webhook/bc01e8c1-2f72-4498-8fa3-53d7f6407a32";
 
           let res;
-
-          // 🔹 1️⃣ Coba domain dulu
           try {
-            res = await fetch(primaryUrl, {
-              method: "POST",
-              body: formData,
-              // ⚠️ JANGAN SET Content-Type header - browser akan set sendiri dengan boundary
-            });
-
-            if (!res.ok) {
-              throw new Error("Primary endpoint gagal");
-            }
-          } catch (primaryError) {
+            res = await fetch(primaryUrl, { method: "POST", body: formData });
+            if (!res.ok) throw new Error("Primary endpoint gagal");
+          } catch {
             console.warn("Primary gagal, mencoba fallback IP...");
-
-            // 🔹 2️⃣ Jika gagal, pakai IP
-            res = await fetch(fallbackUrl, {
-              method: "POST",
-              body: formData,
-              // ⚠️ JANGAN SET Content-Type header - browser akan set sendiri dengan boundary
-            });
-
-            if (!res.ok) {
-              throw new Error("Fallback endpoint juga gagal");
-            }
+            res = await fetch(fallbackUrl, { method: "POST", body: formData });
+            if (!res.ok) throw new Error("Fallback endpoint juga gagal");
           }
 
-          const data = await res.json();
-          const output = data;
+          const response = await res.json();
 
-          latestMarkdown = output.content;
-          latestHTML = marked.parse(output.content);
-          preview.innerHTML = latestHTML;
+          const data = response[0];
+
+          latestMarkdown = data.content;
+          latestHTML = marked.parse(data.content);
+          latestTitle = data.title || topic;
+          latestThumbnail = data.thumbnail || "";
+
+          document.getElementById("preview").innerHTML = latestHTML;
           document.getElementById("copyButtons").classList.remove("hidden");
-          preview.scrollIntoView({ behavior: "smooth" });
+          if (data.thumbnail) setThumbnailPreview(data.thumbnail);
+          document
+            .getElementById("preview")
+            .scrollIntoView({ behavior: "smooth" });
         } catch (err) {
-          preview.innerHTML = '<p class="text-red-600">❌ Server error</p>';
+          document.getElementById("preview").innerHTML =
+            '<p class="text-red-600">❌ Server error. Pastikan n8n aktif dan endpoint benar.</p>';
           console.error(err);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = "🚀 Generate & Kirim ke n8n";
+        }
+      }
+
+      // ==================== REGENERATE THUMBNAIL ====================
+      async function regenerateThumbnail() {
+        const regenPrompt = document
+          .getElementById("regenPromptInput")
+          .value.trim();
+        const prompt = regenPrompt || lastUsedPrompt;
+
+        if (!prompt) {
+          showToast("❌ Masukkan prompt untuk generate thumbnail.", "error");
+          return;
+        }
+
+        const regenBtn = document.getElementById("regenThumbBtn");
+        const regenSubmitBtn = document.getElementById("regenSubmitBtn");
+        const previewImg = document.getElementById("thumbnailPreviewImg");
+        const skeleton = document.getElementById("thumbnailSkeleton");
+
+        regenBtn.disabled = true;
+        regenSubmitBtn.disabled = true;
+        regenBtn.textContent = "⏳ Generating...";
+        regenSubmitBtn.textContent = "⏳ Generating...";
+        previewImg.classList.add("hidden");
+        skeleton.classList.remove("hidden");
+
+        try {
+          const res = await fetch(IMAGE_GEN_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ prompt }),
+          });
+          if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(`Server responded ${res.status}: ${errText}`);
+          }
+          const response = await res.json();
+          const data = response.data;
+
+          if (!data.url)
+            throw new Error("Response tidak mengandung URL gambar.");
+          if (regenPrompt) lastUsedPrompt = regenPrompt;
+          setThumbnailPreview(data.url);
+          showToast("✅ Thumbnail berhasil di-generate ulang!", "success");
+        } catch (err) {
+          console.error("Regen thumbnail error:", err);
+          showToast("❌ Gagal generate thumbnail: " + err.message, "error");
+          previewImg.classList.remove("hidden");
+          skeleton.classList.add("hidden");
+        } finally {
+          regenBtn.disabled = false;
+          regenSubmitBtn.disabled = false;
+          regenBtn.textContent = "🔄 Generate Ulang";
+          regenSubmitBtn.textContent = "🔄 Generate";
+        }
+      }
+
+      // ==================== EXTRACT TITLE & BODY ====================
+      function extractTitleAndBody(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const h1 = doc.querySelector("h1");
+        const title = h1 ? h1.textContent.trim() : latestTitle;
+        if (h1) h1.remove();
+        return { title, value: doc.body.innerHTML.trim() };
+      }
+
+      // ==================== UPLOAD ARTIKEL ====================
+      async function uploadArtikel() {
+        if (!latestHTML) {
+          showToast("❌ Belum ada artikel yang di-generate.", "error");
+          return;
+        }
+
+        const uploadBtn = document.getElementById("uploadBtn");
+        uploadBtn.disabled = true;
+        uploadBtn.textContent = "⏳ Mengupload...";
+
+        const { title, value } = extractTitleAndBody(latestHTML);
+
+        const seoDescription = document
+          .getElementById("seoDescriptionInput")
+          .value.trim();
+        const seoKey = document.getElementById("keywordInput").value.trim();
+
+        if (!seoDescription) {
+          showToast("❌ Deskripsi SEO wajib diisi sebelum upload.", "error");
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = "☁️ Upload Artikel";
+          return;
+        }
+
+        const payload = {
+          title,
+          value,
+          img: latestThumbnail,
+          description_seo: seoDescription,
+          seo_key: seoKey,
+        };
+
+        try {
+          const res = await fetch(UPLOAD_API_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+          if (!res.ok) {
+            const errText = await res.text();
+            throw new Error(`Server responded ${res.status}: ${errText}`);
+          }
+          showToast("✅ Artikel berhasil diupload!", "success");
+        } catch (err) {
+          console.error("Upload error:", err);
+          showToast("❌ Gagal upload: server error", "error");
+        } finally {
+          uploadBtn.disabled = false;
+          uploadBtn.textContent = "☁️ Upload Artikel";
         }
       }
 
       function copyMarkdown() {
         navigator.clipboard.writeText(latestMarkdown);
-        alert("✅ Markdown berhasil dicopy!");
+        showToast("✅ Markdown berhasil dicopy!");
       }
-
       function copyHTML() {
         navigator.clipboard.writeText(latestHTML);
-        alert("✅ HTML berhasil dicopy!");
+        showToast("✅ HTML berhasil dicopy!");
       }
     </script>
   </body>
