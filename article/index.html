@@ -8,6 +8,7 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/images/logo2.png" />
     <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
     <style>
       /* ===== LIGHTBOX ===== */
       #lightboxModal {
@@ -30,13 +31,9 @@
         transform: scale(1) translateY(0);
         opacity: 1;
       }
-
-      /* Image zoom-in cursor */
       .thumb-img {
         cursor: zoom-in;
       }
-
-      /* Close button ring */
       #lightboxClose {
         outline: none;
         transition:
@@ -47,11 +44,8 @@
         background: rgba(255, 255, 255, 0.18);
         transform: scale(1.1);
       }
-      #lightboxClose:focus-visible {
-        box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.5);
-      }
 
-      /* ===== THUMBNAIL SKELETON ===== */
+      /* ===== SKELETON ===== */
       @keyframes shimmer {
         0% {
           background-position: -600px 0;
@@ -70,6 +64,188 @@
         background-size: 600px 100%;
         animation: shimmer 1.4s infinite;
       }
+
+      /* ===== TOOLBAR ===== */
+      #wysiwyg-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        padding: 8px 10px;
+        background: #f9fafb;
+        border: 1px solid #d1d5db;
+        border-bottom: none;
+        border-top-left-radius: 0.5rem;
+        border-top-right-radius: 0.5rem;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      #wysiwyg-toolbar button,
+      #wysiwyg-toolbar select {
+        height: 30px;
+        padding: 0 8px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+        font-size: 13px;
+        color: #374151;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.15s;
+      }
+      #wysiwyg-toolbar button:hover {
+        background: #e5e7eb;
+      }
+      #wysiwyg-toolbar button.active {
+        background: #dbeafe;
+        border-color: #3b82f6;
+        color: #1d4ed8;
+      }
+      #wysiwyg-toolbar .sep {
+        width: 1px;
+        background: #d1d5db;
+        margin: 0 2px;
+        align-self: stretch;
+        display: inline-block;
+      }
+      #wysiwyg-toolbar select {
+        padding: 0 4px;
+        min-width: 100px;
+      }
+
+      /* ===== EDITOR ===== */
+      #wysiwyg-editor {
+        min-height: 420px;
+        padding: 1.75rem 2.25rem;
+        border: 1px solid #d1d5db;
+        border-bottom-left-radius: 0.5rem;
+        border-bottom-right-radius: 0.5rem;
+        outline: none;
+        overflow-x: auto;
+        font-family: Georgia, "Times New Roman", serif;
+        font-size: 1.05rem;
+        line-height: 1.85;
+        color: #1f2937;
+      }
+      #wysiwyg-editor:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+      }
+      #wysiwyg-editor h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0.5rem 0 0.75rem;
+        color: #111827;
+      }
+      #wysiwyg-editor h2 {
+        font-size: 1.45rem;
+        font-weight: 600;
+        margin: 2rem 0 0.5rem;
+        color: #1f2937;
+        border-bottom: 2px solid #e5e7eb;
+        padding-bottom: 0.35rem;
+      }
+      #wysiwyg-editor h3 {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin: 1.5rem 0 0.4rem;
+        color: #374151;
+      }
+      #wysiwyg-editor p {
+        margin-bottom: 1rem;
+      }
+      #wysiwyg-editor ul,
+      #wysiwyg-editor ol {
+        padding-left: 1.6rem;
+        margin-bottom: 1rem;
+      }
+      #wysiwyg-editor li {
+        margin-bottom: 0.3rem;
+      }
+      #wysiwyg-editor blockquote {
+        border-left: 4px solid #3b82f6;
+        margin: 1.5rem 0;
+        padding: 0.75rem 1rem;
+        background: #eff6ff;
+        border-radius: 0 0.375rem 0.375rem 0;
+        color: #1e40af;
+        font-style: italic;
+      }
+      #wysiwyg-editor strong {
+        font-weight: 700;
+      }
+      #wysiwyg-editor em {
+        font-style: italic;
+      }
+      #wysiwyg-editor a {
+        color: #2563eb;
+        text-decoration: underline;
+      }
+
+      /* TABLE — core fix */
+      #wysiwyg-editor table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1.25rem 0;
+        font-size: 0.95rem;
+      }
+      #wysiwyg-editor th,
+      #wysiwyg-editor td {
+        border: 1px solid #d1d5db;
+        padding: 0.55rem 0.85rem;
+        text-align: left;
+        vertical-align: top;
+      }
+      #wysiwyg-editor th {
+        background: #f3f4f6;
+        font-weight: 600;
+        color: #111827;
+      }
+      #wysiwyg-editor tr:nth-child(even) td {
+        background: #f9fafb;
+      }
+      #wysiwyg-editor tr:hover td {
+        background: #eff6ff;
+      }
+
+      /* word count */
+      #wordCountBadge {
+        font-size: 0.75rem;
+        color: #6b7280;
+        padding: 0.2rem 0.65rem;
+        background: #f3f4f6;
+        border: 1px solid #e5e7eb;
+        border-radius: 9999px;
+      }
+
+      /* active dot */
+      .editor-active-indicator {
+        display: flex;
+        align-items: center;
+        gap: 0.375rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: #059669;
+      }
+      .editor-active-indicator::before {
+        content: "";
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
     </style>
   </head>
   <body class="bg-gray-100 min-h-screen p-6">
@@ -77,12 +253,10 @@
       <!-- FORM -->
       <div class="bg-white rounded-2xl shadow p-6">
         <h2 class="text-xl font-semibold mb-4">📝 Generate Artikel</h2>
-
         <div class="mb-4">
           <label class="block text-sm font-medium mb-1"
-            >Topik Artikel
-            <span class="text-red-500">*</span>
-          </label>
+            >Topik Artikel <span class="text-red-500">*</span></label
+          >
           <input
             id="topicInput"
             type="text"
@@ -90,12 +264,10 @@
             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
           />
         </div>
-
         <div class="mb-4">
           <label class="block text-sm font-medium mb-1"
-            >Keyword
-            <span class="text-red-500">*</span>
-          </label>
+            >Keyword <span class="text-red-500">*</span></label
+          >
           <input
             id="keywordInput"
             type="text"
@@ -103,12 +275,10 @@
             class="w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 outline-none"
           />
         </div>
-
         <div class="mb-4">
           <label class="block text-sm font-medium mb-1"
-            >Jumlah Kata
-            <span class="text-red-500">*</span>
-          </label>
+            >Jumlah Kata <span class="text-red-500">*</span></label
+          >
           <input
             id="wordCountInput"
             type="number"
@@ -116,13 +286,10 @@
             class="w-full border rounded-lg px-3 py-2"
           />
         </div>
-
-        <!-- SEO Description -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-1">
-            Deskripsi SEO
-            <span class="text-red-500">*</span>
-          </label>
+          <label class="block text-sm font-medium mb-1"
+            >Deskripsi SEO <span class="text-red-500">*</span></label
+          >
           <textarea
             id="seoDescriptionInput"
             rows="3"
@@ -133,21 +300,17 @@
             Rekomendasi: 120–160 karakter untuk hasil SEO optimal.
           </p>
         </div>
-
         <div class="mb-4">
-          <div id="thumbnailInputWrapper" class="mt-3">
-            <label class="block text-sm font-medium mb-1"
-              >Deskripsi Cover Image (opsional)</label
-            >
-            <input
-              id="thumbnailPromptInput"
-              type="text"
-              placeholder="Contoh: Foto warehouse industri modern dengan forklift"
-              class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
-            />
-          </div>
+          <label class="block text-sm font-medium mb-1"
+            >Deskripsi Cover Image (opsional)</label
+          >
+          <input
+            id="thumbnailPromptInput"
+            type="text"
+            placeholder="Contoh: Foto warehouse industri modern dengan forklift"
+            class="w-full border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
+          />
         </div>
-
         <div class="mb-4">
           <label class="block text-sm font-medium mb-1"
             >Catatan Tambahan (opsional)</label
@@ -159,7 +322,6 @@
             class="w-full border rounded-lg px-3 py-2"
           ></textarea>
         </div>
-
         <button
           onclick="sendToN8n()"
           id="generateBtn"
@@ -169,85 +331,81 @@
         </button>
       </div>
 
-      <!-- PREVIEW -->
-      <div class="bg-white rounded-2xl shadow p-10">
-        <div class="flex justify-between items-center mb-8">
-          <h2 class="text-xl font-semibold">👀 Preview Artikel</h2>
-          <div id="copyButtons" class="hidden flex flex-wrap gap-2">
-            <button
-              onclick="copyMarkdown()"
-              class="bg-gray-200 px-3 py-1 rounded-lg text-sm hover:bg-gray-300"
+      <!-- EDITOR -->
+      <div class="bg-white rounded-2xl shadow p-6 pb-8">
+        <div class="flex justify-between items-center mb-4 flex-wrap gap-3">
+          <div class="flex items-center gap-3">
+            <h2 class="text-xl font-semibold">✏️ Editor Artikel</h2>
+            <div id="editorStatusBadge" class="hidden editor-active-indicator">
+              Mode Edit Aktif
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <span id="wordCountBadge" class="hidden">0 kata</span>
+            <div
+              id="copyButtons"
+              class="hidden flex flex-wrap gap-2 items-center"
             >
-              📋 Copy Markdown
-            </button>
-            <button
-              onclick="copyHTML()"
-              class="bg-gray-200 px-3 py-1 rounded-lg text-sm hover:bg-gray-300 hidden"
-            >
-              📄 Copy HTML
-            </button>
-            <button
-              onclick="uploadArtikel()"
-              id="uploadBtn"
-              class="bg-green-600 text-white px-4 py-1 rounded-lg text-sm hover:bg-green-700 transition font-medium flex items-center gap-1"
-            >
-              ☁️ Upload Artikel
-            </button>
+              <button
+                onclick="copyMarkdown()"
+                class="bg-gray-200 px-3 py-1.5 rounded-lg text-sm hover:bg-gray-300"
+              >
+                📋 Copy Markdown
+              </button>
+              <button
+                onclick="uploadArtikel()"
+                id="uploadBtn"
+                class="bg-green-600 text-white px-4 py-1.5 rounded-lg text-sm hover:bg-green-700 transition font-medium"
+              >
+                ☁️ Upload Artikel
+              </button>
+            </div>
           </div>
         </div>
 
         <!-- Toast -->
         <div
           id="toast"
-          class="hidden fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium transition-all duration-300"
+          class="hidden fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium"
         ></div>
 
-        <!-- Thumbnail preview -->
-        <div id="thumbnailPreviewWrapper" class="hidden mb-8">
+        <!-- Thumbnail -->
+        <div id="thumbnailPreviewWrapper" class="hidden mb-6">
           <div class="relative w-full group">
             <div
               id="thumbnailSkeleton"
               class="hidden w-full h-64 rounded-xl"
             ></div>
-
             <img
               id="thumbnailPreviewImg"
               src=""
               alt="Thumbnail Preview"
               onclick="openLightbox(this.src)"
-              title="Klik untuk memperbesar"
               class="thumb-img w-full max-h-96 rounded-xl border object-cover transition duration-200 group-hover:brightness-90"
             />
-
-            <!-- Hover overlay hint -->
             <div
-              class="pointer-events-none absolute inset-0 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-200"
+              class="pointer-events-none absolute inset-0 rounded-xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition"
             >
               <span
-                class="bg-black/50 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm flex items-center gap-1.5"
+                class="bg-black/50 text-white text-xs px-3 py-1.5 rounded-full backdrop-blur-sm"
+                >🔍 Klik untuk perbesar</span
               >
-                🔍 Klik untuk perbesar
-              </span>
             </div>
-
-            <!-- Regen button -->
             <div class="absolute bottom-3 right-3">
               <button
                 onclick="regenerateThumbnail()"
                 id="regenThumbBtn"
-                title="Generate ulang thumbnail"
-                class="bg-black/60 hover:bg-black/80 text-white text-xs px-3 py-2 rounded-lg backdrop-blur-sm transition flex items-center gap-1.5 font-medium"
+                class="bg-black/60 hover:bg-black/80 text-white text-xs px-3 py-2 rounded-lg backdrop-blur-sm transition font-medium"
               >
                 🔄 Generate Ulang
               </button>
             </div>
           </div>
-
           <div class="mt-3 flex gap-2 items-center">
             <input
               id="regenPromptInput"
               type="text"
-              placeholder="Prompt baru (opsional, kosong = pakai prompt sebelumnya)"
+              placeholder="Prompt baru (opsional)"
               class="flex-1 border rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-400 outline-none"
             />
             <button
@@ -260,93 +418,155 @@
           </div>
         </div>
 
-        <div class="overflow-x-auto">
-          <article
-            id="preview"
-            class="prose prose-lg max-w-none prose-h1:text-4xl prose-h1:font-bold prose-h2:text-2xl prose-h2:mt-10 prose-h2:mb-4 prose-p:leading-relaxed prose-p:text-gray-700 prose-strong:text-gray-900 prose-ul:my-4 prose-table:table-auto prose-table:w-full prose-th:bg-gray-100 prose-th:p-3 prose-td:p-3 prose-td:border prose-th:border prose-table:border prose-table:rounded-lg"
-          >
-            <p class="text-gray-400 italic">Artikel akan muncul di sini…</p>
-          </article>
+        <!-- Placeholder -->
+        <div
+          id="editorPlaceholder"
+          class="border-2 border-dashed border-gray-200 rounded-xl py-16 text-center text-gray-400"
+        >
+          <div class="text-4xl mb-3">📄</div>
+          <p class="text-sm">
+            Artikel akan muncul di sini setelah di-generate.<br />Anda bisa
+            langsung mengedit sebelum upload.
+          </p>
+        </div>
+
+        <!-- WYSIWYG wrapper -->
+        <div id="wysiwyg-wrapper" class="hidden">
+          <p class="text-xs text-gray-400 mb-2">
+            💡 Klik teks untuk mulai mengedit. Tabel, heading, dan list tampil
+            seperti aslinya.
+          </p>
+
+          <!-- Toolbar -->
+          <div id="wysiwyg-toolbar">
+            <select
+              id="formatBlock"
+              onchange="
+                execFormat(this.value);
+                this.blur();
+              "
+            >
+              <option value="p">Paragraf</option>
+              <option value="h1">Heading 1</option>
+              <option value="h2">Heading 2</option>
+              <option value="h3">Heading 3</option>
+              <option value="h4">Heading 4</option>
+              <option value="pre">Code Block</option>
+            </select>
+            <div class="sep"></div>
+            <button title="Bold" onclick="execCmd('bold')" id="btn-bold">
+              <b>B</b>
+            </button>
+            <button title="Italic" onclick="execCmd('italic')" id="btn-italic">
+              <i>I</i>
+            </button>
+            <button
+              title="Underline"
+              onclick="execCmd('underline')"
+              id="btn-underline"
+            >
+              <u>U</u>
+            </button>
+            <button
+              title="Strikethrough"
+              onclick="execCmd('strikeThrough')"
+              id="btn-strikeThrough"
+            >
+              <s>S</s>
+            </button>
+            <div class="sep"></div>
+            <button title="Ordered List" onclick="execCmd('insertOrderedList')">
+              1.
+            </button>
+            <button
+              title="Unordered List"
+              onclick="execCmd('insertUnorderedList')"
+            >
+              •
+            </button>
+            <div class="sep"></div>
+            <button title="Indent" onclick="execCmd('indent')">→</button>
+            <button title="Outdent" onclick="execCmd('outdent')">←</button>
+            <div class="sep"></div>
+            <button title="Link" onclick="insertLink()">🔗</button>
+            <button title="Remove link" onclick="execCmd('unlink')">🔗✕</button>
+            <div class="sep"></div>
+            <button title="Undo" onclick="execCmd('undo')">↩</button>
+            <button title="Redo" onclick="execCmd('redo')">↪</button>
+            <div class="sep"></div>
+            <button
+              title="Hapus format"
+              onclick="execCmd('removeFormat')"
+              style="font-size: 11px"
+            >
+              Tx
+            </button>
+          </div>
+
+          <!-- Editable div -->
+          <div
+            id="wysiwyg-editor"
+            contenteditable="true"
+            oninput="updateWordCount()"
+            onkeyup="updateToolbarState()"
+          ></div>
         </div>
       </div>
     </div>
 
-    <!-- ===================================================== -->
-    <!-- LIGHTBOX MODAL (redesigned)                           -->
-    <!-- ===================================================== -->
+    <!-- LIGHTBOX -->
     <div
       id="lightboxModal"
       class="fixed inset-0 z-[100] flex items-center justify-center p-4"
       style="background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(6px)"
       role="dialog"
       aria-modal="true"
-      aria-label="Preview gambar"
       onclick="closeLightbox()"
     >
-      <!-- Inner container — click inside doesn't close -->
       <div
         id="lightboxInner"
         class="relative flex flex-col items-center w-full max-w-5xl"
         onclick="event.stopPropagation()"
       >
-        <!-- Top bar: close + download -->
         <div class="w-full flex items-center justify-between mb-3 px-1">
-          <!-- ESC hint -->
           <span class="text-white/40 text-xs select-none"
             >Tekan
             <kbd
               class="bg-white/10 px-1.5 py-0.5 rounded text-white/60 font-mono"
               >ESC</kbd
             >
-            atau klik area gelap untuk tutup</span
+            untuk tutup</span
           >
-
           <div class="flex items-center gap-2">
-            <!-- Download -->
             <a
               id="lightboxDownload"
               href=""
               download
               target="_blank"
               class="flex items-center gap-1.5 text-white/70 hover:text-white text-xs bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg transition"
+              >⬇️ Download</a
             >
-              ⬇️ Download
-            </a>
-
-            <!-- Close button -->
             <button
               id="lightboxClose"
               onclick="closeLightbox()"
-              aria-label="Tutup preview"
               class="flex items-center justify-center w-8 h-8 rounded-full bg-white/10 text-white/80 hover:text-white text-lg leading-none"
             >
               ✕
             </button>
           </div>
         </div>
-
-        <!-- Image -->
-        <div class="relative w-full flex items-center justify-center">
-          <img
-            id="lightboxImg"
-            src=""
-            alt="Preview gambar penuh"
-            class="w-full rounded-2xl object-contain"
-            style="max-height: 80vh"
-          />
-        </div>
-
-        <!-- Bottom caption / counter (optional) -->
-        <p
-          id="lightboxCaption"
-          class="mt-3 text-white/40 text-xs text-center select-none hidden"
-        ></p>
+        <img
+          id="lightboxImg"
+          src=""
+          alt="Preview"
+          class="w-full rounded-2xl object-contain"
+          style="max-height: 80vh"
+        />
       </div>
     </div>
 
     <script>
       let latestMarkdown = "";
-      let latestHTML = "";
       let latestTitle = "";
       let latestThumbnail = "";
       let lastUsedPrompt = "";
@@ -355,63 +575,119 @@
         "https://migrationbe.trumecs.com/api/article/create";
       const IMAGE_GEN_API_URL = "https://files.togu.co.id/api/generate-image";
 
-      // const UPLOAD_API_URL = "http://192.168.1.96:5001/api/article/create1231";
+      // const UPLOAD_API_URL = "http://192.168.1.96:5001/api/article/create";
       // const IMAGE_GEN_API_URL = "http://192.168.1.238:9009/api/generate-image";
+
+      // ==================== TOOLBAR ====================
+      function execCmd(cmd) {
+        document.getElementById("wysiwyg-editor").focus();
+        document.execCommand(cmd, false, null);
+        updateToolbarState();
+      }
+
+      function execFormat(tag) {
+        document.getElementById("wysiwyg-editor").focus();
+        document.execCommand("formatBlock", false, "<" + tag + ">");
+        updateToolbarState();
+      }
+
+      function insertLink() {
+        const url = prompt("Masukkan URL:");
+        if (url) {
+          document.getElementById("wysiwyg-editor").focus();
+          document.execCommand("createLink", false, url);
+        }
+      }
+
+      function updateToolbarState() {
+        ["bold", "italic", "underline", "strikeThrough"].forEach((cmd) => {
+          const btn = document.getElementById("btn-" + cmd);
+          if (btn)
+            btn.classList.toggle("active", document.queryCommandState(cmd));
+        });
+        try {
+          const block = document
+            .queryCommandValue("formatBlock")
+            .toLowerCase()
+            .replace(/[<>]/g, "");
+          const sel = document.getElementById("formatBlock");
+          const match = [...sel.options].find((o) => o.value === block);
+          if (match) sel.value = match.value;
+        } catch (e) {}
+      }
+
+      document.addEventListener("selectionchange", updateToolbarState);
+
+      // ==================== WORD COUNT ====================
+      function updateWordCount() {
+        const text = document.getElementById("wysiwyg-editor").innerText || "";
+        const words = text.trim()
+          ? text
+              .trim()
+              .split(/\s+/)
+              .filter((w) => w).length
+          : 0;
+        const badge = document.getElementById("wordCountBadge");
+        badge.textContent = `${words.toLocaleString("id-ID")} kata`;
+        badge.classList.remove("hidden");
+      }
+
+      // ==================== SET EDITOR CONTENT ====================
+      function setEditorContent(html) {
+        document.getElementById("wysiwyg-editor").innerHTML = html;
+        document.getElementById("editorPlaceholder").classList.add("hidden");
+        document.getElementById("wysiwyg-wrapper").classList.remove("hidden");
+        document.getElementById("editorStatusBadge").classList.remove("hidden");
+        updateWordCount();
+      }
+
+      function getEditorHTML() {
+        return document.getElementById("wysiwyg-editor").innerHTML;
+      }
 
       // ==================== TOAST ====================
       function showToast(message, type = "success") {
         const toast = document.getElementById("toast");
         toast.textContent = message;
-        toast.className = `fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium transition-all duration-300 ${
-          type === "success" ? "bg-green-600" : "bg-red-600"
-        }`;
+        toast.className = `fixed top-6 right-6 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium transition-all duration-300 ${type === "success" ? "bg-green-600" : "bg-red-600"}`;
         toast.classList.remove("hidden");
         setTimeout(() => toast.classList.add("hidden"), 4000);
       }
 
-      // ==================== THUMBNAIL PREVIEW ====================
+      // ==================== THUMBNAIL ====================
       function setThumbnailPreview(url) {
-        const wrapper = document.getElementById("thumbnailPreviewWrapper");
-        const img = document.getElementById("thumbnailPreviewImg");
-        const skeleton = document.getElementById("thumbnailSkeleton");
-        img.src = url;
-        img.classList.remove("hidden");
-        skeleton.classList.add("hidden");
-        wrapper.classList.remove("hidden");
+        document.getElementById("thumbnailPreviewImg").src = url;
+        document
+          .getElementById("thumbnailPreviewImg")
+          .classList.remove("hidden");
+        document.getElementById("thumbnailSkeleton").classList.add("hidden");
+        document
+          .getElementById("thumbnailPreviewWrapper")
+          .classList.remove("hidden");
         latestThumbnail = url;
       }
 
       // ==================== LIGHTBOX ====================
       function openLightbox(src) {
-        const modal = document.getElementById("lightboxModal");
-        const img = document.getElementById("lightboxImg");
-        const dl = document.getElementById("lightboxDownload");
-        img.src = src;
-        dl.href = src;
-        modal.classList.add("open");
+        document.getElementById("lightboxImg").src = src;
+        document.getElementById("lightboxDownload").href = src;
+        document.getElementById("lightboxModal").classList.add("open");
         document.body.style.overflow = "hidden";
-        // Focus close btn for keyboard accessibility
         setTimeout(() => document.getElementById("lightboxClose").focus(), 50);
       }
-
       function closeLightbox() {
-        const modal = document.getElementById("lightboxModal");
-        modal.classList.remove("open");
+        document.getElementById("lightboxModal").classList.remove("open");
         document.body.style.overflow = "";
-        // Clear src after transition so old image doesn't flash next time
         setTimeout(() => {
           document.getElementById("lightboxImg").src = "";
         }, 300);
       }
-
-      // Keyboard: ESC to close
       document.addEventListener("keydown", (e) => {
         if (e.key === "Escape") closeLightbox();
       });
 
-      // ==================== ARTICLE GENERATION ====================
+      // ==================== GENERATE ====================
       async function sendToN8n() {
-        document.getElementById("preview").innerHTML = "menunggu respon...";
         const topic = document.getElementById("topicInput").value.trim();
         const keyword = document.getElementById("keywordInput").value.trim();
         const wordCount =
@@ -430,20 +706,27 @@
           return;
         }
         if (!notes) notes = "Tidak ada";
-
         lastUsedPrompt = thumbnailPrompt;
 
         const btn = document.getElementById("generateBtn");
         btn.disabled = true;
         btn.textContent = "⏳ Sedang generate...";
 
+        latestMarkdown = "";
         latestTitle = "";
         latestThumbnail = "";
         document
           .getElementById("thumbnailPreviewWrapper")
           .classList.add("hidden");
         document.getElementById("copyButtons").classList.add("hidden");
+        document.getElementById("wysiwyg-wrapper").classList.add("hidden");
+        document.getElementById("editorStatusBadge").classList.add("hidden");
+        document.getElementById("wordCountBadge").classList.add("hidden");
         document.getElementById("regenPromptInput").value = "";
+
+        const ph = document.getElementById("editorPlaceholder");
+        ph.classList.remove("hidden");
+        ph.innerHTML = `<div class="text-4xl mb-3 animate-spin">⚙️</div><p class="text-sm">Sedang generate artikel, mohon tunggu…</p>`;
 
         const formData = new FormData();
         formData.append("topic", topic);
@@ -458,35 +741,30 @@
             "https://wa.togu.co.id/webhook/bc01e8c1-2f72-4498-8fa3-53d7f6407a32";
           const fallbackUrl =
             "http://192.168.1.96:5678/webhook/bc01e8c1-2f72-4498-8fa3-53d7f6407a32";
-
           let res;
           try {
             res = await fetch(primaryUrl, { method: "POST", body: formData });
-            if (!res.ok) throw new Error("Primary endpoint gagal");
+            if (!res.ok) throw new Error();
           } catch {
-            console.warn("Primary gagal, mencoba fallback IP...");
             res = await fetch(fallbackUrl, { method: "POST", body: formData });
-            if (!res.ok) throw new Error("Fallback endpoint juga gagal");
+            if (!res.ok) throw new Error("Fallback juga gagal");
           }
 
           const response = await res.json();
-
           const data = response[0];
-
           latestMarkdown = data.content;
-          latestHTML = marked.parse(data.content);
           latestTitle = data.title || topic;
           latestThumbnail = data.thumbnail || "";
 
-          document.getElementById("preview").innerHTML = latestHTML;
+          setEditorContent(marked.parse(data.content));
           document.getElementById("copyButtons").classList.remove("hidden");
           if (data.thumbnail) setThumbnailPreview(data.thumbnail);
           document
-            .getElementById("preview")
+            .getElementById("wysiwyg-wrapper")
             .scrollIntoView({ behavior: "smooth" });
         } catch (err) {
-          document.getElementById("preview").innerHTML =
-            '<p class="text-red-600">❌ Server error. Pastikan n8n aktif dan endpoint benar.</p>';
+          ph.classList.remove("hidden");
+          ph.innerHTML = `<div class="text-4xl mb-3">❌</div><p class="text-sm text-red-500">Server error. Pastikan n8n aktif dan endpoint benar.</p>`;
           console.error(err);
         } finally {
           btn.disabled = false;
@@ -494,13 +772,12 @@
         }
       }
 
-      // ==================== REGENERATE THUMBNAIL ====================
+      // ==================== REGEN THUMBNAIL ====================
       async function regenerateThumbnail() {
         const regenPrompt = document
           .getElementById("regenPromptInput")
           .value.trim();
         const prompt = regenPrompt || lastUsedPrompt;
-
         if (!prompt) {
           showToast("❌ Masukkan prompt untuk generate thumbnail.", "error");
           return;
@@ -508,15 +785,10 @@
 
         const regenBtn = document.getElementById("regenThumbBtn");
         const regenSubmitBtn = document.getElementById("regenSubmitBtn");
-        const previewImg = document.getElementById("thumbnailPreviewImg");
-        const skeleton = document.getElementById("thumbnailSkeleton");
-
-        regenBtn.disabled = true;
-        regenSubmitBtn.disabled = true;
-        regenBtn.textContent = "⏳ Generating...";
-        regenSubmitBtn.textContent = "⏳ Generating...";
-        previewImg.classList.add("hidden");
-        skeleton.classList.remove("hidden");
+        regenBtn.disabled = regenSubmitBtn.disabled = true;
+        regenBtn.textContent = regenSubmitBtn.textContent = "⏳ Generating...";
+        document.getElementById("thumbnailPreviewImg").classList.add("hidden");
+        document.getElementById("thumbnailSkeleton").classList.remove("hidden");
 
         try {
           const res = await fetch(IMAGE_GEN_API_URL, {
@@ -524,26 +796,21 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ prompt }),
           });
-          if (!res.ok) {
-            const errText = await res.text();
-            throw new Error(`Server responded ${res.status}: ${errText}`);
-          }
+          if (!res.ok) throw new Error(`Server ${res.status}`);
           const response = await res.json();
-          const data = response.data;
-
-          if (!data.url)
-            throw new Error("Response tidak mengandung URL gambar.");
+          if (!response.data?.url)
+            throw new Error("URL gambar tidak ditemukan.");
           if (regenPrompt) lastUsedPrompt = regenPrompt;
-          setThumbnailPreview(data.url);
-          showToast("✅ Thumbnail berhasil di-generate ulang!", "success");
+          setThumbnailPreview(response.data.url);
+          showToast("✅ Thumbnail berhasil di-generate ulang!");
         } catch (err) {
-          console.error("Regen thumbnail error:", err);
           showToast("❌ Gagal generate thumbnail: " + err.message, "error");
-          previewImg.classList.remove("hidden");
-          skeleton.classList.add("hidden");
+          document
+            .getElementById("thumbnailPreviewImg")
+            .classList.remove("hidden");
+          document.getElementById("thumbnailSkeleton").classList.add("hidden");
         } finally {
-          regenBtn.disabled = false;
-          regenSubmitBtn.disabled = false;
+          regenBtn.disabled = regenSubmitBtn.disabled = false;
           regenBtn.textContent = "🔄 Generate Ulang";
           regenSubmitBtn.textContent = "🔄 Generate";
         }
@@ -559,10 +826,19 @@
         return { title, value: doc.body.innerHTML.trim() };
       }
 
-      // ==================== UPLOAD ARTIKEL ====================
+      // ==================== UPLOAD ====================
       async function uploadArtikel() {
-        if (!latestHTML) {
-          showToast("❌ Belum ada artikel yang di-generate.", "error");
+        const editorHTML = getEditorHTML();
+        if (!editorHTML || editorHTML === "<br>") {
+          showToast("❌ Belum ada artikel.", "error");
+          return;
+        }
+        const seoDescription = document
+          .getElementById("seoDescriptionInput")
+          .value.trim();
+        const seoKey = document.getElementById("keywordInput").value.trim();
+        if (!seoDescription) {
+          showToast("❌ Deskripsi SEO wajib diisi sebelum upload.", "error");
           return;
         }
 
@@ -570,20 +846,7 @@
         uploadBtn.disabled = true;
         uploadBtn.textContent = "⏳ Mengupload...";
 
-        const { title, value } = extractTitleAndBody(latestHTML);
-
-        const seoDescription = document
-          .getElementById("seoDescriptionInput")
-          .value.trim();
-        const seoKey = document.getElementById("keywordInput").value.trim();
-
-        if (!seoDescription) {
-          showToast("❌ Deskripsi SEO wajib diisi sebelum upload.", "error");
-          uploadBtn.disabled = false;
-          uploadBtn.textContent = "☁️ Upload Artikel";
-          return;
-        }
-
+        const { title, value } = extractTitleAndBody(editorHTML);
         const payload = {
           title,
           value,
@@ -598,27 +861,21 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
           });
-          if (!res.ok) {
-            const errText = await res.text();
-            throw new Error(`Server responded ${res.status}: ${errText}`);
-          }
-          showToast("✅ Artikel berhasil diupload!", "success");
+          if (!res.ok) throw new Error(`Server ${res.status}`);
+          showToast("✅ Artikel berhasil diupload!");
         } catch (err) {
-          console.error("Upload error:", err);
           showToast("❌ Gagal upload: server error", "error");
+          console.error(err);
         } finally {
           uploadBtn.disabled = false;
           uploadBtn.textContent = "☁️ Upload Artikel";
         }
       }
 
+      // ==================== COPY ====================
       function copyMarkdown() {
         navigator.clipboard.writeText(latestMarkdown);
         showToast("✅ Markdown berhasil dicopy!");
-      }
-      function copyHTML() {
-        navigator.clipboard.writeText(latestHTML);
-        showToast("✅ HTML berhasil dicopy!");
       }
     </script>
   </body>

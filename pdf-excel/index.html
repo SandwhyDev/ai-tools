@@ -1,0 +1,1221 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Doc Extractor — Invoice / Quotation</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f5f7fa;
+        --white: #ffffff;
+        --border: #e2e6ed;
+        --border-strong: #c8cfda;
+        --accent: #2563eb;
+        --accent-light: #eff4ff;
+        --accent-hover: #1d4ed8;
+        --green: #16a34a;
+        --green-light: #f0fdf4;
+        --green-hover: #15803d;
+        --red: #dc2626;
+        --red-light: #fef2f2;
+        --orange: #ea580c;
+        --text: #111827;
+        --text-2: #374151;
+        --text-3: #6b7280;
+        --text-4: #9ca3af;
+        --header-bg: #1e293b;
+        --th-bg: #f8fafc;
+        --row-hover: #f8fafc;
+        --tag-bg: #e0e7ff;
+        --tag-text: #3730a3;
+        --shadow-sm:
+          0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.05);
+        --shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+        --radius: 10px;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: "Inter", sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        min-height: 100vh;
+      }
+
+      /* ── Top bar ── */
+      .topbar {
+        background: var(--header-bg);
+        padding: 0 32px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        height: 56px;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      }
+
+      .topbar-icon {
+        font-size: 20px;
+      }
+
+      .topbar-title {
+        font-weight: 700;
+        font-size: 16px;
+        color: #fff;
+        letter-spacing: -0.3px;
+      }
+
+      .topbar-sub {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-left: 2px;
+      }
+
+      .topbar-badge {
+        margin-left: auto;
+        font-size: 11px;
+        font-family: "IBM Plex Mono", monospace;
+        color: #64748b;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 3px 10px;
+        border-radius: 20px;
+        letter-spacing: 0.5px;
+      }
+
+      /* ── Page ── */
+      .page {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 28px 24px 60px;
+      }
+
+      /* ── Card ── */
+      .card {
+        background: var(--white);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow-sm);
+        overflow: hidden;
+        margin-bottom: 20px;
+      }
+
+      .card-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--border);
+        background: var(--white);
+      }
+
+      .card-header-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: var(--accent-light);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+      }
+
+      .card-title {
+        font-weight: 600;
+        font-size: 14px;
+        color: var(--text);
+      }
+
+      .card-sub {
+        font-size: 12px;
+        color: var(--text-3);
+        margin-top: 1px;
+      }
+
+      .card-body {
+        padding: 20px;
+      }
+
+      /* ── Drop zone ── */
+      .drop-zone {
+        border: 2px dashed var(--border-strong);
+        border-radius: 8px;
+        padding: 36px 24px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.18s;
+        position: relative;
+        background: var(--bg);
+      }
+
+      .drop-zone:hover,
+      .drop-zone.drag-over {
+        border-color: var(--accent);
+        background: var(--accent-light);
+      }
+
+      .drop-zone input[type="file"] {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+      }
+
+      .drop-zone-icon {
+        font-size: 36px;
+        margin-bottom: 10px;
+      }
+
+      .drop-zone-title {
+        font-weight: 600;
+        font-size: 15px;
+        color: var(--text-2);
+        margin-bottom: 4px;
+      }
+
+      .drop-zone-sub {
+        font-size: 12px;
+        color: var(--text-3);
+        font-family: "IBM Plex Mono", monospace;
+      }
+
+      /* ── File pill ── */
+      .file-pill {
+        display: none;
+        align-items: center;
+        gap: 10px;
+        background: var(--green-light);
+        border: 1px solid #bbf7d0;
+        border-radius: 8px;
+        padding: 12px 14px;
+        margin-top: 12px;
+      }
+      .file-pill.show {
+        display: flex;
+      }
+      .file-pill-icon {
+        font-size: 22px;
+        flex-shrink: 0;
+      }
+      .file-pill-info {
+        flex: 1;
+        min-width: 0;
+      }
+      .file-pill-name {
+        font-weight: 600;
+        font-size: 13px;
+        color: var(--green);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .file-pill-size {
+        font-size: 11px;
+        color: var(--text-3);
+        font-family: "IBM Plex Mono", monospace;
+        margin-top: 1px;
+      }
+      .file-pill-remove {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-4);
+        font-size: 16px;
+        padding: 4px;
+        border-radius: 4px;
+        transition: all 0.15s;
+        flex-shrink: 0;
+        line-height: 1;
+      }
+      .file-pill-remove:hover {
+        color: var(--red);
+        background: var(--red-light);
+      }
+
+      /* ── Webhook info ── */
+      .webhook-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 14px;
+        padding: 9px 12px;
+        background: #f0f4ff;
+        border: 1px solid #c7d7fe;
+        border-radius: 7px;
+        font-size: 11px;
+        font-family: "IBM Plex Mono", monospace;
+        color: var(--text-3);
+      }
+      .webhook-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--accent);
+        flex-shrink: 0;
+      }
+      .webhook-url {
+        color: var(--accent);
+        font-weight: 500;
+      }
+
+      /* ── Buttons ── */
+      .btn-row {
+        display: flex;
+        gap: 8px;
+        margin-top: 16px;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 18px;
+        border-radius: 7px;
+        font-family: "Inter", sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.15s;
+        white-space: nowrap;
+        text-decoration: none;
+      }
+      .btn svg {
+        flex-shrink: 0;
+      }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--accent-hover);
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+      }
+      .btn-primary:disabled {
+        background: #93c5fd;
+        cursor: not-allowed;
+        box-shadow: none;
+      }
+
+      .btn-ghost {
+        background: var(--white);
+        color: var(--text-2);
+        border: 1px solid var(--border);
+      }
+      .btn-ghost:hover {
+        border-color: var(--border-strong);
+        background: var(--bg);
+      }
+
+      .btn-green {
+        background: var(--green);
+        color: #fff;
+      }
+      .btn-green:hover {
+        background: var(--green-hover);
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+      }
+
+      .btn-blue {
+        background: #0284c7;
+        color: #fff;
+      }
+      .btn-blue:hover {
+        background: #0369a1;
+        box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);
+      }
+
+      /* ── Progress ── */
+      .progress-box {
+        display: none;
+        margin-top: 14px;
+        background: var(--bg);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+      }
+      .progress-box.show {
+        display: block;
+      }
+      .progress-steps {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+      }
+      .step {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-size: 12px;
+        color: var(--text-4);
+        transition: color 0.25s;
+      }
+      .step.active {
+        color: var(--accent);
+        font-weight: 500;
+      }
+      .step.done {
+        color: #86efac;
+      }
+      .step-icon {
+        width: 18px;
+        text-align: center;
+        flex-shrink: 0;
+        font-size: 13px;
+      }
+      .spin {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border: 2px solid #bfdbfe;
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* ── Error ── */
+      .err-box {
+        display: none;
+        align-items: flex-start;
+        gap: 8px;
+        margin-top: 12px;
+        padding: 11px 14px;
+        background: var(--red-light);
+        border: 1px solid #fca5a5;
+        border-radius: 8px;
+        font-size: 12px;
+        color: var(--red);
+        font-family: "IBM Plex Mono", monospace;
+        word-break: break-word;
+        white-space: pre-wrap;
+      }
+      .err-box.show {
+        display: flex;
+      }
+
+      /* ── Meta grid ── */
+      .meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1px;
+        background: var(--border);
+        border-bottom: 1px solid var(--border);
+      }
+      .meta-cell {
+        background: var(--white);
+        padding: 12px 16px;
+      }
+      .meta-key {
+        font-size: 10px;
+        font-weight: 600;
+        color: var(--text-4);
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        margin-bottom: 3px;
+      }
+      .meta-val {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+        word-break: break-word;
+      }
+      .meta-val.blue {
+        color: var(--accent);
+      }
+
+      /* ── Table ── */
+      .table-scroll {
+        overflow-x: auto;
+        overflow-y: auto;
+        max-height: 520px;
+      }
+      .table-scroll::-webkit-scrollbar {
+        width: 7px;
+        height: 7px;
+      }
+      .table-scroll::-webkit-scrollbar-track {
+        background: var(--bg);
+      }
+      .table-scroll::-webkit-scrollbar-thumb {
+        background: var(--border-strong);
+        border-radius: 4px;
+      }
+      .table-scroll::-webkit-scrollbar-thumb:hover {
+        background: #9ca3af;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13px;
+        min-width: 680px;
+      }
+
+      thead tr {
+        background: var(--th-bg);
+        position: sticky;
+        top: 0;
+        z-index: 5;
+      }
+
+      th {
+        padding: 10px 14px;
+        text-align: left;
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--text-3);
+        text-transform: uppercase;
+        letter-spacing: 0.6px;
+        border-bottom: 2px solid var(--border);
+        white-space: nowrap;
+      }
+
+      td {
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text-2);
+        vertical-align: middle;
+      }
+
+      tr:hover td {
+        background: var(--row-hover);
+      }
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      .td-no {
+        color: var(--text-4);
+        font-size: 12px;
+        text-align: center;
+        width: 40px;
+      }
+      .td-desc {
+        font-weight: 600;
+        color: var(--text);
+      }
+      .td-spec {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 11px;
+        color: var(--accent);
+      }
+      .td-num {
+        text-align: right;
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+      }
+      .td-price {
+        color: var(--orange);
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px;
+        text-align: right;
+      }
+      .td-null {
+        color: var(--text-4);
+      }
+      .unit-tag {
+        display: inline-block;
+        background: var(--tag-bg);
+        color: var(--tag-text);
+        border-radius: 5px;
+        padding: 2px 8px;
+        font-size: 11px;
+        font-weight: 600;
+      }
+
+      td[contenteditable="true"] {
+        outline: none;
+        cursor: text;
+      }
+      td[contenteditable="true"]:focus {
+        background: #eff6ff;
+        box-shadow: inset 0 0 0 2px #bfdbfe;
+      }
+
+      /* ── Action bar ── */
+      .action-bar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        border-top: 1px solid var(--border);
+        background: var(--th-bg);
+        flex-wrap: wrap;
+      }
+      .item-count {
+        font-size: 12px;
+        color: var(--text-3);
+        margin-left: auto;
+        font-family: "IBM Plex Mono", monospace;
+      }
+      .item-count b {
+        color: var(--accent);
+      }
+
+      /* ── Empty ── */
+      .empty {
+        padding: 60px 20px;
+        text-align: center;
+      }
+      .empty-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+        opacity: 0.25;
+      }
+      .empty-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: var(--text-3);
+        margin-bottom: 4px;
+      }
+      .empty-sub {
+        font-size: 12px;
+        color: var(--text-4);
+      }
+
+      /* ── Toast ── */
+      .toast {
+        position: fixed;
+        bottom: 28px;
+        right: 28px;
+        background: var(--text);
+        color: #fff;
+        padding: 11px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        transform: translateY(60px);
+        opacity: 0;
+        transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+        z-index: 999;
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Top bar -->
+    <div class="topbar">
+      <span class="topbar-icon">📄</span>
+      <div>
+        <div class="topbar-title">Doc Extractor</div>
+      </div>
+      <span class="topbar-sub">Invoice · Quotation · Inquiry</span>
+      <span class="topbar-badge">v3.1 · n8n WEBHOOK</span>
+    </div>
+
+    <div class="page">
+      <!-- Upload card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-header-icon">📤</div>
+          <div>
+            <div class="card-title">Upload PDF</div>
+            <div class="card-sub">
+              Pilih file PDF invoice / quotation / inquiry untuk di-ekstrak
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="drop-zone" id="dropZone">
+            <input
+              type="file"
+              id="fileInput"
+              accept=".pdf"
+              onchange="onFileSelected(this)"
+            />
+            <div class="drop-zone-icon">📂</div>
+            <div class="drop-zone-title">
+              Drop PDF di sini atau klik untuk browse
+            </div>
+            <div class="drop-zone-sub">Format: PDF · Maks. 20 MB</div>
+          </div>
+
+          <div class="file-pill" id="filePill">
+            <div class="file-pill-icon">📋</div>
+            <div class="file-pill-info">
+              <div class="file-pill-name" id="fileName"></div>
+              <div class="file-pill-size" id="fileSize"></div>
+            </div>
+            <button
+              class="file-pill-remove"
+              onclick="removeFile()"
+              title="Hapus file"
+            >
+              ✕
+            </button>
+          </div>
+
+          <div class="webhook-row">
+            <div class="webhook-dot"></div>
+            <div>
+              POST →
+              <span class="webhook-url"
+                >192.168.1.96:5678/webhook-test/5b334912...</span
+              >
+              &nbsp;·&nbsp; field: <b>data</b> &nbsp;·&nbsp; multipart/form-data
+            </div>
+          </div>
+
+          <!-- Progress -->
+          <div class="progress-box" id="progressBox">
+            <div class="progress-steps">
+              <div class="step" id="step1">
+                <span class="step-icon" id="icon1">○</span> Uploading PDF ke
+                webhook n8n...
+              </div>
+              <div class="step" id="step2">
+                <span class="step-icon" id="icon2">○</span> Menunggu response
+                dari n8n...
+              </div>
+              <div class="step" id="step3">
+                <span class="step-icon" id="icon3">○</span> Parsing hasil
+                ekstraksi...
+              </div>
+              <div class="step" id="step4">
+                <span class="step-icon" id="icon4">○</span> Rendering tabel
+                output...
+              </div>
+            </div>
+          </div>
+
+          <!-- Error -->
+          <div class="err-box" id="errBox">
+            <span>⚠</span><span id="errText"></span>
+          </div>
+
+          <div class="btn-row">
+            <button
+              class="btn btn-primary"
+              id="btnSend"
+              onclick="sendPDF()"
+              disabled
+            >
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              Send & Extract
+            </button>
+            <button class="btn btn-ghost" onclick="removeFile()">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+              </svg>
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output card -->
+      <div class="card" id="outputCard">
+        <div class="card-header">
+          <div class="card-header-icon" style="background: #f0fdf4">📊</div>
+          <div>
+            <div class="card-title">Hasil Ekstraksi</div>
+            <div class="card-sub">
+              Klik cell untuk edit langsung · Semua kolom bisa diubah sebelum
+              export
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="empty" id="emptyState">
+          <div class="empty-icon">📋</div>
+          <div class="empty-title">Belum ada data</div>
+          <div class="empty-sub">Upload PDF lalu klik Send &amp; Extract</div>
+        </div>
+
+        <!-- Result -->
+        <div id="resultArea" style="display: none">
+          <div class="meta-grid" id="metaGrid"></div>
+          <div class="table-scroll">
+            <table>
+              <thead id="tableHead"></thead>
+              <tbody id="tableBody"></tbody>
+            </table>
+          </div>
+          <div class="action-bar">
+            <button class="btn btn-blue" onclick="copyTSV()">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" />
+                <path
+                  d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                />
+              </svg>
+              Copy ke Excel (TSV)
+            </button>
+            <button class="btn btn-green" onclick="downloadExcel()">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.5"
+              >
+                <path
+                  d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="16" y1="13" x2="8" y2="13" />
+                <line x1="16" y1="17" x2="8" y2="17" />
+              </svg>
+              Download .xlsx
+            </button>
+            <button class="btn btn-ghost" onclick="copyAll()">
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path
+                  d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"
+                />
+                <rect x="8" y="2" width="8" height="4" rx="1" />
+              </svg>
+              Copy Semua
+            </button>
+            <span class="item-count"
+              ><b id="itemCount">0</b> item ditemukan</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /page -->
+
+    <div class="toast" id="toast"></div>
+
+    <!-- SheetJS CDN yang benar -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+
+    <script>
+      const WEBHOOK_URL =
+        "http://192.168.1.96:5678/webhook-test/5b334912-8383-481d-b4b6-3da4162503ba";
+      let extractedData = null;
+      let selectedFile = null;
+
+      /* ── Drag & Drop ── */
+      const dz = document.getElementById("dropZone");
+      dz.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dz.classList.add("drag-over");
+      });
+      dz.addEventListener("dragleave", () => dz.classList.remove("drag-over"));
+      dz.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dz.classList.remove("drag-over");
+        const f = e.dataTransfer.files[0];
+        if (f && f.type === "application/pdf") setFile(f);
+        else toast("⚠ Hanya file PDF yang diterima");
+      });
+
+      function onFileSelected(el) {
+        if (el.files[0]) setFile(el.files[0]);
+      }
+
+      function setFile(f) {
+        if (f.size > 20 * 1024 * 1024) {
+          toast("⚠ File terlalu besar (maks 20MB)");
+          return;
+        }
+        selectedFile = f;
+        document.getElementById("fileName").textContent = f.name;
+        document.getElementById("fileSize").textContent =
+          fmtBytes(f.size) + " · PDF";
+        document.getElementById("filePill").classList.add("show");
+        document.getElementById("btnSend").disabled = false;
+        hideErr();
+        resetSteps();
+      }
+
+      function removeFile() {
+        selectedFile = null;
+        document.getElementById("fileInput").value = "";
+        document.getElementById("filePill").classList.remove("show");
+        document.getElementById("btnSend").disabled = true;
+        document.getElementById("progressBox").classList.remove("show");
+        document.getElementById("emptyState").style.display = "block";
+        document.getElementById("resultArea").style.display = "none";
+        extractedData = null;
+        hideErr();
+        resetSteps();
+      }
+
+      function fmtBytes(b) {
+        if (b < 1024) return b + " B";
+        if (b < 1048576) return (b / 1024).toFixed(1) + " KB";
+        return (b / 1048576).toFixed(2) + " MB";
+      }
+
+      /* ── Steps ── */
+      function resetSteps() {
+        for (let i = 1; i <= 4; i++) {
+          document.getElementById("step" + i).className = "step";
+          document.getElementById("icon" + i).innerHTML = "○";
+        }
+      }
+      function stepActive(n) {
+        document.getElementById("step" + n).className = "step active";
+        document.getElementById("icon" + n).innerHTML =
+          '<span class="spin"></span>';
+      }
+      function stepDone(n) {
+        document.getElementById("step" + n).className = "step done";
+        document.getElementById("icon" + n).innerHTML = "✓";
+      }
+      function showErr(msg) {
+        document.getElementById("errText").textContent = msg;
+        document.getElementById("errBox").classList.add("show");
+      }
+      function hideErr() {
+        document.getElementById("errBox").classList.remove("show");
+      }
+
+      /* ── Send PDF ── */
+      async function sendPDF() {
+        if (!selectedFile) return;
+        const btn = document.getElementById("btnSend");
+        btn.disabled = true;
+        document.getElementById("progressBox").classList.add("show");
+        document.getElementById("emptyState").style.display = "block";
+        document.getElementById("resultArea").style.display = "none";
+        hideErr();
+        resetSteps();
+
+        try {
+          stepActive(1);
+          const fd = new FormData();
+          fd.append("data", selectedFile, selectedFile.name);
+
+          stepActive(2);
+          const res = await fetch(WEBHOOK_URL, { method: "POST", body: fd });
+          stepDone(1);
+          stepDone(2);
+
+          if (!res.ok) {
+            const txt = await res.text();
+            throw new Error(`HTTP ${res.status}: ${txt.slice(0, 300)}`);
+          }
+
+          stepActive(3);
+          const raw = await res.text();
+          let parsed = null;
+          try {
+            parsed = JSON.parse(raw);
+          } catch (e) {
+            const m = raw.match(/\{[\s\S]*\}/);
+            if (m) {
+              try {
+                parsed = JSON.parse(m[0]);
+              } catch (e2) {}
+            }
+          }
+          if (!parsed)
+            throw new Error(
+              "Response bukan JSON valid.\n\nRaw response:\n" +
+                raw.slice(0, 400),
+            );
+          stepDone(3);
+
+          stepActive(4);
+          extractedData = normalize(parsed);
+          render(extractedData);
+          stepDone(4);
+        } catch (err) {
+          showErr(err.message);
+          resetSteps();
+          console.error(err);
+        }
+        btn.disabled = false;
+      }
+
+      /* ── Normalize ── */
+      function normalize(d) {
+        if (Array.isArray(d)) d = d[0] || {};
+        const nested = !!(d.company || d.document || d.customer);
+        const meta = {
+          doc_type: d.document_type || d.doc_type || "Document",
+          doc_number: nested
+            ? d.document?.number || null
+            : d.doc_number || null,
+          doc_date: nested ? d.document?.date || null : d.doc_date || null,
+          company: nested ? d.company?.name || null : d.company_name || null,
+          customer: nested ? d.customer?.name || null : d.customer_name || null,
+          subject: nested ? d.document?.subject || null : d.subject || null,
+          notes: d.notes || null,
+        };
+        const items = (d.items || []).map((it, i) => ({
+          no: it.no || i + 1,
+          desc: it.description || "",
+          spec: it.specification || it.part_number || it.part_no || "",
+          qty: it.qty ?? it.quantity ?? "",
+          unit: it.unit || "EA",
+          price: it.unit_price ?? it.price ?? "",
+          total: it.total_price ?? it.total ?? "",
+          date: it.expected_date || it.date || "",
+        }));
+        return { meta, items };
+      }
+
+      function nullVal(v) {
+        return v === null || v === undefined || v === "" ? null : v;
+      }
+
+      /* ── Render ── */
+      function render({ meta, items }) {
+        // Meta grid
+        const fields = [
+          { k: "Doc Type", v: meta.doc_type },
+          { k: "No. Dokumen", v: meta.doc_number },
+          { k: "Tanggal", v: meta.doc_date },
+          { k: "Perusahaan", v: meta.company },
+          { k: "Customer", v: meta.customer },
+          { k: "Subject", v: meta.subject },
+          { k: "Catatan", v: meta.notes },
+        ].filter((f) => f.v);
+
+        document.getElementById("metaGrid").innerHTML = fields
+          .map(
+            (f) =>
+              `<div class="meta-cell">
+      <div class="meta-key">${f.k}</div>
+      <div class="meta-val${f.k === "No. Dokumen" ? " blue" : ""}">${f.v}</div>
+    </div>`,
+          )
+          .join("");
+
+        // Table head
+        const cols = [
+          "No",
+          "Deskripsi",
+          "Spesifikasi / Part No.",
+          "Qty",
+          "Unit",
+          "Harga Satuan",
+          "Total Harga",
+          "Tgl. Kebutuhan",
+        ];
+        document.getElementById("tableHead").innerHTML =
+          `<tr>${cols.map((c) => `<th>${c}</th>`).join("")}</tr>`;
+
+        // Table body
+        document.getElementById("tableBody").innerHTML = items
+          .map(
+            (it) => `
+    <tr>
+      <td class="td-no">${it.no}</td>
+      <td class="td-desc" contenteditable="true">${it.desc}</td>
+      <td class="td-spec" contenteditable="true">${it.spec || '<span class="td-null">—</span>'}</td>
+      <td class="td-num" contenteditable="true">${nullVal(it.qty) ?? '<span class="td-null">—</span>'}</td>
+      <td contenteditable="true"><span class="unit-tag">${it.unit}</span></td>
+      <td class="td-price" contenteditable="true">${nullVal(it.price) ?? '<span class="td-null">—</span>'}</td>
+      <td class="td-price" contenteditable="true">${nullVal(it.total) ?? '<span class="td-null">—</span>'}</td>
+      <td contenteditable="true">${it.date || '<span class="td-null">—</span>'}</td>
+    </tr>`,
+          )
+          .join("");
+
+        document.getElementById("itemCount").textContent = items.length;
+        document.getElementById("emptyState").style.display = "none";
+        document.getElementById("resultArea").style.display = "block";
+
+        // Scroll to output
+        document
+          .getElementById("outputCard")
+          .scrollIntoView({ behavior: "smooth", block: "start" });
+        toast(`✓ ${items.length} item berhasil diekstrak`);
+      }
+
+      /* ── Table data helper ── */
+      function tableData() {
+        const headers = [...document.querySelectorAll("#tableHead th")].map(
+          (th) => th.textContent,
+        );
+        const rows = [...document.querySelectorAll("#tableBody tr")].map((tr) =>
+          [...tr.querySelectorAll("td")].map((td) =>
+            td.innerText.trim().replace(/^—$/, ""),
+          ),
+        );
+        return { headers, rows };
+      }
+
+      /* ── Copy TSV ── */
+      function copyTSV() {
+        const { meta } = extractedData || {};
+        const { headers, rows } = tableData();
+        let s = "";
+        if (meta) {
+          const mkeys = {
+            doc_type: "Document Type",
+            doc_number: "No. Dokumen",
+            doc_date: "Tanggal",
+            company: "Perusahaan",
+            customer: "Customer",
+            subject: "Subject",
+            notes: "Catatan",
+          };
+          Object.entries(mkeys).forEach(([k, label]) => {
+            if (meta[k]) s += `${label}\t${meta[k]}\n`;
+          });
+          s += "\n";
+        }
+        s +=
+          headers.join("\t") + "\n" + rows.map((r) => r.join("\t")).join("\n");
+        copyText(s, "✓ Data berhasil di-copy! Tekan Ctrl+V di Excel");
+      }
+
+      /* ── Download XLSX ── */
+      function downloadExcel() {
+        if (typeof XLSX === "undefined") {
+          toast("⚠ Library XLSX belum dimuat, coba refresh halaman");
+          return;
+        }
+        const { meta } = extractedData || {};
+        const { headers, rows } = tableData();
+        const wb = XLSX.utils.book_new();
+
+        // Sheet Items
+        const ws = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+        ws["!cols"] = [
+          { wch: 5 },
+          { wch: 30 },
+          { wch: 22 },
+          { wch: 7 },
+          { wch: 7 },
+          { wch: 16 },
+          { wch: 16 },
+          { wch: 16 },
+        ];
+        XLSX.utils.book_append_sheet(wb, ws, "Items");
+
+        // Sheet Info
+        if (meta) {
+          const infoRows = [["Field", "Value"]];
+          const labels = {
+            doc_type: "Document Type",
+            doc_number: "No. Dokumen",
+            doc_date: "Tanggal",
+            company: "Perusahaan",
+            customer: "Customer",
+            subject: "Subject",
+            notes: "Catatan",
+          };
+          Object.entries(labels).forEach(([k, l]) => {
+            if (meta[k]) infoRows.push([l, meta[k]]);
+          });
+          const wi = XLSX.utils.aoa_to_sheet(infoRows);
+          wi["!cols"] = [{ wch: 18 }, { wch: 45 }];
+          XLSX.utils.book_append_sheet(wb, wi, "Info Dokumen");
+        }
+
+        const fname = `quotation_${meta?.doc_number || "export"}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+        XLSX.writeFile(wb, fname);
+        toast("✓ File Excel berhasil didownload");
+      }
+
+      /* ── Copy All ── */
+      function copyAll() {
+        const { meta } = extractedData || {};
+        const { headers, rows } = tableData();
+        let s = "=== INFO DOKUMEN ===\n";
+        if (meta) {
+          const labels = {
+            doc_type: "Type",
+            doc_number: "No",
+            doc_date: "Date",
+            company: "Company",
+            customer: "Customer",
+            subject: "Subject",
+            notes: "Notes",
+          };
+          Object.entries(labels).forEach(([k, l]) => {
+            if (meta[k]) s += `${l}: ${meta[k]}\n`;
+          });
+        }
+        s +=
+          "\n=== ITEMS ===\n" +
+          headers.join(" | ") +
+          "\n" +
+          rows.map((r) => r.join(" | ")).join("\n");
+        copyText(s, "✓ Semua data berhasil di-copy");
+      }
+
+      function copyText(s, msg) {
+        navigator.clipboard
+          .writeText(s)
+          .then(() => toast(msg))
+          .catch(() => {
+            const ta = document.createElement("textarea");
+            ta.value = s;
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand("copy");
+            document.body.removeChild(ta);
+            toast(msg);
+          });
+      }
+
+      /* ── Toast ── */
+      function toast(msg) {
+        const el = document.getElementById("toast");
+        el.textContent = msg;
+        el.classList.add("show");
+        setTimeout(() => el.classList.remove("show"), 3000);
+      }
+    </script>
+  </body>
+</html>
