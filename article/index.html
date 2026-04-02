@@ -184,7 +184,7 @@
         text-decoration: underline;
       }
 
-      /* TABLE — core fix */
+      /* TABLE */
       #wysiwyg-editor table {
         border-collapse: collapse;
         width: 100%;
@@ -208,6 +208,38 @@
       }
       #wysiwyg-editor tr:hover td {
         background: #eff6ff;
+      }
+
+      /* ===== TITLE INPUT ===== */
+      #articleTitleInput {
+        width: 100%;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        padding: 0.6rem 0.9rem;
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #111827;
+        outline: none;
+        transition:
+          border-color 0.15s,
+          box-shadow 0.15s;
+        font-family: Georgia, "Times New Roman", serif;
+        background: #fafafa;
+        resize: none;
+        overflow: hidden;
+        line-height: 1.5;
+        min-height: 3rem;
+        display: block;
+      }
+      #articleTitleInput:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+        background: #fff;
+      }
+      #articleTitleInput::placeholder {
+        color: #9ca3af;
+        font-weight: 400;
+        font-style: italic;
       }
 
       /* word count */
@@ -432,10 +464,25 @@
 
         <!-- WYSIWYG wrapper -->
         <div id="wysiwyg-wrapper" class="hidden">
-          <p class="text-xs text-gray-400 mb-2">
+          <p class="text-xs text-gray-400 mb-3">
             💡 Klik teks untuk mulai mengedit. Tabel, heading, dan list tampil
             seperti aslinya.
           </p>
+
+          <!-- ✏️ Editable Title -->
+          <div class="mb-4">
+            <label
+              class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5"
+            >
+              📌 Judul Artikel
+            </label>
+            <textarea
+              id="articleTitleInput"
+              rows="2"
+              placeholder="Tulis judul artikel di sini…"
+              oninput="autoResizeTitle(this)"
+            ></textarea>
+          </div>
 
           <!-- Toolbar -->
           <div id="wysiwyg-toolbar">
@@ -578,6 +625,12 @@
       // const UPLOAD_API_URL = "http://192.168.1.96:5001/api/article/create";
       // const IMAGE_GEN_API_URL = "http://192.168.1.238:9009/api/generate-image";
 
+      // ==================== AUTO RESIZE TITLE ====================
+      function autoResizeTitle(el) {
+        el.style.height = "auto";
+        el.style.height = el.scrollHeight + "px";
+      }
+
       // ==================== TOOLBAR ====================
       function execCmd(cmd) {
         document.getElementById("wysiwyg-editor").focus();
@@ -633,12 +686,27 @@
       }
 
       // ==================== SET EDITOR CONTENT ====================
-      function setEditorContent(html) {
-        document.getElementById("wysiwyg-editor").innerHTML = html;
+      function setEditorContent(html, title) {
+        // Strip h1 from body content (title is now in its own input)
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, "text/html");
+        const h1 = doc.querySelector("h1");
+        const extractedTitle = h1 ? h1.textContent.trim() : title || "";
+        if (h1) h1.remove();
+        const bodyWithoutTitle = doc.body.innerHTML.trim();
+
+        const titleEl = document.getElementById("articleTitleInput");
+        titleEl.value = extractedTitle;
+        autoResizeTitle(titleEl);
+        document.getElementById("wysiwyg-editor").innerHTML = bodyWithoutTitle;
         document.getElementById("editorPlaceholder").classList.add("hidden");
         document.getElementById("wysiwyg-wrapper").classList.remove("hidden");
         document.getElementById("editorStatusBadge").classList.remove("hidden");
         updateWordCount();
+      }
+
+      function getEditorTitle() {
+        return document.getElementById("articleTitleInput").value.trim();
       }
 
       function getEditorHTML() {
@@ -723,6 +791,9 @@
         document.getElementById("editorStatusBadge").classList.add("hidden");
         document.getElementById("wordCountBadge").classList.add("hidden");
         document.getElementById("regenPromptInput").value = "";
+        const titleResetEl = document.getElementById("articleTitleInput");
+        titleResetEl.value = "";
+        autoResizeTitle(titleResetEl);
 
         const ph = document.getElementById("editorPlaceholder");
         ph.classList.remove("hidden");
@@ -740,7 +811,7 @@
           const primaryUrl =
             "https://wa.togu.co.id/webhook/bc01e8c1-2f72-4498-8fa3-53d7f6407a32";
           const fallbackUrl =
-            "http://192.168.1.96:5678/webhook/bc01e8c1-2f72-4498-8fa3-53d7f6407a32";
+            "http://192.168.1.96:5678/webhook-test/bc01e8c1-2f72-4498-8fa3-53d7f6407a32";
           let res;
           try {
             res = await fetch(primaryUrl, { method: "POST", body: formData });
@@ -756,7 +827,9 @@
           latestTitle = data.title || topic;
           latestThumbnail = data.thumbnail || "";
 
-          setEditorContent(marked.parse(data.content));
+          const renderedHTML = marked.parse(data.content);
+          setEditorContent(renderedHTML, latestTitle);
+
           document.getElementById("copyButtons").classList.remove("hidden");
           if (data.thumbnail) setThumbnailPreview(data.thumbnail);
           document
@@ -816,16 +889,6 @@
         }
       }
 
-      // ==================== EXTRACT TITLE & BODY ====================
-      function extractTitleAndBody(html) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, "text/html");
-        const h1 = doc.querySelector("h1");
-        const title = h1 ? h1.textContent.trim() : latestTitle;
-        if (h1) h1.remove();
-        return { title, value: doc.body.innerHTML.trim() };
-      }
-
       // ==================== UPLOAD ====================
       async function uploadArtikel() {
         const editorHTML = getEditorHTML();
@@ -833,6 +896,15 @@
           showToast("❌ Belum ada artikel.", "error");
           return;
         }
+
+        // Title from the dedicated input (editable by user)
+        const title = getEditorTitle() || latestTitle;
+        if (!title) {
+          showToast("❌ Judul artikel wajib diisi.", "error");
+          document.getElementById("articleTitleInput").focus();
+          return;
+        }
+
         const seoDescription = document
           .getElementById("seoDescriptionInput")
           .value.trim();
@@ -846,10 +918,9 @@
         uploadBtn.disabled = true;
         uploadBtn.textContent = "⏳ Mengupload...";
 
-        const { title, value } = extractTitleAndBody(editorHTML);
         const payload = {
           title,
-          value,
+          value: editorHTML,
           img: latestThumbnail,
           discription_seo: seoDescription,
           seo_key: seoKey,
