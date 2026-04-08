@@ -4,10 +4,10 @@ let latestThumbnail = "";
 let lastUsedPrompt = "";
 
 const UPLOAD_API_URL = "https://migrationbe.trumecs.com/api/article/create";
-// const IMAGE_GEN_API_URL = "https://files.togu.co.id/api/generate-image";
+const IMAGE_GEN_API_URL = "https://files.togu.co.id/api/generate-image";
 
 // const UPLOAD_API_URL = "http://192.168.1.96:5001/api/article/create";
-const IMAGE_GEN_API_URL = "http://192.168.1.238:9009/api/generate-image";
+// const IMAGE_GEN_API_URL = "http://192.168.1.238:9009/api/generate-image";
 
 // ==================== AUTO RESIZE TITLE ====================
 function autoResizeTitle(el) {
@@ -186,7 +186,7 @@ async function sendToN8n() {
     const primaryUrl =
       "https://wa.togu.co.id/webhook/bc01e8c1-2f72-4498-8fa3-53d7f6407a32";
     const fallbackUrl =
-      "http://192.168.1.96:5678/webhook-test/bc01e8c1-2f72-4498-8fa3-53d7f6407a32";
+      "http://192.168.1.96:5678/webhook/bc01e8c1-2f72-4498-8fa3-53d7f6407a32";
     let res;
     try {
       res = await fetch(primaryUrl, { method: "POST", body: formData });
