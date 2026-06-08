@@ -73,7 +73,13 @@
           id="uploadArea"
           class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center mb-6 hover:border-blue-500 transition-colors"
         >
-          <input type="file" id="imageInput" accept="image/*" class="hidden" />
+          <input
+            type="file"
+            id="imageInput"
+            accept="image/*"
+            multiple
+            class="hidden"
+          />
           <label for="imageInput" class="cursor-pointer">
             <svg
               class="mx-auto h-12 w-12 text-gray-400 mb-4"
@@ -89,22 +95,16 @@
               ></path>
             </svg>
             <p class="text-gray-600 font-medium mb-2">
-              Klik untuk upload gambar
+              Klik atau seret gambar ke sini
             </p>
-            <p class="text-gray-400 text-sm">PNG, JPG, JPEG (Maks. 10MB)</p>
+            <p class="text-gray-400 text-sm">
+              Bisa pilih beberapa gambar sekaligus · PNG, JPG, JPEG (Maks. 10MB)
+            </p>
           </label>
         </div>
 
-        <!-- Preview Image -->
-        <div id="imagePreview" class="hidden mb-6 flex justify-center">
-          <!-- <h3 class="text-lg font-semibold text-gray-700 mb-3">
-            Preview Gambar:
-          </h3> -->
-          <img
-            id="previewImg"
-            class="max-w-full h-auto rounded-lg border border-gray-300"
-          />
-        </div>
+        <!-- Preview Image Queue -->
+        <div id="imagePreview" class="hidden mb-6"></div>
 
         <!-- Convert Button -->
         <button
@@ -130,57 +130,18 @@
         </div>
       </div>
 
-      <!-- Results Table -->
+      <!-- Sticky action bar (visible after conversion) -->
       <div
-        id="resultsContainer"
-        class="hidden bg-white rounded-lg shadow-lg p-6"
+        id="resultsHeader"
+        class="hidden bg-white rounded-lg shadow-lg px-5 py-3 mt-6 flex justify-between items-center sticky top-2 z-10 border border-gray-200"
       >
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-2xl font-bold text-gray-800">Hasil Konversi</h2>
-          <button
-            id="copyBtn"
-            class="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-          >
-            📋 Copi ke Excel
-          </button>
-        </div>
-
-        <div id="notification" class="hidden my-4 p-4 rounded-lg"></div>
-
-        <div class="table-container">
-          <table id="dataTable" class="w-full border border-gray-300">
-            <thead>
-              <tr class="bg-gray-100">
-                <th
-                  class="border border-gray-300 px-4 py-2 text-left font-semibold text-gray-700"
-                >
-                  Item Pekerjaan
-                </th>
-                <th
-                  class="border border-gray-300 px-4 py-2 text-left font-semibold text-gray-700"
-                >
-                  Volume
-                </th>
-                <th
-                  class="border border-gray-300 px-4 py-2 text-right font-semibold text-gray-700"
-                >
-                  Harga Satuan (Rp)
-                </th>
-                <th
-                  class="border border-gray-300 px-4 py-2 text-right font-semibold text-gray-700"
-                >
-                  Total (Rp)
-                </th>
-              </tr>
-            </thead>
-            <tbody id="tableBody">
-              <!-- Data will be inserted here -->
-            </tbody>
-          </table>
-        </div>
+        <h2 class="text-lg font-bold text-gray-800">Hasil Konversi</h2>
       </div>
+
+      <!-- Per-image sections + merged table injected here -->
+      <div id="resultsContainer" class="hidden mt-3 space-y-4"></div>
     </div>
 
-    <script src="./index2ac.js"></script>
+    <script src="./index3ac.js"></script>
   </body>
 </html>
