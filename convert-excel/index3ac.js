@@ -104,10 +104,21 @@ function addFiles(files) {
   const counter = imagePreview.querySelector("p");
   if (counter) counter.textContent = `${uploadedImages.length} gambar dipilih`;
 
+  // Update button text to show how many new images are pending
+  const pendingCount = uploadedImages.filter(
+    (_, i) => !convertedIndices.has(i),
+  ).length;
+  btnText.textContent =
+    pendingCount === uploadedImages.length
+      ? "Konversi ke Excel"
+      : `Konversi ${pendingCount} Gambar Baru`;
+
   UploadArea.classList.add("hidden");
   startOver.classList.remove("hidden");
   convertBtn.classList.remove("hidden");
+  convertBtn.disabled = false;
   imagePreview.classList.remove("hidden");
+  imageInput.value = "";
 }
 
 function initImageQueue() {
@@ -485,43 +496,91 @@ function makeMiniTable(data) {
 /* =====================================================
    IMAGE MODAL
 ===================================================== */
-function openImageModal(src, name) {
-  // Remove any existing modal
+function openImageModal(src, name, tblEl) {
   document.getElementById("imgModal")?.remove();
 
   const overlay = document.createElement("div");
   overlay.id = "imgModal";
   overlay.className =
-    "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-80";
+    "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4";
   overlay.style.backdropFilter = "blur(4px)";
 
+  // ── Outer container ──
   const box = document.createElement("div");
-  box.className = "relative max-w-5xl w-full mx-4 flex flex-col items-center";
+  box.className = "relative w-full flex flex-col bg-transparent";
+  box.style.maxWidth = "95vw";
+  box.style.maxHeight = "92vh";
 
-  // Close button
+  // ── Top bar: filename + close ──
+  const topBar = document.createElement("div");
+  topBar.className = "flex items-center justify-between mb-2 px-1";
+
+  const label = document.createElement("p");
+  label.className = "text-white text-sm opacity-80 truncate";
+  label.textContent = name;
+
   const closeBtn = document.createElement("button");
   closeBtn.className =
-    "absolute -top-10 right-0 text-white text-3xl font-bold hover:text-gray-300 transition-colors leading-none";
+    "flex-shrink-0 ml-4 text-white text-2xl font-bold hover:text-gray-300 transition-colors leading-none";
   closeBtn.textContent = "✕";
   closeBtn.addEventListener("click", () => overlay.remove());
 
-  // Filename label
-  const label = document.createElement("p");
-  label.className =
-    "text-white text-sm mb-2 self-start opacity-70 truncate max-w-full";
-  label.textContent = name;
+  topBar.append(label, closeBtn);
 
-  // Image
+  // ── Content row: image left + table right ──
+  const contentRow = document.createElement("div");
+  contentRow.className = "flex gap-4 overflow-hidden";
+  contentRow.style.maxHeight = "85vh";
+
+  // Image col
+  const imgCol = document.createElement("div");
+  imgCol.className = "flex-shrink-0 flex items-start justify-center";
+  imgCol.style.maxWidth = tblEl ? "55%" : "100%";
+
   const img = document.createElement("img");
   img.src = src;
   img.alt = name;
-  img.className = "max-h-screen rounded-xl shadow-2xl object-contain";
+  img.className = "rounded-xl shadow-2xl object-contain w-full";
   img.style.maxHeight = "85vh";
+  imgCol.appendChild(img);
 
-  box.append(closeBtn, label, img);
+  contentRow.appendChild(imgCol);
+
+  // Table col (if tbl DOM element provided)
+  if (tblEl) {
+    const rowCount = tblEl.querySelectorAll("tbody tr").length;
+    const tableCol = document.createElement("div");
+    tableCol.className = "flex-1 bg-white rounded-xl overflow-auto shadow-xl";
+    tableCol.style.maxHeight = "85vh";
+
+    // Header
+    const tblHeader = document.createElement("div");
+    tblHeader.className =
+      "sticky top-0 bg-gray-50 border-b border-gray-200 px-4 py-2.5 flex items-center gap-2";
+    tblHeader.innerHTML = `
+      <span class="font-semibold text-gray-700 text-sm">Item Ditemukan</span>
+      <span class="bg-blue-100 text-blue-700 text-xs font-bold rounded-full px-2 py-0.5">${rowCount}</span>
+    `;
+
+    // Clone the live table so edits show up, but modal copy is read-only display
+    const clonedTbl = tblEl.cloneNode(true);
+    clonedTbl.className = "w-full border-collapse text-sm";
+    // Strip edit interactivity from clone
+    clonedTbl.querySelectorAll("td").forEach((td) => {
+      td.style.cursor = "default";
+      td.style.outline = "";
+      td.title = "";
+    });
+
+    tableCol.appendChild(tblHeader);
+    tableCol.appendChild(clonedTbl);
+    contentRow.appendChild(tableCol);
+  }
+
+  box.append(topBar, contentRow);
   overlay.appendChild(box);
 
-  // Close on backdrop click
+  // Close on backdrop
   overlay.addEventListener("click", (e) => {
     if (e.target === overlay) overlay.remove();
   });
@@ -607,7 +666,7 @@ function appendImageSection(file, data, index) {
   fr.onload = (ev) => {
     imgEl.src = ev.target.result;
     imgEl.addEventListener("click", () =>
-      openImageModal(ev.target.result, file.name),
+      openImageModal(ev.target.result, file.name, tbl),
     );
   };
   fr.readAsDataURL(file);
@@ -1197,9 +1256,22 @@ function showTrumsModal() {
     tbody.appendChild(tr);
   }
 
-  // Auto-populate from collectedItems; fallback to 1 empty row
-  if (collectedItems.length > 0) {
-    collectedItems.forEach((item) => addItemRow(item));
+  // Auto-populate dari tabel hasil konversi (baca DOM langsung supaya edit inline ikut)
+  const liveItems = [];
+  document.querySelectorAll("#resultsContainer tbody tr").forEach((tr) => {
+    const cells = tr.querySelectorAll("td");
+    if (cells.length < 4) return;
+    const item = {
+      item: cells[0]?.innerText.trim().replace(/-$/, "").trim(),
+      deskripsi: cells[1]?.innerText.trim().replace(/-$/, "").trim(),
+      quantity: cells[2]?.innerText.trim().replace(/-$/, "").trim(),
+      unit: cells[3]?.innerText.trim().replace(/-$/, "").trim(),
+    };
+    if (item.item || item.deskripsi) liveItems.push(item);
+  });
+
+  if (liveItems.length > 0) {
+    liveItems.forEach((item) => addItemRow(item));
   } else {
     addItemRow();
   }
@@ -2090,10 +2162,12 @@ const postImage = async (url, image) => {
 convertBtn.addEventListener("click", async function () {
   if (uploadedImages.length === 0) return;
 
+  convertBtn.disabled = true;
+  convertBtn.classList.add("flex", "items-center", "justify-center", "gap-2");
+  btnLoader.classList.remove("hidden");
+  btnLoader.classList.remove("mx-auto");
   btnText.classList.remove("hidden");
   btnText.textContent = "Memproses...";
-  btnLoader.classList.remove("hidden");
-  convertBtn.disabled = true;
 
   // Only process images not yet converted
   const pending = uploadedImages
@@ -2115,8 +2189,21 @@ convertBtn.addEventListener("click", async function () {
   let successCount = 0;
 
   const stopLoading = () => {
-    btnText.textContent = "Konversi ke Excel";
+    const remainingPending = uploadedImages.filter(
+      (_, i) => !convertedIndices.has(i),
+    ).length;
+    btnText.textContent =
+      remainingPending > 0
+        ? `Konversi ${remainingPending} Gambar Baru`
+        : "Konversi ke Excel";
     btnLoader.classList.add("hidden");
+    btnLoader.classList.add("mx-auto");
+    convertBtn.classList.remove(
+      "flex",
+      "items-center",
+      "justify-center",
+      "gap-2",
+    );
     convertBtn.disabled = false;
   };
 
@@ -2136,7 +2223,7 @@ convertBtn.addEventListener("click", async function () {
         card.classList.add("border-blue-400", "border-2");
       }
 
-      btnText.textContent = `Memproses ${i + 1}/${uploadedImages.length}...`;
+      btnText.textContent = `Memproses ${i + 1} / ${uploadedImages.length}...`;
 
       try {
         let data;
