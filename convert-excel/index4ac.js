@@ -11,8 +11,8 @@ const categoryWrapper = document.getElementById("categoryWrapper");
 const categorySelect = document.getElementById("categorySelect");
 
 const JWT_TOKEN =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHAiOiJ0cnVtcyIsInVzZXIiOnsidW5pcXVlX2lkIjoiOGNiYTg4YTMyODY1MjgwZWY3MjdlMGJhY2M1NmU1NDUiLCJ1bmlxdWVfY29kZSI6IlBFT1BMRSA2MTc5MzM5NSIsImdpZCI6bnVsbCwicGxhdGZvcm0iOiJ3ZWIiLCJpZGVudGlmaWVyIjoid2ViLWNocm9tZS05YXM4ZGgxIn0sInR5cGUiOiJzdXBlcnVzZXIiLCJpYXQiOjE3NzMzODU1NzR9.85hDE7l0R48WZvjQdrEcblwt-6BenRhriejlWWesJCA";
-const URL = "http://192.168.1.228:9008";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHAiOiJ0cnVtcyIsInVzZXIiOnsidW5pcXVlX2lkIjoiZjM1YjdkMjViNjMzODNjZjFlOWM4NWRhZWQ2YTc2MzMiLCJ1bmlxdWVfY29kZSI6IlBFT1BMRSA3NzQxMTM2NiIsImdpZCI6bnVsbCwicGxhdGZvcm0iOiJ3ZWIiLCJpZGVudGlmaWVyIjoid2ViLWNocm9tZS05YXM4ZGgxMjEifSwidHlwZSI6InN1cGVydXNlciIsImlhdCI6MTc2NzMzODM3N30.av3ZzlXliAv9GkPOFCbpa26To5A9x2vK9zJ_QcX1U50";
+const URL = "https://api.trumecs.com";
 let uploadedImages = []; // array of File objects (multiple)
 let currentColumnKeys = [];
 let collectedItems = []; // accumulates items across multiple images
@@ -28,10 +28,14 @@ function makeImageCard(file, idx) {
   card.id = `imgCard-${idx}`;
 
   const img = document.createElement("img");
-  img.className = "w-full h-full object-cover";
+  img.className = "w-full h-full object-cover cursor-zoom-in";
   const reader = new FileReader();
   reader.onload = (ev) => {
     img.src = ev.target.result;
+    img.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openImageModal(ev.target.result, file.name, null);
+    });
   };
   reader.readAsDataURL(file);
   card.appendChild(img);
@@ -527,21 +531,26 @@ function openImageModal(src, name, tblEl) {
 
   topBar.append(label, closeBtn);
 
-  // ── Content row: image left + table right ──
+  // ── Content row: image left + table right (or centered if no table) ──
   const contentRow = document.createElement("div");
-  contentRow.className = "flex gap-4 overflow-hidden";
+  contentRow.className = tblEl
+    ? "flex gap-4 overflow-hidden"
+    : "flex justify-center overflow-hidden";
   contentRow.style.maxHeight = "85vh";
 
   // Image col
   const imgCol = document.createElement("div");
-  imgCol.className = "flex-shrink-0 flex items-start justify-center";
-  imgCol.style.maxWidth = tblEl ? "55%" : "100%";
+  imgCol.className = tblEl
+    ? "flex-shrink-0 flex items-start justify-center"
+    : "flex items-start justify-center";
+  if (tblEl) imgCol.style.maxWidth = "55%";
 
   const img = document.createElement("img");
   img.src = src;
   img.alt = name;
-  img.className = "rounded-xl shadow-2xl object-contain w-full";
+  img.className = "rounded-xl shadow-2xl object-contain";
   img.style.maxHeight = "85vh";
+  img.style.maxWidth = tblEl ? "100%" : "90vw";
   imgCol.appendChild(img);
 
   contentRow.appendChild(imgCol);
