@@ -1948,6 +1948,7 @@
                         <th>Serial Number</th>
                         <th class="col-qty">Quantity</th>
                         <th class="col-unit">Unit</th>
+                        <th>Brand</th>
                       </tr>
                     </thead>
                     <tbody id="itemTableBody"></tbody>
@@ -3175,7 +3176,7 @@
       }
 
       // ─── ITEM REVIEW TABLE (menggantikan preview mentah) ─────
-      // Header Excel yang dikenali: Item, Serial Number, Deskripsi, Quantity, Unit, image
+      // Header Excel yang dikenali: Item, Brand, Serial Number, Deskripsi, Quantity, Unit, image
       var items = [];
       const ITEM_HEADER_MAP = {
         item: "item",
@@ -3189,6 +3190,9 @@
         qty: "quantity",
         unit: "unit",
         satuan: "unit",
+        brand: "brand",
+        merk: "brand",
+        merek: "brand",
         image: "image_ref",
         gambar: "image_ref",
       };
@@ -3281,7 +3285,7 @@
       function renderItemsTable() {
         const tbody = document.getElementById("itemTableBody");
         if (!items.length) {
-          tbody.innerHTML = `<tr><td colspan="5" class="item-table-empty">Belum ada item. Upload file Excel terlebih dahulu.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="6" class="item-table-empty">Belum ada item. Upload file Excel terlebih dahulu.</td></tr>`;
           document.getElementById("previewMeta").textContent = "0 item";
           return;
         }
@@ -3294,6 +3298,7 @@
               <td>${escHtml(it.serial_number) || '<span style="color:var(--muted)">—</span>'}</td>
               <td>${it.quantity}</td>
               <td>${escHtml(it.unit) || '<span style="color:var(--muted)">—</span>'}</td>
+              <td>${escHtml(it.brand) || '<span style="color:var(--muted)">—</span>'}</td>
             </tr>`;
           })
           .join("");
