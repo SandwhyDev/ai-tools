@@ -854,6 +854,9 @@
         letter-spacing: 0.04em;
         white-space: nowrap;
       }
+      .item-table thead th.col-image {
+        width: 72px;
+      }
       .item-table thead th.col-qty {
         width: 90px;
       }
@@ -1248,442 +1251,383 @@
           <!-- Section 1: Detail -->
           <div class="card p-6 fade-in">
             <div
-              class="flex items-center gap-2 mb-5"
+              class="flex items-center mb-5"
               style="
+                justify-content: space-between;
                 padding-bottom: 16px;
                 border-bottom: 1px solid var(--border);
               "
             >
-              <svg
-                width="14"
-                height="14"
-                fill="none"
-                stroke="var(--accent)"
-                stroke-width="2"
-                viewBox="0 0 24 24"
-              >
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 8v4l3 3" />
-              </svg>
-              <span
-                style="font-size: 13px; font-weight: 600; color: var(--text)"
-                >Detail RFQ</span
-              >
-            </div>
-
-            <!-- Cari RFQ yang sudah ada (RFQ ini dipakai untuk menambahkan
-                 banyak item ke RFQ yang sudah pernah dibuat sebelumnya) -->
-            <div id="rfqSearchBlock">
-              <label class="label">Cari RFQ</label>
-              <div class="item-autocomplete-wrap">
-                <input
-                  type="text"
-                  id="continueRfqSearch"
-                  class="item-row-input"
-                  placeholder="Cari no. RFQ / nama perusahaan..."
-                  autocomplete="off"
-                  oninput="onContinueRfqSearch(this.value)"
-                />
-              </div>
-              <div id="continueRfqList" style="margin-top: 12px">
-                <div class="dropdown-loading">
-                  <div class="spin-sm"></div>
-                  Memuat RFQ terbaru...
-                </div>
-              </div>
-            </div>
-
-            <!-- Ringkasan RFQ yang sudah dipilih -->
-            <div id="rfqSummaryBlock" style="display: none">
-              <div
-                style="
-                  border: 1px solid var(--border);
-                  border-radius: 10px;
-                  padding: 14px 16px;
-                  background: var(--surface2);
-                "
-              >
-                <div
-                  class="flex items-center justify-between"
-                  style="margin-bottom: 8px"
+              <div class="flex items-center gap-2">
+                <svg
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="var(--accent)"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
                 >
-                  <span
-                    id="rfqSummaryCode"
-                    style="
-                      font-family: &quot;IBM Plex Mono&quot;, monospace;
-                      font-size: 12px;
-                      color: var(--accent);
-                      font-weight: 600;
-                    "
-                  ></span>
-                  <button
-                    type="button"
-                    class="btn-ghost"
-                    style="padding: 4px 12px; font-size: 12px"
-                    onclick="changeRfqSelection()"
-                  >
-                    Ganti RFQ
-                  </button>
-                </div>
-                <div
-                  id="rfqSummaryCompany"
-                  style="
-                    font-size: 14px;
-                    font-weight: 600;
-                    color: var(--text);
-                    margin-bottom: 4px;
-                  "
-                ></div>
-                <div
-                  id="rfqSummaryAddress"
-                  style="
-                    font-size: 12px;
-                    color: var(--muted);
-                    margin-bottom: 2px;
-                  "
-                ></div>
-                <div
-                  id="rfqSummaryMeta"
-                  style="font-size: 12px; color: var(--muted)"
-                ></div>
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M12 8v4l3 3" />
+                </svg>
+                <span
+                  style="font-size: 13px; font-weight: 600; color: var(--text)"
+                  >Detail RFQ</span
+                >
               </div>
+              <button
+                type="button"
+                class="btn-ghost"
+                style="
+                  padding: 6px 14px;
+                  font-size: 12px;
+                  display: flex;
+                  align-items: center;
+                  gap: 6px;
+                "
+                onclick="openContinueRfqModal()"
+              >
+                <svg
+                  width="13"
+                  height="13"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
+                Lanjutkan RFQ
+              </button>
             </div>
 
-            <!-- Field asli (perusahaan, PIC, alamat, tanggal, prioritas, note) tetap
-                 dipertahankan untuk menyimpan data & dipakai saat submit, tapi
-                 disembunyikan karena sudah diisi otomatis dari hasil "Cari RFQ" di atas. -->
-            <div id="rfqManualFields" style="display: none">
-              <div
-                class="grid grid-cols-1 gap-4"
-                style="grid-template-columns: 1fr 1fr"
-              >
-                <!-- Nama Perusahaan/Perorangan -->
-                <div style="grid-column: span 2">
-                  <label class="label"
-                    >Nama Perusahaan/Perorangan
-                    <span style="color: var(--danger)">*</span></label
-                  >
-                  <input
-                    type="hidden"
-                    name="company_id"
-                    id="company_val"
-                    required
-                  />
-                  <div class="contact-wrap" id="wrap_company">
-                    <div class="contact-input-row" id="row_company">
-                      <div
-                        class="selected-chip"
-                        id="chip_company"
-                        style="display: none"
-                      ></div>
-                      <input
-                        type="text"
-                        class="contact-search-input"
-                        id="search_company"
-                        placeholder="Cari Kontak"
-                        autocomplete="off"
-                      />
-                      <button
-                        type="button"
-                        class="contact-clear-btn"
-                        id="clear_company"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <div class="contact-status" id="status_company"></div>
-                    <div class="contact-dropdown" id="dropdown_company"></div>
-                  </div>
-                </div>
-
-                <!-- PIC (tergantung perusahaan yang dipilih) -->
-                <div style="grid-column: span 2">
-                  <label class="label">PIC</label>
-                  <input type="hidden" name="pic_id" id="pic_val" />
-                  <div class="contact-wrap" id="wrap_pic">
-                    <div class="contact-input-row" id="row_pic">
-                      <div
-                        class="selected-chip"
-                        id="chip_pic"
-                        style="display: none"
-                      ></div>
-                      <input
-                        type="text"
-                        class="contact-search-input"
-                        id="search_pic"
-                        placeholder="Pilih perusahaan dulu"
-                        autocomplete="off"
-                        disabled
-                      />
-                      <button
-                        type="button"
-                        class="contact-clear-btn"
-                        id="clear_pic"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <div class="contact-status" id="status_pic"></div>
-                    <div class="contact-dropdown" id="dropdown_pic"></div>
-                  </div>
-                </div>
-
-                <!-- File Lampiran -->
-                <div style="grid-column: span 2">
-                  <div class="flex items-center justify-between mb-2">
-                    <label class="label" style="margin-bottom: 0">
-                      File Lampiran
-                      <span
-                        style="
-                          color: var(--muted);
-                          font-size: 10px;
-                          text-transform: none;
-                          letter-spacing: 0;
-                          margin-left: 6px;
-                        "
-                        >(gambar, PDF, dokumen — opsional)</span
-                      >
-                    </label>
-                    <span
-                      class="attach-count-badge"
-                      id="attachCountBadge"
-                      style="display: none"
-                    >
-                      <svg
-                        width="11"
-                        height="11"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2.5"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
-                        />
-                      </svg>
-                      <span id="attachCountText">0 file</span>
-                    </span>
-                  </div>
-                  <div
-                    class="attach-drop-zone"
-                    id="attachDropZone"
-                    onclick="document.getElementById('attachInput').click()"
-                  >
-                    <input
-                      type="file"
-                      id="attachInput"
-                      multiple
-                      accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar"
-                      style="display: none"
-                      onchange="handleAttachments(this.files)"
-                    />
+            <div
+              class="grid grid-cols-1 gap-4"
+              style="grid-template-columns: 1fr 1fr"
+            >
+              <!-- Nama Perusahaan/Perorangan -->
+              <div style="grid-column: span 2">
+                <label class="label"
+                  >Nama Perusahaan/Perorangan
+                  <span style="color: var(--danger)">*</span></label
+                >
+                <input
+                  type="hidden"
+                  name="company_id"
+                  id="company_val"
+                  required
+                />
+                <div class="contact-wrap" id="wrap_company">
+                  <div class="contact-input-row" id="row_company">
                     <div
-                      style="
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        gap: 8px;
-                        pointer-events: none;
-                      "
+                      class="selected-chip"
+                      id="chip_company"
+                      style="display: none"
+                    ></div>
+                    <input
+                      type="text"
+                      class="contact-search-input"
+                      id="search_company"
+                      placeholder="Cari Kontak"
+                      autocomplete="off"
+                    />
+                    <button
+                      type="button"
+                      class="contact-clear-btn"
+                      id="clear_company"
                     >
-                      <div
-                        style="
-                          width: 40px;
-                          height: 40px;
-                          background: rgba(0, 153, 255, 0.08);
-                          border: 1px solid rgba(0, 153, 255, 0.2);
-                          border-radius: 10px;
-                          display: flex;
-                          align-items: center;
-                          justify-content: center;
-                        "
-                      >
-                        <svg
-                          width="20"
-                          height="20"
-                          fill="none"
-                          stroke="#60a5fa"
-                          stroke-width="1.5"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
-                          />
-                        </svg>
-                      </div>
-                      <p
-                        style="
-                          font-size: 13px;
-                          font-weight: 500;
-                          color: var(--text);
-                        "
-                      >
-                        Drag & drop lampiran di sini
-                      </p>
-                      <p style="font-size: 11px; color: var(--muted)">
-                        atau klik untuk memilih — gambar, PDF, Word, Excel, dll.
-                        Bisa multiple files
-                      </p>
-                    </div>
+                      ✕
+                    </button>
                   </div>
-                  <div class="attach-list" id="attachList"></div>
+                  <div class="contact-status" id="status_company"></div>
+                  <div class="contact-dropdown" id="dropdown_company"></div>
                 </div>
+              </div>
 
-                <!-- Alamat Perusahaan/Perorangan -->
-                <div style="grid-column: span 2">
-                  <label class="label">Alamat Perusahaan/Perorangan</label>
-                  <input type="hidden" name="address_id" id="address_val" />
-                  <input
-                    type="hidden"
-                    name="address_text"
-                    id="address_text_val"
-                  />
-                  <input
-                    type="hidden"
-                    name="address_street"
-                    id="address_street_val"
-                  />
-                  <input
-                    type="hidden"
-                    name="address_village"
-                    id="address_village_val"
-                  />
-                  <input
-                    type="hidden"
-                    name="address_city"
-                    id="address_city_val"
-                  />
-                  <input
-                    type="hidden"
-                    name="address_regency"
-                    id="address_regency_val"
-                  />
-                  <input
-                    type="hidden"
-                    name="address_province"
-                    id="address_province_val"
-                  />
-                  <div class="contact-wrap" id="wrap_address">
-                    <div class="contact-input-row" id="row_address">
-                      <div
-                        class="selected-chip"
-                        id="chip_address"
-                        style="display: none"
-                      ></div>
-                      <input
-                        type="text"
-                        class="contact-search-input"
-                        id="search_address"
-                        placeholder="Cari Alamat/Buat Baru"
-                        autocomplete="off"
-                      />
-                      <button
-                        type="button"
-                        class="contact-clear-btn"
-                        id="clear_address"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                    <div class="contact-status" id="status_address"></div>
-                    <div class="contact-dropdown" id="dropdown_address"></div>
+              <!-- PIC (tergantung perusahaan yang dipilih) -->
+              <div style="grid-column: span 2">
+                <label class="label">PIC</label>
+                <input type="hidden" name="pic_id" id="pic_val" />
+                <div class="contact-wrap" id="wrap_pic">
+                  <div class="contact-input-row" id="row_pic">
+                    <div
+                      class="selected-chip"
+                      id="chip_pic"
+                      style="display: none"
+                    ></div>
+                    <input
+                      type="text"
+                      class="contact-search-input"
+                      id="search_pic"
+                      placeholder="Pilih perusahaan dulu"
+                      autocomplete="off"
+                      disabled
+                    />
+                    <button
+                      type="button"
+                      class="contact-clear-btn"
+                      id="clear_pic"
+                    >
+                      ✕
+                    </button>
                   </div>
-                  <div
-                    id="addressDetailBox"
-                    style="
-                      display: none;
-                      margin-top: 8px;
-                      padding: 8px 12px;
-                      background: var(--surface2);
-                      border: 1px solid var(--border);
-                      border-radius: 8px;
-                      font-size: 12px;
-                      color: var(--muted);
-                      line-height: 1.5;
-                    "
-                  ></div>
+                  <div class="contact-status" id="status_pic"></div>
+                  <div class="contact-dropdown" id="dropdown_pic"></div>
                 </div>
+              </div>
 
-                <!-- Tanggal Permintaan -->
-                <div style="grid-column: span 2">
-                  <label
-                    class="label"
-                    style="display: flex; align-items: center; gap: 6px"
+              <!-- File Lampiran -->
+              <div style="grid-column: span 2">
+                <div class="flex items-center justify-between mb-2">
+                  <label class="label" style="margin-bottom: 0">
+                    File Lampiran
+                    <span
+                      style="
+                        color: var(--muted);
+                        font-size: 10px;
+                        text-transform: none;
+                        letter-spacing: 0;
+                        margin-left: 6px;
+                      "
+                      >(gambar, PDF, dokumen — opsional)</span
+                    >
+                  </label>
+                  <span
+                    class="attach-count-badge"
+                    id="attachCountBadge"
+                    style="display: none"
                   >
                     <svg
                       width="11"
                       height="11"
                       fill="none"
                       stroke="currentColor"
-                      stroke-width="2"
+                      stroke-width="2.5"
                       viewBox="0 0 24 24"
                     >
-                      <rect x="3" y="4" width="18" height="18" rx="2" />
-                      <line x1="16" y1="2" x2="16" y2="6" />
-                      <line x1="8" y1="2" x2="8" y2="6" />
-                      <line x1="3" y1="10" x2="21" y2="10" />
+                      <path
+                        d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+                      />
                     </svg>
-                    Tanggal Permintaan
-                    <span style="color: var(--danger)">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="request_date"
-                    id="request_date"
-                    class="input-field"
-                    style="max-width: 220px"
-                    required
-                  />
+                    <span id="attachCountText">0 file</span>
+                  </span>
                 </div>
-
-                <!-- Prioritas -->
-                <div style="grid-column: span 2">
-                  <label class="label">Prioritas</label>
+                <div
+                  class="attach-drop-zone"
+                  id="attachDropZone"
+                  onclick="document.getElementById('attachInput').click()"
+                >
                   <input
-                    type="hidden"
-                    name="priority"
-                    id="priority_val"
-                    value="low"
+                    type="file"
+                    id="attachInput"
+                    multiple
+                    accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.zip,.rar"
+                    style="display: none"
+                    onchange="handleAttachments(this.files)"
                   />
                   <div
-                    style="display: flex; gap: 8px; flex-wrap: wrap"
-                    id="priorityGroup"
+                    style="
+                      display: flex;
+                      flex-direction: column;
+                      align-items: center;
+                      gap: 8px;
+                      pointer-events: none;
+                    "
                   >
-                    <button
-                      type="button"
-                      class="priority-btn active"
-                      data-value="low"
+                    <div
+                      style="
+                        width: 40px;
+                        height: 40px;
+                        background: rgba(0, 153, 255, 0.08);
+                        border: 1px solid rgba(0, 153, 255, 0.2);
+                        border-radius: 10px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                      "
                     >
-                      Low
-                    </button>
-                    <button
-                      type="button"
-                      class="priority-btn"
-                      data-value="medium"
+                      <svg
+                        width="20"
+                        height="20"
+                        fill="none"
+                        stroke="#60a5fa"
+                        stroke-width="1.5"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"
+                        />
+                      </svg>
+                    </div>
+                    <p
+                      style="
+                        font-size: 13px;
+                        font-weight: 500;
+                        color: var(--text);
+                      "
                     >
-                      Medium
-                    </button>
-                    <button
-                      type="button"
-                      class="priority-btn"
-                      data-value="high"
-                    >
-                      High
-                    </button>
+                      Drag & drop lampiran di sini
+                    </p>
+                    <p style="font-size: 11px; color: var(--muted)">
+                      atau klik untuk memilih — gambar, PDF, Word, Excel, dll.
+                      Bisa multiple files
+                    </p>
                   </div>
                 </div>
+                <div class="attach-list" id="attachList"></div>
+              </div>
 
-                <!-- Note -->
-                <div style="grid-column: span 2">
-                  <label class="label">Note</label>
-                  <textarea
-                    name="note"
-                    class="input-field"
-                    rows="3"
-                    placeholder="Catatan tambahan (opsional)..."
-                    style="resize: vertical"
-                  ></textarea>
+              <!-- Alamat Perusahaan/Perorangan -->
+              <div style="grid-column: span 2">
+                <label class="label">Alamat Perusahaan/Perorangan</label>
+                <input type="hidden" name="address_id" id="address_val" />
+                <input
+                  type="hidden"
+                  name="address_text"
+                  id="address_text_val"
+                />
+                <input
+                  type="hidden"
+                  name="address_street"
+                  id="address_street_val"
+                />
+                <input
+                  type="hidden"
+                  name="address_village"
+                  id="address_village_val"
+                />
+                <input
+                  type="hidden"
+                  name="address_city"
+                  id="address_city_val"
+                />
+                <input
+                  type="hidden"
+                  name="address_regency"
+                  id="address_regency_val"
+                />
+                <input
+                  type="hidden"
+                  name="address_province"
+                  id="address_province_val"
+                />
+                <div class="contact-wrap" id="wrap_address">
+                  <div class="contact-input-row" id="row_address">
+                    <div
+                      class="selected-chip"
+                      id="chip_address"
+                      style="display: none"
+                    ></div>
+                    <input
+                      type="text"
+                      class="contact-search-input"
+                      id="search_address"
+                      placeholder="Cari Alamat/Buat Baru"
+                      autocomplete="off"
+                    />
+                    <button
+                      type="button"
+                      class="contact-clear-btn"
+                      id="clear_address"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  <div class="contact-status" id="status_address"></div>
+                  <div class="contact-dropdown" id="dropdown_address"></div>
                 </div>
+                <div
+                  id="addressDetailBox"
+                  style="
+                    display: none;
+                    margin-top: 8px;
+                    padding: 8px 12px;
+                    background: var(--surface2);
+                    border: 1px solid var(--border);
+                    border-radius: 8px;
+                    font-size: 12px;
+                    color: var(--muted);
+                    line-height: 1.5;
+                  "
+                ></div>
+              </div>
+
+              <!-- Tanggal Permintaan -->
+              <div style="grid-column: span 2">
+                <label
+                  class="label"
+                  style="display: flex; align-items: center; gap: 6px"
+                >
+                  <svg
+                    width="11"
+                    height="11"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <line x1="16" y1="2" x2="16" y2="6" />
+                    <line x1="8" y1="2" x2="8" y2="6" />
+                    <line x1="3" y1="10" x2="21" y2="10" />
+                  </svg>
+                  Tanggal Permintaan
+                  <span style="color: var(--danger)">*</span>
+                </label>
+                <input
+                  type="date"
+                  name="request_date"
+                  id="request_date"
+                  class="input-field"
+                  style="max-width: 220px"
+                  required
+                />
+              </div>
+
+              <!-- Prioritas -->
+              <div style="grid-column: span 2">
+                <label class="label">Prioritas</label>
+                <input
+                  type="hidden"
+                  name="priority"
+                  id="priority_val"
+                  value="low"
+                />
+                <div
+                  style="display: flex; gap: 8px; flex-wrap: wrap"
+                  id="priorityGroup"
+                >
+                  <button
+                    type="button"
+                    class="priority-btn active"
+                    data-value="low"
+                  >
+                    Low
+                  </button>
+                  <button
+                    type="button"
+                    class="priority-btn"
+                    data-value="medium"
+                  >
+                    Medium
+                  </button>
+                  <button type="button" class="priority-btn" data-value="high">
+                    High
+                  </button>
+                </div>
+              </div>
+
+              <!-- Note -->
+              <div style="grid-column: span 2">
+                <label class="label">Note</label>
+                <textarea
+                  name="note"
+                  class="input-field"
+                  rows="3"
+                  placeholder="Catatan tambahan (opsional)..."
+                  style="resize: vertical"
+                ></textarea>
               </div>
             </div>
           </div>
@@ -1943,16 +1887,80 @@
                   <table class="item-table">
                     <thead>
                       <tr>
+                        <th class="col-image">Image</th>
                         <th>Item</th>
                         <th>Deskripsi</th>
                         <th>Serial Number</th>
                         <th class="col-qty">Quantity</th>
                         <th class="col-unit">Unit</th>
+                        <th class="col-aksi">Aksi</th>
                       </tr>
                     </thead>
                     <tbody id="itemTableBody"></tbody>
                   </table>
                 </div>
+                <button
+                  type="button"
+                  class="item-add-row-btn"
+                  onclick="addEmptyItemRow()"
+                >
+                  <svg
+                    width="13"
+                    height="13"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.5"
+                    viewBox="0 0 24 24"
+                  >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                  Tambah Item
+                </button>
+              </div>
+              <input
+                type="file"
+                id="itemImageInput"
+                accept="image/*"
+                style="display: none"
+              />
+            </div>
+          </div>
+
+          <!-- Modal: Lanjutkan RFQ (cari inquiry existing, isi ulang form) -->
+          <div
+            id="continueRfqOverlay"
+            class="item-detail-overlay"
+            style="display: none"
+            onclick="if (event.target === this) closeContinueRfqModal();"
+          >
+            <div class="item-detail-panel">
+              <div class="item-detail-header">
+                <span>Lanjutkan RFQ</span>
+                <button
+                  type="button"
+                  class="item-detail-close"
+                  onclick="closeContinueRfqModal()"
+                >
+                  &times;
+                </button>
+              </div>
+              <div style="padding: 16px 20px 0; flex-shrink: 0">
+                <input
+                  type="text"
+                  id="continueRfqSearch"
+                  class="item-row-input"
+                  placeholder="Cari no. RFQ / nama perusahaan..."
+                  autocomplete="off"
+                  oninput="onContinueRfqSearch(this.value)"
+                />
+              </div>
+              <div
+                class="item-detail-body"
+                id="continueRfqList"
+                style="padding-top: 14px"
+              >
+                <div class="item-table-empty">Ketik untuk mencari RFQ...</div>
               </div>
             </div>
           </div>
@@ -2159,10 +2167,8 @@
       const API_BASE = "https://api.trumecs.com/api";
       const JWT_TOKEN =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHAiOiJ0cnVtcyIsInVzZXIiOnsidW5pcXVlX2lkIjoiZjM1YjdkMjViNjMzODNjZjFlOWM4NWRhZWQ2YTc2MzMiLCJ1bmlxdWVfY29kZSI6IlBFT1BMRSA3NzQxMTM2NiIsImdpZCI6bnVsbCwicGxhdGZvcm0iOiJ3ZWIiLCJpZGVudGlmaWVyIjoid2ViLWNocm9tZS05YXM4ZGgxMjEifSwidHlwZSI6InN1cGVydXNlciIsImlhdCI6MTc2NzMzODM3N30.av3ZzlXliAv9GkPOFCbpa26To5A9x2vK9zJ_QcX1U50";
-      // Endpoint import Excel ke inquiry yang sudah ada (server lokal)
-      const API_URL = "https://api.trumecs.com/api/import-inquiries";
-      const IMPORT_INQUIRIES_TOKEN =
-        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHAiOiJ0cnVtcyIsInVzZXIiOnsidW5pcXVlX2lkIjoiZjM1YjdkMjViNjMzODNjZjFlOWM4NWRhZWQ2YTc2MzMiLCJ1bmlxdWVfY29kZSI6IlBFT1BMRSA3NzQxMTM2NiIsImdpZCI6bnVsbCwicGxhdGZvcm0iOiJ3ZWIiLCJpZGVudGlmaWVyIjoid2ViLWNocm9tZS05YXM4ZGgxMjEifSwidHlwZSI6InN1cGVydXNlciIsImlhdCI6MTc2NzMzODM3N30.av3ZzlXliAv9GkPOFCbpa26To5A9x2vK9zJ_QcX1U50";
+      // TODO: sesuaikan dengan endpoint RFQ yang sebenarnya di backend
+      const API_URL = "http://192.168.1.228:9008/api/inquiries-create";
 
       // Endpoint & token khusus untuk autocomplete "Item" (katalog inventori)
       // PERHATIAN: token ini punya masa berlaku (exp) — akan kedaluwarsa dan
@@ -2188,9 +2194,6 @@
           "-" +
           String(today.getDate()).padStart(2, "0");
         document.getElementById("request_date").value = iso;
-
-        // Tampilkan 10 RFQ terbaru langsung tanpa perlu ketik dulu
-        fetchRfqList("");
       };
 
       // ─── PRIORITY SEGMENTED BUTTONS ──────────────────────────
@@ -2800,65 +2803,31 @@
         detailBox.style.display = "none";
       }
 
-      // ─── CARI RFQ (inline di card Detail RFQ) ───
+      // ─── LANJUTKAN RFQ (cari inquiry lama & isi ulang form) ───
       let rfqSearchDebounce = null;
       let rfqSearchResults = [];
 
-      function showRfqSummary(inquiry) {
-        document.getElementById("rfqSearchBlock").style.display = "none";
-        document.getElementById("rfqSummaryBlock").style.display = "block";
-        document.getElementById("rfqSummaryCode").textContent =
-          inquiry.unique_code || "";
-        document.getElementById("rfqSummaryCompany").textContent =
-          (inquiry.request_to && inquiry.request_to.name) || "(tanpa nama)";
-        document.getElementById("rfqSummaryAddress").textContent =
-          (inquiry.address &&
-            (inquiry.address.address_name || inquiry.address.contact_name)) ||
-          "";
-        const dateStr = inquiry.date ? formatUnixDate(inquiry.date) : "";
-        const picName = (inquiry.request_by && inquiry.request_by.name) || "";
-        document.getElementById("rfqSummaryMeta").textContent = [
-          dateStr,
-          inquiry.priority ? `Prioritas: ${inquiry.priority}` : "",
-          picName ? `PIC: ${picName}` : "",
-        ]
-          .filter(Boolean)
-          .join(" • ");
-      }
-
-      // Cari RFQ lain → reset semua data yang sudah dimuat, tampilkan pencarian lagi
-      function changeRfqSelection() {
-        continuedInquiryId = "";
-        contactFields.forEach((f) => clearContact(f));
-        clearAddressField();
-        document.getElementById("request_date").value = "";
-        document
-          .querySelectorAll(".priority-btn")
-          .forEach((b) => b.classList.remove("active"));
-        document
-          .querySelector('.priority-btn[data-value="low"]')
-          .classList.add("active");
-        document.getElementById("priority_val").value = "low";
-        const noteEl = document.querySelector('textarea[name="note"]');
-        if (noteEl) noteEl.value = "";
-
-        document.getElementById("rfqSummaryBlock").style.display = "none";
-        document.getElementById("rfqSearchBlock").style.display = "block";
+      function openContinueRfqModal() {
+        document.getElementById("continueRfqOverlay").style.display = "flex";
         document.getElementById("continueRfqSearch").value = "";
-        fetchRfqList("");
+        document.getElementById("continueRfqList").innerHTML =
+          `<div class="item-table-empty">Ketik untuk mencari RFQ...</div>`;
         setTimeout(
           () => document.getElementById("continueRfqSearch").focus(),
           50,
         );
-        checkSubmitReady();
+      }
+
+      function closeContinueRfqModal() {
+        document.getElementById("continueRfqOverlay").style.display = "none";
       }
 
       function onContinueRfqSearch(value) {
         const kw = value.trim();
         clearTimeout(rfqSearchDebounce);
         if (!kw) {
-          // input dikosongkan → tampilkan lagi 10 RFQ terbaru (default list)
-          fetchRfqList("");
+          document.getElementById("continueRfqList").innerHTML =
+            `<div class="item-table-empty">Ketik untuk mencari RFQ...</div>`;
           return;
         }
         rfqSearchDebounce = setTimeout(() => fetchRfqList(kw), 350);
@@ -2866,7 +2835,7 @@
 
       async function fetchRfqList(keyword) {
         const list = document.getElementById("continueRfqList");
-        list.innerHTML = `<div class="dropdown-loading"><div class="spin-sm"></div> ${keyword ? "Mencari RFQ..." : "Memuat RFQ terbaru..."}</div>`;
+        list.innerHTML = `<div class="dropdown-loading"><div class="spin-sm"></div> Mencari RFQ...</div>`;
         try {
           const res = await fetch(`${API_BASE}/search`, {
             method: "POST",
@@ -2884,7 +2853,7 @@
                   status: [],
                 },
               ],
-              limit: "10",
+              limit: "20",
               offset: "1",
               table: "inquiries",
               sort: { column: "created_at", order: "DESC" },
@@ -2924,9 +2893,7 @@
       function renderRfqList(kw, rows) {
         const list = document.getElementById("continueRfqList");
         if (!rows.length) {
-          list.innerHTML = kw
-            ? `<div class="item-table-empty">Tidak ada RFQ untuk "${escHtml(kw)}"</div>`
-            : `<div class="item-table-empty">Belum ada RFQ tersedia</div>`;
+          list.innerHTML = `<div class="item-table-empty">Tidak ada RFQ untuk "${escHtml(kw)}"</div>`;
           return;
         }
         list.innerHTML = rows
@@ -3016,7 +2983,7 @@
         const noteEl = document.querySelector('textarea[name="note"]');
         if (noteEl) noteEl.value = inquiry.description || "";
 
-        showRfqSummary(inquiry);
+        closeContinueRfqModal();
         showToast(
           `RFQ ${inquiry.unique_code || ""} berhasil dimuat ke form`,
           "success",
@@ -3271,19 +3238,57 @@
       function renderItemsTable() {
         const tbody = document.getElementById("itemTableBody");
         if (!items.length) {
-          tbody.innerHTML = `<tr><td colspan="5" class="item-table-empty">Belum ada item. Upload file Excel terlebih dahulu.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="7" class="item-table-empty">Belum ada item. Klik "Tambah Item" atau upload Excel.</td></tr>`;
           document.getElementById("previewMeta").textContent = "0 item";
           return;
         }
         tbody.innerHTML = items
           .map((it) => {
+            const thumb = it.preview_url
+              ? `<img src="${it.preview_url}" alt="${escHtml(it.item)}" />`
+              : `<svg width="20" height="20" fill="none" stroke="#0a0c10" stroke-width="1.5" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>`;
             return `
             <tr data-row-id="${it.id}">
-              <td>${escHtml(it.item) || '<span style="color:var(--muted)">—</span>'}</td>
-              <td>${escHtml(it.deskripsi) || '<span style="color:var(--muted)">—</span>'}</td>
-              <td>${escHtml(it.serial_number) || '<span style="color:var(--muted)">—</span>'}</td>
-              <td>${it.quantity}</td>
-              <td>${escHtml(it.unit) || '<span style="color:var(--muted)">—</span>'}</td>
+              <td>
+                <div class="item-image-cell" title="Klik untuk upload gambar" onclick="triggerItemImagePick('${it.id}')">${thumb}</div>
+              </td>
+              <td>
+                <div class="item-autocomplete-wrap contact-wrap" id="itemwrap_${it.id}">
+                  <input type="text" class="item-row-input item-item-input" id="iteminput_${it.id}"
+                    placeholder="Cari/isi nama item" autocomplete="off"
+                    value="${escHtml(it.item)}"
+                    onfocus="onItemFocus('${it.id}')"
+                    onclick="onItemFocus('${it.id}')"
+                    oninput="onItemNameInput('${it.id}', this.value)" />
+                  <div class="contact-dropdown" id="itemdropdown_${it.id}"></div>
+                </div>
+              </td>
+              <td>
+                <textarea class="item-row-input" rows="1" placeholder="Tambahkan Deskripsi"
+                  onchange="updateItemField('${it.id}','deskripsi',this.value)">${escHtml(it.deskripsi)}</textarea>
+              </td>
+              <td>
+                <input type="text" class="item-row-input" placeholder="—" value="${escHtml(it.serial_number)}"
+                  onchange="updateItemField('${it.id}','serial_number',this.value)" />
+              </td>
+              <td>
+                <input type="number" min="1" class="item-row-input item-qty-input" value="${it.quantity}"
+                  onchange="updateItemField('${it.id}','quantity',this.value)" />
+              </td>
+              <td>
+                <div class="item-autocomplete-wrap" id="unitwrap_${it.id}">
+                  <input type="text" class="item-row-input" id="unitinput_${it.id}"
+                    autocomplete="off" value="${escHtml(it.unit)}"
+                    onfocus="onUnitFocus('${it.id}')" onclick="onUnitFocus('${it.id}')"
+                    oninput="onUnitTyping('${it.id}', this.value)" />
+                  <div class="contact-dropdown" id="unitdropdown_${it.id}"></div>
+                </div>
+              </td>
+              <td>
+                <button type="button" class="item-remove-btn" title="Hapus item" onclick="removeItemRow('${it.id}')">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="3,6 5,6 21,6" /><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" /></svg>
+                </button>
+              </td>
             </tr>`;
           })
           .join("");
@@ -3291,6 +3296,26 @@
           items.length + " item";
         checkSubmitReady();
       }
+
+      // klik cell gambar → pilih file gambar khusus untuk baris item tsb
+      let pendingImageItemId = null;
+      function triggerItemImagePick(id) {
+        pendingImageItemId = id;
+        document.getElementById("itemImageInput").click();
+      }
+      document
+        .getElementById("itemImageInput")
+        .addEventListener("change", (e) => {
+          const file = e.target.files[0];
+          e.target.value = "";
+          if (!file || !pendingImageItemId) return;
+          const it = items.find((x) => x.id === pendingImageItemId);
+          if (!it) return;
+          if (it.preview_url) URL.revokeObjectURL(it.preview_url);
+          it.image_file = file;
+          it.preview_url = URL.createObjectURL(file);
+          renderItemsTable();
+        });
 
       // ─── ITEM AUTOCOMPLETE (pola sama seperti company/address) ─
       const itemAutocompleteState = {};
@@ -3878,29 +3903,121 @@
             return;
           }
 
-          // Harus sudah pilih RFQ (mengisi continuedInquiryId lewat "Cari RFQ")
-          if (!continuedInquiryId) {
-            showToast("Cari & pilih RFQ terlebih dahulu", "error");
-            return;
-          }
+          let valid = true;
 
-          // Minimal 1 item dengan nama terisi (sanity check hasil parsing Excel)
+          // Nama Perusahaan/Perorangan wajib
+          const companyVal = document.getElementById("company_val").value;
+          const companyRow = document.getElementById("row_company");
+          if (!companyVal) {
+            companyRow.classList.add("error");
+            valid = false;
+          } else companyRow.classList.remove("error");
+
+          // Tanggal Permintaan wajib
+          const reqDateInput = document.getElementById("request_date");
+          if (!reqDateInput.value) {
+            reqDateInput.style.borderColor = "var(--danger)";
+            valid = false;
+          } else reqDateInput.style.borderColor = "";
+
+          // Minimal 1 item dengan nama terisi
           const validItems = items.filter((it) => it.item.trim());
           if (!validItems.length) {
-            showToast(
-              "File Excel tidak berisi item yang valid, cek kembali file-nya",
-              "error",
-            );
+            showToast("Tambahkan minimal 1 item dengan nama terisi", "error");
+            valid = false;
+          }
+
+          if (!valid) {
+            showToast("Lengkapi semua field yang wajib diisi", "error");
             return;
           }
 
-          const fd = new FormData();
-          fd.append("unique_id", continuedInquiryId);
-          fd.append("excel", uploadedFile, uploadedFile.name);
+          const fd = new FormData(e.target);
 
-          console.log("📤 Payload import-inquiries:", {
-            unique_id: continuedInquiryId,
-            excel: uploadedFile.name,
+          // request_date → unix timestamp 10 digit
+          const reqUnix = dateToUnix(fd.get("request_date"));
+
+          // Field utama inquiry (POST https://api.trumecs.com/api/inquiries-create)
+          // unique_id: kalau ini lanjutan RFQ lama, sambungkan ke inquiry itu.
+          fd.set("unique_id", continuedInquiryId || "");
+          fd.delete("request_date");
+          if (reqUnix !== null) fd.set("date", reqUnix);
+          fd.set("status", "draft");
+          fd.set("priority", fd.get("priority") || "low");
+          fd.set("description", fd.get("note") || "");
+          fd.set("request_by_id", fd.get("pic_id") || "");
+          fd.set("type", "sales_inquiry");
+          fd.set("request_to_id", fd.get("company_id") || "");
+          fd.set("address_id", fd.get("address_id") || "");
+          fd.delete("company_id");
+          fd.delete("pic_id");
+          fd.delete("note");
+
+          // item_request[i][...] ← data hasil review/edit tabel item
+          // TODO: konfirmasi field mana saja yang wajib diisi backend
+          validItems.forEach((it, i) => {
+            fd.append(`item_request[${i}][unique_id]`, "null");
+            fd.append(
+              `item_request[${i}][catalogue_id]`,
+              it.catalogue_id || "",
+            );
+            fd.append(`item_request[${i}][catalogue_name]`, it.item);
+            fd.append(`item_request[${i}][description]`, it.deskripsi || "");
+            fd.append(`item_request[${i}][unit_id]`, it.unit_id || "");
+            fd.append(`item_request[${i}][unit_name]`, it.unit || "");
+            fd.append(`item_request[${i}][request_qty]`, it.quantity);
+            fd.append(`item_request[${i}][approved_qty]`, "0");
+            fd.append(`item_request[${i}][rejected_qty]`, "0");
+            fd.append(`item_request[${i}][remaining_qty]`, it.quantity);
+            fd.append(`item_request[${i}][sn]`, it.serial_number || "");
+          });
+
+          // Gambar per item dikirim terpisah, nama file diprefix dengan id item
+          // agar backend bisa mencocokkan gambar ke item terkait di atas.
+          fd.delete("files");
+          validItems.forEach((it) => {
+            if (it.image_file) {
+              fd.append(
+                "item_images",
+                it.image_file,
+                `${it.id}__${it.image_file.name}`,
+              );
+            }
+          });
+
+          // Lampiran (dokumen pendukung, terpisah dari gambar item) → key "files"
+          attachments.forEach((a) => {
+            fd.append("files", a.file);
+          });
+
+          console.log("📤 Payload:", {
+            unique_id: fd.get("unique_id") || "(RFQ baru)",
+            request_to_id: fd.get("request_to_id"),
+            request_by_id: fd.get("request_by_id") || "(kosong)",
+            address_id: fd.get("address_id") || "(kosong)",
+            address_text: fd.get("address_text") || "(kosong)",
+            address_detail: {
+              street: fd.get("address_street") || "",
+              village: fd.get("address_village") || "",
+              city: fd.get("address_city") || "",
+              regency: fd.get("address_regency") || "",
+              province: fd.get("address_province") || "",
+            },
+            date: fd.get("date") ?? "(kosong)",
+            status: fd.get("status"),
+            priority: fd.get("priority"),
+            description: fd.get("description") ?? "",
+            type: fd.get("type"),
+            item_request: validItems.map((it, i) => ({
+              catalogue_id: it.catalogue_id || "",
+              catalogue_name: it.item,
+              unit_id: it.unit_id || "",
+              unit_name: it.unit,
+              request_qty: it.quantity,
+              sn: it.serial_number || "",
+            })),
+            item_images: validItems.filter((it) => it.image_file).length,
+            attachments: attachments.map((a) => a.file.name),
           });
 
           const btn = document.getElementById("submitBtn");
@@ -3913,7 +4030,7 @@
           try {
             const res = await fetch(API_URL, {
               method: "POST",
-              headers: { Authorization: `Bearer ${IMPORT_INQUIRIES_TOKEN}` },
+              headers: { Authorization: `Bearer ${JWT_TOKEN}` },
               body: fd,
             });
             if (!res.ok)
@@ -3958,9 +4075,6 @@
         document
           .querySelectorAll(".input-field")
           .forEach((el) => (el.style.borderColor = ""));
-        document.getElementById("rfqSummaryBlock").style.display = "none";
-        document.getElementById("rfqSearchBlock").style.display = "block";
-        document.getElementById("continueRfqSearch").value = "";
       }
 
       function formatSize(b) {
